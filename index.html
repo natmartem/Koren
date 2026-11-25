@@ -35,7 +35,7 @@ html[lang=ar] body{font-size:17px}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 a{color:var(--accent)}
-a.li,a.pill{color:inherit;text-decoration:none}
+a.li,a.pill,a.btn{color:inherit;text-decoration:none}
 a.pill.root{color:var(--root)}
 nav.tabs[hidden]{display:none}
 .wrap{max-width:680px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom,0px))}
@@ -124,12 +124,26 @@ html[dir=rtl] .chev{transform:scaleX(-1)}
 .reading .line .reveal{flex:1;text-align:start;background:none;border:0;padding:0;display:flex;flex-direction:column;gap:4px}
 .reading .rl{font-size:20px;line-height:1.45}
 textarea{width:100%;min-height:120px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:10px;font:13px/1.4 ui-monospace,monospace;direction:ltr}
-.switch{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.switch{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
+.seg{flex-shrink:0}
 .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .seg button{border:0;background:var(--surface);padding:8px 12px;font-size:14px;min-height:40px}
 .seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
 .msg{font-size:14px;color:var(--good)}
 .back{border:0;background:none;color:var(--accent);padding:12px 0 0;font-weight:600;display:inline-flex;gap:4px;align-items:center}
+.fbk{border:1px dashed var(--line);border-radius:12px;background:var(--surface);margin-top:12px}
+.fbk>summary{list-style:none;cursor:pointer;padding:9px 12px;font-size:14px;color:var(--mute);display:flex;align-items:center;gap:6px;min-height:40px}
+.fbk>summary::-webkit-details-marker{display:none}
+.fbk[open]>summary{color:var(--ink)}
+.fbk-dot{color:var(--accent);font-weight:700}
+.fbk-in{padding:0 12px 10px;display:flex;flex-direction:column;gap:4px}
+.fbk-ta{width:100%;min-height:76px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);color:var(--ink);font:16px/1.4 var(--f-body);direction:auto}
+.fbk-s{font-size:12px;min-height:1em;color:var(--mute)}
+.fbrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start;padding:8px 0;border-top:1px solid var(--line)}
+.fbrow p{white-space:pre-wrap;overflow-wrap:anywhere}
+.fbrow small{color:var(--mute)}
+.fbrow .x{width:36px;height:36px}
+.fb-list>summary{cursor:pointer;color:var(--accent);font-weight:500;padding:4px 0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 </style>
@@ -198,6 +212,35 @@ function build(){
     PITEMS[o.key]=o;return o})});
 }
 build();
+const APP_VERSION="1.1";
+
+/* ================= feedback notes (localStorage "koren-feedback") =================
+   A note box under each drill question, drill result, topic, principle and reading.
+   Each note keeps what was on screen, so More → "Feedback for Claude" turns all notes into one prompt. */
+let FB=[];
+try{const a=JSON.parse(localStorage.getItem("koren-feedback")||"[]");if(Array.isArray(a))FB=a.filter(x=>x&&typeof x.id==="string"&&typeof x.text==="string")}catch(e){}
+const saveFB=()=>{try{localStorage.setItem("koren-feedback",JSON.stringify(FB));return true}catch(e){return false}};
+const FBCTX={};
+const fbGet=id=>FB.find(x=>x.id===id);
+const txt=html=>{const d=document.createElement("div");d.innerHTML=String(html||"");d.querySelectorAll(".spk,[hidden],script").forEach(n=>n.remove());return d.textContent.replace(/\s+/g," ").trim()};
+function fbBox(id,ctx,open){
+  FBCTX[id]=ctx;const e=fbGet(id),v=e?e.text:"";
+  return `<details class="fbk"${v||open?" open":""}><summary>✎ ${T("Feedback","ملاحظة")}${v?` <span class="fbk-dot" aria-label="${T("has a note","فيها ملاحظة")}">•</span>`:""}</summary>
+   <div class="fbk-in"><textarea class="fbk-ta" data-fb="${esc(id)}" rows="3" placeholder="${T("What was confusing, too easy, wrong or nice?","ما الذي كان مربكًا أو سهلًا جدًّا أو خاطئًا أو جميلًا؟")}">${esc(v)}</textarea><small class="fbk-s" aria-live="polite"></small></div></details>`;
+}
+function fbSet(id,text){
+  let e=fbGet(id);
+  if(!text.trim()){if(e){FB=FB.filter(x=>x!==e);saveFB()}return true}
+  if(!e){e={id,at:Date.now(),ver:APP_VERSION};FB.push(e)}
+  e.text=text;const c=FBCTX[id];if(c){try{e.ctx=c()}catch(err){}}
+  return saveFB();
+}
+function fbRefresh(id){const e=fbGet(id),c=FBCTX[id];if(e&&c){try{e.ctx=c()}catch(err){}saveFB()}}
+document.addEventListener("input",e=>{
+  const ta=e.target;if(!ta||!ta.matches||!ta.matches("[data-fb]"))return;
+  const ok=fbSet(ta.dataset.fb,ta.value)!==false;
+  const s=ta.parentNode.querySelector(".fbk-s");if(s)s.textContent=ok?T("Saved on this phone","حُفظت على هذا الهاتف"):T("Could not save: storage is full or blocked","تعذّر الحفظ: التخزين ممتلئ أو محظور");
+});
 const wordsOf=t=>WORDS.filter(w=>w.topic===t);
 const phrasesOf=t=>PHRASES.filter(w=>w.topic===t);
 const taggedWith=pid=>[...WORDS,...PHRASES].filter(w=>w.ps.includes(pid));
@@ -357,7 +400,8 @@ function vTopic(id){
    <button type="button" class="btn${fresh?"":" primary"}" data-act="tpractice" data-id="${esc(id)}">${T("Practise this topic","تدرّب على هذا الموضوع")}</button></div>
    ${ps.length?`<span class="label">${T("Principles you'll meet here","مبادئ ستجدها هنا")}</span>${pchips(ps)}`:""}</div>
   <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to see its meaning.","اضغط على الكلمة لترى معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
-  ${ph.length?`<div class="card"><span class="label">${T("Phrases","العبارات")}</span><div>${ph.map(wordRow).join("")}</div></div>`:""}`;
+  ${ph.length?`<div class="card"><span class="label">${T("Phrases","العبارات")}</span><div>${ph.map(wordRow).join("")}</div></div>`:""}
+  ${fbBox("t:"+id,()=>({kind:"topic",src:`Topic “${t.en}” (id ${id})`}))}`;
 }
 function vPrinciples(){
   const groups=["grammar","words","sound"];
@@ -376,7 +420,8 @@ function vPrinciple(id){
   ${p.ex&&p.ex.length?`<div class="card"><span class="label">${T("Examples","أمثلة")}</span><span class="tap-hint">${T("Tap to see the meaning.","اضغط لترى المعنى.")}</span><div>${p.ex.map(x=>{const it={key:wkey(x[0]),ru:x[0],en:x[1],ar:x[2]};const k=x[0].includes(" ")?"S:"+plain(x[0]):it.key;return `<div class="word">${spk(k,x[0])}<button type="button" class="reveal" data-reveal><span class="w ru">${esc(x[0])}</span><span class="m" hidden>${M(it)}</span></button></div>`}).join("")}</div></div>`:""}
   ${p.list&&p.list.length?`<div class="card"><button type="button" class="btn primary wide" data-act="ppractice" data-id="${esc(id)}">${T("Practise this principle","تدرّب على هذا المبدأ")}</button>${levelPill(id)?`<div class="row">${levelPill(id)}</div>`:""}</div>`:""}
   ${pat?`<div class="card"><span class="label">${T(`Words this rule gives you: ${p.list.length}`,`كلمات تمنحك إياها هذه القاعدة: ${p.list.length}`)}</span><div>${p.list.map(x=>`<div class="word">${spk(x.akey,x.ru)}<button type="button" class="reveal" data-reveal><span class="w ru">${esc(x.ru)}</span><span class="m" hidden>${esc(x.en)} · <span class="ar">${esc(x.ar)}</span></span></button></div>`).join("")}</div></div>`:""}
-  ${tg.length?`<div class="card"><span class="label">${T("In your topics","في مواضيعك")}</span>${Object.keys(byTopic).map(t=>`<a class="pill" href="#topic/${esc(t)}" style="align-self:flex-start">${esc(tname(t))}</a><div>${byTopic[t].map(wordRow).join("")}</div>`).join("")}</div>`:""}`;
+  ${tg.length?`<div class="card"><span class="label">${T("In your topics","في مواضيعك")}</span>${Object.keys(byTopic).map(t=>`<a class="pill" href="#topic/${esc(t)}" style="align-self:flex-start">${esc(tname(t))}</a><div>${byTopic[t].map(wordRow).join("")}</div>`).join("")}</div>`:""}
+  ${fbBox("p:"+id,()=>({kind:"principle",src:`Principle “${p.en}” (id ${id}), explanations shown in ${S.lang==="ar"?"Arabic":"English"}`}))}`;
 }
 function vReads(){
   return `<h1>${T("Read","القراءة")}</h1><p class="lead">${T("Short texts made of words from your topics. The translation waits behind a tap.","نصوص قصيرة من كلمات مواضيعك. الترجمة تنتظر خلف ضغطة.")}</p>
@@ -386,11 +431,13 @@ function vReading(id){
   const r=READS.find(x=>x.id===id);if(!r)return vReads();
   return `<a class="back" href="#read">← ${T("Read","القراءة")}</a><h1>${esc(L(r))}</h1>
   <div class="card reading"><span class="tap-hint">${T("Tap a line to check the meaning.","اضغط على السطر لتتأكد من المعنى.")}</span><div>${r.lines.map(l=>`<div class="line">${spk("S:"+plain(l[0]),l[0])}<button type="button" class="reveal" data-reveal><span class="rl ru">${RUt(l[0])}</span><span class="m" hidden>${esc(S.lang==="ar"?l[2]:l[1])}</span></button></div>`).join("")}</div></div>
-  <div class="card"><button type="button" class="btn${S.read[id]?"":" primary"} wide" data-act="markread" data-id="${esc(id)}">${S.read[id]?T("Read ✓","مقروء ✓"):T("I've read it","قرأته")}</button></div>`;
+  <div class="card"><button type="button" class="btn${S.read[id]?"":" primary"} wide" data-act="markread" data-id="${esc(id)}">${S.read[id]?T("Read ✓","مقروء ✓"):T("I've read it","قرأته")}</button></div>
+  ${fbBox("r:"+id,()=>({kind:"reading",src:`Reading “${r.en}” (id ${id})`}))}`;
 }
 function vMore(){
   const nA=Object.keys(AUD).length;
   return `<h1>${T("More","المزيد")}</h1>
+  ${fbCard()}
   <div class="card"><span class="label">${T("Settings","الإعدادات")}</span>
    <div class="switch"><span>${T("Explanations in","لغة الشرح")}</span><div class="seg"><button type="button" data-lang="en" aria-pressed="${S.lang==="en"}">English</button><button type="button" data-lang="ar" aria-pressed="${S.lang==="ar"}" class="ar">العربية</button></div></div>
    <div class="switch"><span>${T("Stress marks","علامات النبر")}</span><div class="seg"><button type="button" data-act="stress" data-v="0" aria-pressed="${!S.stressAll}">${T("Fade when known","تختفي عند المعرفة")}</button><button type="button" data-act="stress" data-v="1" aria-pressed="${S.stressAll}">${T("Always","دائمًا")}</button></div></div>
@@ -481,9 +528,9 @@ function topicQs(id,learnNew){
 function reviewQs(n){
   return dueKeys().slice(0,n).map(k=>ITEMS[k]?wordQ(ITEMS[k],reviewTypeFor(ITEMS[k])):principleQ(PITEMS[k],["pick","mean","type"][Math.floor(Math.random()*3)])).filter(Boolean);
 }
-function startQ(list,title){
+function startQ(list,title,src){
   if(!list.length)return;
-  Q={list,i:0,answered:false,title,right:0,touched:new Set(),finished:false,factShown:0};
+  Q={list,i:0,answered:false,title,src:src||"Practice",qid:Date.now().toString(36),res:[],right:0,touched:new Set(),finished:false,factShown:0};
   if(location.hash==="#drill")render();else location.hash="#drill";
   autoPlay();
 }
@@ -492,6 +539,24 @@ function sessionList(){
   const p=nextPrinciple();if(p)q.push(...principleQs(p.id,5));
   const t=nextTopic();if(t)q.push(...topicQs(t.id,true).slice(0,10));
   return q;
+}
+
+/* what a question looked like, in words, for feedback notes */
+const TASK={intro:"New word card",pm:"What does it mean?",pr:"Which one is it? (meaning → Russian)",lp:"Listen and pick",ty:"Type it in Russian",lt:"Listen and type",form:"Fill the gap",pat:"Which is the Russian word? (English → Russian)",pmean:"What does it mean? (rule word)",pty:"Use the rule: type it",stress:"Where is the stress?",read:"Read the sign"};
+function qCtx(i){
+  const Qr=Q,q=Q.list[i];
+  return ()=>{
+    const it=q.it||{},x=q.x||{},r=Qr.res[i];
+    const opts=(q.opts||[]).map(o=>typeof o==="string"?o:o.ru+" ("+o.en+")").join(" | ");
+    let prompt="";
+    if(q.t==="form")prompt=x.frame+(x.hint?" ("+x.hint+")":" — "+x.en);
+    else if(q.x)prompt=(q.t==="pat"||q.t==="pty")?x.en:x.ru;
+    else prompt=(q.t==="pr"||q.t==="ty")?it.en:it.ru;
+    const ans=q.t==="form"?x.full:(x.ru||it.ru||"");
+    return {kind:"question",src:Qr.src,n:`${i+1}/${Qr.list.length}`,task:TASK[q.t]||q.t,prompt,opts,ans,
+      item:[(it.ru||x.ru||x.ans||""),(it.en||x.en||"")].filter(Boolean).join(" — "),key:it.key||x.key||"",
+      lang:S.lang==="ar"?"Arabic":"English",result:q.t==="intro"?"just shown":r===undefined?"not answered yet":r?"right":"wrong"};
+  };
 }
 
 /* ================= practice: drawing a question ================= */
@@ -525,7 +590,7 @@ function renderQ(){
     const typing=q.t==="ty"||q.t==="lt"||q.t==="pty";
     body=head+(typing?`<input class="typein ru" id="typein" lang="ru" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="${T("Russian keyboard","لوحة المفاتيح الروسية")}"><button type="button" class="btn primary wide" data-act="check">${T("Check","تحقّق")}</button>`:`<div class="opts">${opts}</div>`)+`<div id="fb"></div>`;
   }
-  view.innerHTML=`<div class="drill"><div class="dtop"><button type="button" class="x" data-act="quit" aria-label="${T("Close","إغلاق")}">×</button><div class="meter"><i style="width:${pct}%"></i></div></div>${body}</div>`;
+  view.innerHTML=`<div class="drill"><div class="dtop"><button type="button" class="x" data-act="quit" aria-label="${T("Close","إغلاق")}">×</button><div class="meter"><i style="width:${pct}%"></i></div></div>${body}${fbBox("q:"+Q.qid+":"+Q.i,qCtx(Q.i))}</div>`;
   const ti=$("#typein");if(ti)setTimeout(()=>{try{ti.focus()}catch(e){}},50);
 }
 function autoPlay(){
@@ -538,7 +603,7 @@ function answer(given){
   const q=Q.list[Q.i],right=ansOf(q);
   const ok=q.t==="ty"||q.t==="lt"||q.t==="pty"?norm(given)===norm(right):given===right;
   const item=q.it||q.x,key=item.key;
-  grade(key,ok);if(q.x)pstat(q.x.pid,ok);if(ok)Q.right++;Q.touched.add(key);save();
+  grade(key,ok);if(q.x)pstat(q.x.pid,ok);if(ok)Q.right++;Q.touched.add(key);Q.res[Q.i]=ok;save();fbRefresh("q:"+Q.qid+":"+Q.i);
   document.querySelectorAll("[data-ans]").forEach(b=>{b.disabled=true;if(b.dataset.ans===right)b.classList.add("ok");else if(b.dataset.ans===given)b.classList.add("dim")});
   const ti=$("#typein");if(ti)ti.disabled=true;
   const audioKey=q.x?(q.x.akey):item.key,audioText=q.t==="form"?q.x.full:right;
@@ -570,7 +635,8 @@ function renderEnd(){
     ${r?`<a class="li" href="#r/${esc(r.id)}"><div class="grow"><div class="t">${esc(L(r))}</div><div class="s">${T("A short reading","قراءة قصيرة")}</div></div>${CHEV}</a>`:""}
     ${p?`<a class="li" href="#p/${esc(p.id)}"><div class="grow"><div class="t">${esc(L(p))}</div><div class="s">${esc(L(p.can))}</div></div>${CHEV}</a>`:""}
    </div></div>
-   <button type="button" class="btn wide" data-act="quit">${T("Back to Today","العودة إلى اليوم")}</button></div>`;
+   <button type="button" class="btn wide" data-act="quit">${T("Back to Today","العودة إلى اليوم")}</button>
+   ${fbBox("d:"+Q.qid,()=>{const qs=Q.list.filter(q=>q.t!=="intro"),wr=Q.list.map((q,i)=>Q.res[i]===false?(q.t==="form"?q.x.full:(q.x||q.it).ru):null).filter(Boolean);return {kind:"drill",src:Q.src,score:`${Q.right}/${qs.length} right`,wrong:wr.join(", ")}})}</div>`;
 }
 
 /* ================= events ================= */
@@ -584,10 +650,10 @@ document.addEventListener("click",e=>{
   if(t.hasAttribute("data-reveal-mean")){const m=$("#introm");if(m)m.hidden=false;t.remove();return}
   if(t.dataset.ans!==undefined){answer(t.dataset.ans);return}
   const a=t.dataset.act;if(!a)return;
-  if(a==="session"){const l=sessionList();if(l.length)startQ(l,"session");return}
-  if(a==="learn")return startQ(topicQs(t.dataset.id,true),"topic");
-  if(a==="tpractice")return startQ(topicQs(t.dataset.id,false),"topic");
-  if(a==="ppractice")return startQ(principleQs(t.dataset.id,8),"principle");
+  if(a==="session"){const l=sessionList();if(l.length)startQ(l,"session","Today's session");return}
+  if(a==="learn")return startQ(topicQs(t.dataset.id,true),"topic",`Learn new words, topic “${(TOPm[t.dataset.id]||{}).en}”`);
+  if(a==="tpractice")return startQ(topicQs(t.dataset.id,false),"topic",`Topic practice “${(TOPm[t.dataset.id]||{}).en}”`);
+  if(a==="ppractice")return startQ(principleQs(t.dataset.id,8),"principle",`Principle practice “${(PRm[t.dataset.id]||{}).en}” (id ${t.dataset.id})`);
   if(a==="check"){const v=($("#typein")||{}).value||"";if(!v.trim())return;answer(v);return}
   if(a==="next"){nextQ();return}
   if(a==="quit"){Q=null;location.hash="#today";return}
@@ -597,9 +663,12 @@ document.addEventListener("click",e=>{
   if(a==="addpack"){addPack();return}
   if(a==="rmpack"){const i=+t.dataset.i;if(t.dataset.sure){PACKS.splice(i,1);savePacks();build();render()}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط مرة أخرى للإزالة")}return}
   if(a==="backup"){backup();return}
+  if(a==="fbcopy"){copyPrompt();return}
+  if(a==="fbrm"){FB=FB.filter(x=>x.id!==t.dataset.id);saveFB();const op=!!$(".fb-list[open]");render();if(op){const d=$(".fb-list");if(d)d.open=true}return}
+  if(a==="fbclear"){if(t.dataset.sure){FB=[];saveFB();render();const m=$("#fbmsg");if(m)m.textContent=T("All notes cleared.","حُذفت كل الملاحظات.")}else{t.dataset.sure="1";t.textContent=T(`Tap again to delete ${FB.length} notes`,`اضغط مرة أخرى لحذف ${FB.length} ملاحظة`)}return}
 });
 document.addEventListener("keydown",e=>{
-  if(e.key!=="Enter"||!Q)return;
+  if(e.key!=="Enter"||!Q||(e.target.matches&&e.target.matches("[data-fb]")))return;
   if(e.target.id==="typein"&&!Q.answered){e.preventDefault();const v=e.target.value;if(v.trim())answer(v);return}
   if(Q.answered&&!e.target.closest("a")){const nb=$('#fb [data-act="next"]');if(nb){e.preventDefault();nextQ()}}
 });
@@ -613,7 +682,7 @@ document.addEventListener("change",async e=>{
   }
   if(t.dataset.act==="restore"){
     const m=$("#bkmsg");if(!o||o.app!=="koren-backup"||!o.state){m.textContent=T("That isn't a Koren backup file.","هذا ليس ملف نسخة احتياطية لكورين.");return}
-    S=Object.assign(S,o.state);if(Array.isArray(o.packs))PACKS=o.packs;save();savePacks();build();render();
+    S=Object.assign(S,o.state);if(Array.isArray(o.packs))PACKS=o.packs;if(Array.isArray(o.feedback)){FB=o.feedback.filter(x=>x&&typeof x.id==="string"&&typeof x.text==="string");saveFB()}save();savePacks();build();render();
     const m2=$("#bkmsg");if(m2)m2.textContent=T("Progress restored.","تمت استعادة التقدم.");
   }
 });
@@ -625,8 +694,51 @@ function addPack(){
   if(!savePacks()){m.textContent=T("Couldn't save the pack on this phone.","تعذّر حفظ الحزمة على هذا الهاتف.");return}
   build();render();const m2=$("#packmsg");if(m2)m2.textContent=T("Pack added.","أُضيفت الحزمة.");
 }
+/* ================= feedback for Claude ================= */
+const FBORDER={general:0,topic:1,principle:2,question:3,drill:4,reading:5};
+const fbSorted=()=>FB.slice().sort((a,b)=>((FBORDER[(a.ctx||{}).kind]??9)-(FBORDER[(b.ctx||{}).kind]??9))||(a.at-b.at));
+function fbWhere(x){const c=x.ctx||{};if(c.kind==="question")return `${c.src} · ${c.n} · ${c.task}`;return c.src||"Note"}
+function fbCard(){
+  const list=fbSorted().filter(x=>x.id!=="g"),n=FB.length;
+  return `<div class="card" id="fb-card"><span class="label">${T("Feedback for Claude","ملاحظات لـ Claude")} · ${n}</span>
+   <p class="lead">${T("Notes you leave under questions, results, topics, principles and readings gather here. Copy them as one message, paste it into a chat with Claude, and the app gets updated on GitHub.","الملاحظات التي تتركها تحت الأسئلة والنتائج والمواضيع والمبادئ والقراءات تتجمّع هنا. انسخها في رسالة واحدة، والصقها في محادثة مع Claude، فيُحدَّث التطبيق على GitHub.")}</p>
+   ${fbBox("g",()=>({kind:"general",src:"General"}),true)}
+   <div class="row"><button type="button" class="btn small primary" data-act="fbcopy">${T("Copy update prompt","انسخ طلب التحديث")}</button>${n?`<button type="button" class="btn small" data-act="fbclear">${T("Clear all notes","احذف كل الملاحظات")}</button>`:""}</div>
+   <textarea id="fb-out" readonly hidden aria-label="Update prompt"></textarea><p class="msg" id="fbmsg" aria-live="polite"></p>
+   ${list.length?`<details class="fb-list"><summary>${T("Show notes","أظهر الملاحظات")} (${list.length})</summary>${list.map(x=>`<div class="fbrow"><div><small>${esc(fbWhere(x))}</small><p>${esc(x.text)}</p></div><button type="button" class="x" data-act="fbrm" data-id="${esc(x.id)}" aria-label="${T("Delete note","احذف الملاحظة")}">×</button></div>`).join("")}</details>`:""}</div>`;
+}
+function fbPrompt(){
+  const notes=fbSorted(),out=[];
+  out.push(`Here is feedback from using Koren ${APP_VERSION} (course v${BASE.version}) on a phone (${new Date().toISOString().slice(0,10)}). Please update the app in github.com/natmartem/Koren (index.html and course.js) to address it.
+
+Keep progress, added lesson packs and recordings working, and don't change the app radically. Say briefly what you changed for each note (refer to them by number). If a note is unclear or you'd push back on it, say so instead of guessing.`);
+  if(!notes.length){out.push("\n(No notes yet: write the feedback here.)");return out.join("\n")}
+  const head={general:"General",topic:"Topics",principle:"Principles",question:"Drill questions",drill:"Whole drills",reading:"Readings"};
+  let lastK=null;
+  notes.forEach((x,i)=>{
+    const c=x.ctx||{},k=c.kind||"general";
+    if(k!==lastK){out.push(`\n## ${head[k]||"Other"}`);lastK=k}
+    const Ls=[`${i+1}. ${k==="question"?`${c.src}, question ${c.n}: “${c.task}”`:k==="general"?"General note":c.src||"Note"}${x.ver&&x.ver!==APP_VERSION?` (written in ${x.ver})`:""}`];
+    if(k==="question"){
+      if(c.prompt)Ls.push(`   Shown: ${c.prompt}`);
+      if(c.opts)Ls.push(`   Options: ${c.opts}`);
+      if(c.ans)Ls.push(`   Correct answer: ${c.ans} · result: ${c.result}`);
+      if(c.item)Ls.push(`   Item: ${c.item}${c.key?` (${c.key})`:""}`);
+      if(c.lang)Ls.push(`   Explanation language: ${c.lang}`);
+    }
+    if(k==="drill")Ls.push(`   Score: ${c.score}${c.wrong?` · missed: ${c.wrong}`:""}`);
+    Ls.push(`   Note: ${x.text.trim().replace(/\n+/g,"\n   ")}`);
+    out.push(Ls.join("\n"));
+  });
+  return out.join("\n");
+}
+async function copyPrompt(){
+  const text=fbPrompt(),n=FB.length,m=$("#fbmsg");
+  try{await navigator.clipboard.writeText(text);if(m)m.textContent=n?T(`Copied ${n} note${n>1?"s":""}. Paste into a chat with Claude. Clear them here once the update is in.`,`نُسخت ${n} ملاحظة. الصقها في محادثة مع Claude، ثم احذفها هنا بعد التحديث.`):T("Copied the prompt. There are no notes yet, so add your feedback in the chat.","نُسخ الطلب. لا توجد ملاحظات بعد، فاكتب ملاحظاتك في المحادثة.")}
+  catch(e){const ta=$("#fb-out");if(ta){ta.hidden=false;ta.value=text;ta.focus();ta.select()}if(m)m.textContent=T("Couldn't copy automatically. The text is in the box: select all and copy.","تعذّر النسخ التلقائي. النص في المربع: حدّده كله وانسخه.")}
+}
 function backup(){
-  const data=JSON.stringify({app:"koren-backup",v:1,made:new Date().toISOString(),state:S,packs:PACKS});
+  const data=JSON.stringify({app:"koren-backup",v:1,made:new Date().toISOString(),state:S,packs:PACKS,feedback:FB});
   const file=new File([data],"koren-backup-"+new Date().toISOString().slice(0,10)+".json",{type:"application/json"});
   if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Koren backup"}).catch(()=>{});return}
   const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();a.remove();
