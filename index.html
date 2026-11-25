@@ -1,0 +1,640 @@
+<!doctype html>
+<!-- Koren · Copyright © 2026 natmartem · SPDX-License-Identifier: AGPL-3.0-or-later · see LICENSE and README.md -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Koren · Корень</title>
+<meta name="description" content="Russian for Arabic and English speakers: topics and the principles that build the language.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#EEF0F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11131C" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Koren">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --bg:#EEF0F6; --surface:#FFFFFF; --ink:#161A2B; --mute:#5B6177; --line:#D5D9E6;
+  --accent:#34468C; --accent-ink:#FFFFFF; --tint:#E0E5F4;
+  --root:#A9580A; --root-tint:#F6E7D3; --good:#226B45; --good-tint:#DCEFE3; --soft:#F4F5FA;
+  --f-body:'Onest','Noto Naskh Arabic',system-ui,sans-serif; --f-display:'Unbounded','Onest','Noto Naskh Arabic',system-ui,sans-serif;
+  --f-ar:'Noto Naskh Arabic','Onest',serif; color-scheme:light}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#11131C; --surface:#191C29; --ink:#E7E9F2; --mute:#9CA2B9; --line:#2A2F44;
+  --accent:#9AAAF0; --accent-ink:#121630; --tint:#242B4A;
+  --root:#F2A65A; --root-tint:#3A2A17; --good:#6CC992; --good-tint:#173022; --soft:#151826; color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body);min-height:100vh}
+html[lang=ar] body{font-size:17px}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+a{color:var(--accent)}
+a.li,a.pill{color:inherit;text-decoration:none}
+a.pill.root{color:var(--root)}
+nav.tabs[hidden]{display:none}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom,0px))}
+header.top{position:sticky;top:0;z-index:10;background:var(--bg);padding:calc(10px + env(safe-area-inset-top,0px)) 16px 8px;border-bottom:1px solid var(--line)}
+.top-in{max-width:680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font:700 18px var(--f-display);letter-spacing:.01em;display:flex;align-items:baseline;gap:8px}
+.brand small{font:500 13px var(--f-body);color:var(--mute)}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.lang button{border:0;background:none;padding:6px 12px;font-size:14px;min-width:44px;min-height:36px}
+.lang button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px))}
+nav.tabs button{flex:1;max-width:136px;border:0;background:none;padding:8px 2px;font-size:13px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:52px}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current=page]{color:var(--accent);font-weight:600}
+h1{font:700 22px/1.25 var(--f-display);margin:18px 0 4px}
+html[lang=ar] h1,html[lang=ar] h2{font-family:var(--f-ar)}
+h2{font:700 16px/1.3 var(--f-display);margin:0}
+p{margin:0}
+.lead{color:var(--mute)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 16px;font-weight:600;min-height:46px;text-align:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.wide{width:100%}
+.btn.small{min-height:36px;padding:6px 12px;font-size:14px;font-weight:500}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);font-weight:600}
+html[lang=ar] .label{letter-spacing:0;font-size:13px}
+.ru{font-family:var(--f-body);direction:ltr;unicode-bidi:isolate}
+.ar{font-family:var(--f-ar);direction:rtl;unicode-bidi:isolate}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);background:none;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:start}
+.li:first-child{border-top:0}
+.li .grow{flex:1;min-width:0}
+.li .t{font-weight:600}
+.li .s{font-size:14px;color:var(--mute)}
+.chev{color:var(--mute);flex:none}
+html[dir=rtl] .chev{transform:scaleX(-1)}
+.meter{height:6px;border-radius:4px;background:var(--tint);overflow:hidden;margin-top:6px}
+.meter i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:13px;padding:3px 10px;border-radius:999px;background:var(--tint);color:var(--ink);border:0;min-height:30px}
+.pill.root{background:var(--root-tint);color:var(--root)}
+.pill.good{background:var(--good-tint);color:var(--good)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.word{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.word:first-child{border-top:0}
+.word .reveal{flex:1;min-width:0;text-align:start;background:none;border:0;padding:4px 0;display:flex;flex-direction:column;gap:2px}
+.word .w{font-size:21px;line-height:1.3}
+.word .m{font-size:15px;color:var(--mute)}
+.word .m[hidden]{display:none}
+.tap-hint{font-size:13px;color:var(--mute)}
+.spk{flex:none;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--soft);display:inline-flex;align-items:center;justify-content:center;color:var(--accent)}
+.spk.big{width:64px;height:64px}
+.spk.big svg{width:28px;height:28px}
+.spk.playing{background:var(--tint)}
+.body p+p,.body p+ul,.body ul+p,.body p+ol,.body ol+p{margin-top:10px}
+.body ul,.body ol{margin:6px 0 0;padding-inline-start:22px}
+.body li+li{margin-top:4px}
+.say{border:0;background:var(--tint);border-radius:6px;padding:0 5px;font-size:1.04em;color:var(--ink);font-family:var(--f-body);direction:ltr;unicode-bidi:isolate;line-height:1.5}
+.bridge{background:var(--root-tint);border-radius:14px;padding:14px;border:0}
+.bridge .label{color:var(--root)}
+.kind{font-size:13px;color:var(--mute)}
+/* drill */
+.drill{min-height:60vh;display:flex;flex-direction:column;gap:14px;padding-top:10px}
+.dtop{display:flex;align-items:center;gap:10px}
+.dtop .meter{flex:1;margin:0}
+.x{border:0;background:none;width:40px;height:40px;font-size:22px;color:var(--mute)}
+.prompt{color:var(--mute);font-size:15px}
+.big{font-size:34px;line-height:1.25;font-weight:500;text-align:center;margin:6px 0;word-break:break-word}
+.big.latin{font-family:var(--f-body)}
+.sign{align-self:center;background:#1F3D8C;color:#fff;font:700 26px var(--f-body);letter-spacing:.06em;padding:10px 20px;border-radius:6px;direction:ltr}
+.frame{font-size:24px;line-height:1.4;text-align:center}
+.blank{display:inline-block;min-width:3.5em;border-bottom:2px solid var(--accent);color:var(--accent)}
+.hint{text-align:center;color:var(--mute)}
+.center{display:flex;justify-content:center}
+.opts{display:grid;gap:10px}
+.opt{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:14px;font-size:19px;text-align:center;min-height:56px}
+.opt.ok{border-color:var(--accent);background:var(--tint);font-weight:600}
+.opt.dim{opacity:.45}
+.opt:disabled{cursor:default;color:var(--ink)}
+.typein{width:100%;font-size:22px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);direction:ltr;text-align:center}
+.fb{border-radius:14px;padding:12px 14px;background:var(--soft);border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.fb .yes{color:var(--accent);font-weight:600}
+.fact{font-size:14px;color:var(--mute);border-top:1px dashed var(--line);padding-top:8px}
+.reading .line{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.reading .line:first-child{border-top:0}
+.reading .line .reveal{flex:1;text-align:start;background:none;border:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.reading .rl{font-size:20px;line-height:1.45}
+textarea{width:100%;min-height:120px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:10px;font:13px/1.4 ui-monospace,monospace;direction:ltr}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:8px 12px;font-size:14px;min-height:40px}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+.msg{font-size:14px;color:var(--good)}
+.back{border:0;background:none;color:var(--accent);padding:12px 0 0;font-weight:600;display:inline-flex;gap:4px;align-items:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand"><span class="ru">Корень</span><small>Koren</small></div>
+  <div class="lang" role="group" aria-label="Explanation language">
+    <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar" class="ar">ع</button>
+  </div>
+</div></header>
+<main class="wrap" id="view"></main>
+<nav class="tabs" id="tabs" aria-label="Sections"></nav>
+<audio id="player" preload="none"></audio>
+<script src="course.js"></script>
+<script>
+/* Koren · Copyright © 2026 natmartem · SPDX-License-Identifier: AGPL-3.0-or-later
+   localStorage "koren-state": progress and settings. "koren-packs": lessons added in the app.
+   IndexedDB "koren" → "audio", "audio2": recordings imported on this phone. */
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ACC=/́/g;
+const plain=s=>String(s).replace(ACC,"");
+const norm=s=>plain(s).toLowerCase().replace(/ё/g,"е").replace(/[.,!?¿¡—–\-«»"“”:;…]/g," ").replace(/\s+/g," ").trim();
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
+
+/* ================= state ================= */
+let S={v:1,lang:"en",srs:{},seen:{},ps:{},stressAll:false,tts:true,read:{}};
+let storageOK=true;
+try{const raw=localStorage.getItem("koren-state");if(raw){const o=JSON.parse(raw);if(o&&typeof o==="object")S=Object.assign(S,o)}}catch(e){}
+try{localStorage.setItem("koren-probe","1");localStorage.removeItem("koren-probe")}catch(e){storageOK=false}
+const save=()=>{try{localStorage.setItem("koren-state",JSON.stringify(S))}catch(e){storageOK=false}};
+const T=(en,ar)=>S.lang==="ar"?ar:en;
+
+/* ================= course, with lesson packs merged in ================= */
+const BASE=window.COURSE||{topics:[],principles:[],words:[],phrases:[],readings:[],facts:[]};
+let PACKS=[];
+try{const a=JSON.parse(localStorage.getItem("koren-packs")||"[]");if(Array.isArray(a))PACKS=a}catch(e){}
+const savePacks=()=>{try{localStorage.setItem("koren-packs",JSON.stringify(PACKS));return true}catch(e){return false}};
+let TOP=[],PR=[],WORDS=[],PHRASES=[],READS=[],FACTS=[],ITEMS={},PITEMS={},TOPm={},PRm={};
+const wkey=ru=>"W:"+plain(ru).toLowerCase();
+const pkey=ru=>"P:"+plain(ru);
+function build(){
+  const c={topics:[...BASE.topics],principles:[...BASE.principles],words:[...BASE.words],phrases:[...BASE.phrases],readings:[...(BASE.readings||[])],facts:[...(BASE.facts||[])]};
+  PACKS.forEach(p=>{
+    (p.topics||[]).forEach(t=>{const i=c.topics.findIndex(x=>x.id===t.id);if(i<0)c.topics.push(t);else c.topics[i]=Object.assign({},c.topics[i],t)});
+    (p.principles||[]).forEach(t=>{const i=c.principles.findIndex(x=>x.id===t.id);if(i<0)c.principles.push(t);else c.principles[i]=Object.assign({},c.principles[i],t)});
+    ["words","phrases","readings","facts"].forEach(k=>{(p[k]||[]).forEach(x=>c[k].push(x))});
+  });
+  TOP=c.topics;PR=c.principles;READS=c.readings;FACTS=c.facts;TOPm={};PRm={};ITEMS={};PITEMS={};
+  TOP.forEach(t=>TOPm[t.id]=t);PR.forEach(p=>PRm[p.id]=p);
+  const mk=(a,kind)=>{const key=kind==="w"?wkey(a[0]):pkey(a[0]);
+    if(ITEMS[key]){const o=ITEMS[key];(a[4]||"").split(/\s+/).filter(Boolean).forEach(x=>{if(!o.ps.includes(x))o.ps.push(x)});return null}
+    const o={key,kind,ru:a[0],en:a[1],ar:a[2],topic:a[3],ps:(a[4]||"").split(/\s+/).filter(x=>x&&PRm[x])};ITEMS[key]=o;return o};
+  WORDS=c.words.map(a=>mk(a,"w")).filter(Boolean);
+  PHRASES=c.phrases.map(a=>mk(a,"p")).filter(Boolean);
+  PR.forEach(p=>{p.list=(p.items||[]).map((x,i)=>{
+    let o;
+    if(p.drill==="form")o={pid:p.id,frame:x[0],hint:x[1],ans:x[2],wrong:[x[3],x[4],x[5]],en:x[6],ar:x[7],full:x[0].replace("…",x[2]).replace(/\s+([.?!,])/g,"$1")};
+    else if(p.drill==="stress")o={pid:p.id,ru:x[0],en:(ITEMS[wkey(x[0])]||{}).en||"",ar:(ITEMS[wkey(x[0])]||{}).ar||""};
+    else o={pid:p.id,ru:x[0],en:x[1],ar:x[2]};
+    o.key="I:"+p.id+":"+plain(o.ans||o.ru)+"|"+plain(o.hint||"")+"|"+plain(o.frame||"");
+    o.akey=p.drill==="form"?"S:"+plain(o.full):wkey(o.ru);
+    PITEMS[o.key]=o;return o})});
+}
+build();
+const wordsOf=t=>WORDS.filter(w=>w.topic===t);
+const phrasesOf=t=>PHRASES.filter(w=>w.topic===t);
+const taggedWith=pid=>[...WORDS,...PHRASES].filter(w=>w.ps.includes(pid));
+
+/* ================= stress marks ================= */
+const known=key=>{const r=S.srs[key];return !!(r&&r.b>=3)};
+const RUw=it=>esc(S.stressAll||!known(it.key)?it.ru:plain(it.ru));
+function RUt(text){ /* per word in running text: fade the mark on words already known */
+  if(S.stressAll)return esc(text);
+  return String(text).split(/(\s+)/).map(tok=>{const core=tok.replace(/[.,!?—–«»"“”:;…]/g,"");if(!core)return esc(tok);
+    return known(wkey(core))?esc(plain(tok)):esc(tok)}).join("");
+}
+const M=it=>esc(S.lang==="ar"?it.ar:it.en);
+
+/* ================= audio: recordings first, phone voice second ================= */
+const AUD={};const player=$("#player");let playingBtn=null;
+const SPK=`<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+let ruVoice=null;const ttsOK=()=>("speechSynthesis" in window)&&S.tts;
+function loadVoices(){try{const v=speechSynthesis.getVoices().filter(x=>/^ru/i.test(x.lang));ruVoice=v.find(x=>/milena|yuri|katya/i.test(x.name))||v[0]||null}catch(e){}}
+if("speechSynthesis" in window){loadVoices();try{speechSynthesis.onvoiceschanged=loadVoices}catch(e){}}
+const hasA=k=>!!(AUD[k]&&AUD[k].length);
+const canPlay=k=>hasA(k)||ttsOK();
+const spk=(k,text,big)=>canPlay(k)?`<button type="button" class="spk${big?" big":""}" data-play="${esc(k)}" data-text="${esc(plain(text))}" aria-label="${T("Play","تشغيل")}">${SPK}</button>`:"";
+function speak(text){
+  if(!ttsOK())return;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(plain(text));u.lang="ru-RU";u.rate=.85;if(ruVoice)u.voice=ruVoice;speechSynthesis.speak(u)}catch(e){}
+}
+function play(k,text,btn){
+  const arr=AUD[k];
+  if(arr&&arr.length){
+    const a=arr[Math.floor(Math.random()*arr.length)]; /* several voices: the ear learns the sound, not one person */
+    try{if(!a.url){const bin=atob(a.d),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);a.url=URL.createObjectURL(new Blob([u],{type:a.m}))}
+      if(playingBtn)playingBtn.classList.remove("playing");playingBtn=btn||null;if(btn)btn.classList.add("playing");
+      player.src=a.url;const p=player.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}
+    return;
+  }
+  speak(text);
+}
+player.addEventListener("ended",()=>{if(playingBtn)playingBtn.classList.remove("playing");playingBtn=null});
+function addClips(o,src,sp){
+  if(!o||o.app!=="koren-audio"||!o.clips||typeof o.clips!=="object")return -1;let n=0;
+  Object.keys(o.clips).forEach(k=>{const c=o.clips[k];
+    if(/^[WPS]:/.test(k)&&c&&typeof c.m==="string"&&/^audio\//.test(c.m)&&typeof c.d==="string"){
+      AUD[k]=(AUD[k]||[]).filter(x=>!(x.sp===sp&&x.src===src));AUD[k].push({m:c.m,d:c.d,src,sp});n++}});
+  return n;
+}
+function idb(){return new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error("no idb"));const r=indexedDB.open("koren",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function idbOp(mode,fn){const db=await idb();return new Promise((res,rej)=>{const t=db.transaction("kv",mode),r=fn(t.objectStore("kv"));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})}
+const idbGet=k=>idbOp("readonly",s=>s.get(k));
+const idbSet=(k,v)=>idbOp("readwrite",s=>s.put(v,k));
+async function loadAudio(){
+  for(const sp of [1,2]){
+    const f=sp===1?"koren-audio.json":"koren-audio-2.json";
+    try{const r=await fetch(f,{cache:"no-cache"});if(r.ok)addClips(await r.json(),"host",sp)}catch(e){}
+    try{const loc=await idbGet(sp===1?"audio":"audio2");if(loc)addClips(loc,"local",sp)}catch(e){}
+  }
+  if(!Q)render();
+}
+
+/* ================= progress ================= */
+const IV=[0,1,2,4,8,16,32];
+function grade(key,ok){
+  const r=S.srs[key]||{b:0,d:0,n:0,w:0};
+  if(ok){r.b=Math.min(6,r.b+1);r.d=today()+IV[r.b]}else{r.b=Math.max(0,r.b-2);r.d=today();r.w=(r.w||0)+1}
+  r.n=(r.n||0)+1;S.srs[key]=r;
+}
+function pstat(pid,ok){const s=S.ps[pid]||{n:0,r:[]};s.n++;s.r.push(ok?1:0);if(s.r.length>10)s.r=s.r.slice(-10);S.ps[pid]=s}
+function level(pid){const s=S.ps[pid];if(!s||!s.n)return 0;const last=s.r.slice(-8),ok=last.reduce((a,b)=>a+b,0);return s.n>=10&&ok>=7?2:1}
+const levelPill=pid=>{const l=level(pid);return l===2?`<span class="pill good">${T("Comfortable","مرتاح فيه")}</span>`:l===1?`<span class="pill">${T("Practising","قيد التدريب")}</span>`:""};
+const recognised=list=>list.filter(w=>(S.srs[w.key]||{}).b>=2).length;
+const seenOrDrilled=it=>S.seen[it.key]||S.srs[it.key];
+function dueKeys(){const d=today();return Object.keys(S.srs).filter(k=>S.srs[k].d<=d&&(ITEMS[k]||PITEMS[k])).sort((a,b)=>S.srs[a].d-S.srs[b].d)}
+const nextPrinciple=()=>PR.find(p=>p.list&&p.list.length&&level(p.id)<2)||PR[0];
+const nextTopic=()=>TOP.find(t=>wordsOf(t.id).some(w=>!seenOrDrilled(w)))||TOP[0];
+const nextReading=()=>READS.find(r=>!S.read[r.id])||READS[0];
+
+/* ================= text helpers ================= */
+const md=s=>String(s||"").replace(/\{([^}]+)\}/g,(m,x)=>`<button type="button" class="say" data-say="${esc(plain(x))}">${esc(x)}</button>`).replace(/<ar>/g,'<span class="ar">').replace(/<\/ar>/g,"</span>");
+const L=o=>o?(S.lang==="ar"?o.ar:o.en):"";
+const tname=id=>TOPm[id]?L(TOPm[id]):id;
+const pname=id=>PRm[id]?L(PRm[id]):id;
+const kindName=k=>k==="grammar"?T("Grammar","القواعد"):k==="words"?T("Word building","بناء الكلمات"):T("Sound and script","الأصوات والكتابة");
+const CHEV=`<svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const pchips=ps=>ps.length?`<div class="chips">${ps.map(p=>`<a class="pill root" href="#p/${esc(p)}">${esc(pname(p))}</a>`).join("")}</div>`:"";
+function wordRow(it){
+  return `<div class="word">${spk(it.key,it.ru)}<button type="button" class="reveal" data-reveal><span class="w ru">${RUw(it)}</span><span class="m" hidden>${M(it)}</span></button></div>`;
+}
+
+/* ================= tabs ================= */
+const ICON={
+ today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+ topics:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>',
+ principles:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 21V11M12 11c0-4 3-7 7-7 0 4-3 7-7 7zM12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z"/><path d="M8 21h8"/></svg>',
+ read:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5c3-1 6-1 9 1 3-2 6-2 9-1v14c-3-1-6-1-9 1-3-2-6-2-9-1z"/><path d="M12 6v14"/></svg>',
+ more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>'};
+function renderTabs(cur){
+  const tabs=[["today",T("Today","اليوم")],["topics",T("Topics","المواضيع")],["principles",T("Principles","المبادئ")],["read",T("Read","القراءة")],["more",T("More","المزيد")]];
+  $("#tabs").innerHTML=tabs.map(([id,n])=>`<button type="button" data-go="#${id}" ${cur===id?'aria-current="page"':""}>${ICON[id]}<span>${n}</span></button>`).join("");
+}
+
+/* ================= views ================= */
+let Q=null; /* the running practice: {list,i,answered,title,back,done:[]} */
+function render(){
+  document.documentElement.lang=S.lang==="ar"?"ar":"en";document.documentElement.dir=S.lang==="ar"?"rtl":"ltr";
+  document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===S.lang)));
+  const h=(location.hash||"#today").slice(1),[v,arg]=h.split("/");
+  $("#tabs").hidden=(v==="drill"&&!!Q);
+  if(v==="drill"&&Q){
+    if(Q.answered&&!Q.finished){Q.answered=false;Q.i++;if(Q.i>=Q.list.length)Q.finished=true} /* back from a card: carry on with the next one */
+    return renderQ()}
+  const tab={topic:"topics",p:"principles",r:"read"}[v]||v;renderTabs(tab);
+  const view=$("#view");
+  const back=Q&&!Q.finished?`<button type="button" class="back" data-go="#drill">← ${T("Back to practice","العودة إلى التدريب")}</button>`:"";
+  let html="";
+  if(v==="topics")html=vTopics();
+  else if(v==="topic"&&TOPm[arg])html=vTopic(arg);
+  else if(v==="principles")html=vPrinciples();
+  else if(v==="p"&&PRm[arg])html=vPrinciple(arg);
+  else if(v==="read")html=vReads();
+  else if(v==="r")html=vReading(arg);
+  else if(v==="more")html=vMore();
+  else html=vToday();
+  view.innerHTML=back+html;
+}
+function vToday(){
+  const p=nextPrinciple(),t=nextTopic(),r=nextReading();
+  const started=PR.filter(x=>level(x.id)>0);
+  const tops=TOP.map(x=>({t:x,n:recognised(wordsOf(x.id))})).filter(x=>x.n>0);
+  const any=Object.keys(S.srs).length>0;
+  return `<h1>${T("Today","اليوم")}</h1>
+  <p class="lead">${T("About 20 minutes: a little review, one new step, then a short reading. Stop whenever you like.","حوالي عشرين دقيقة: مراجعة قليلة، خطوة جديدة، ثم قراءة قصيرة. توقّف متى شئت.")}</p>
+  <div class="card"><button type="button" class="btn primary wide" data-act="session">${any?T("Start today's session","ابدأ جلسة اليوم"):T("Start your first session","ابدأ أول جلسة")}</button></div>
+  <div class="card"><span class="label">${T("Suggested next","المقترح التالي")}</span><div class="list">
+   ${p?`<a class="li" href="#p/${esc(p.id)}"><div class="grow"><div class="t">${esc(L(p))}</div><div class="s">${esc(L(p.can))}</div></div>${CHEV}</a>`:""}
+   ${t?`<a class="li" href="#topic/${esc(t.id)}"><div class="grow"><div class="t">${esc(L(t))}</div><div class="s">${T("New words in this topic","كلمات جديدة في هذا الموضوع")}</div></div>${CHEV}</a>`:""}
+   ${r?`<a class="li" href="#r/${esc(r.id)}"><div class="grow"><div class="t">${esc(L(r))}</div><div class="s">${T("A short reading","قراءة قصيرة")}</div></div>${CHEV}</a>`:""}
+  </div></div>
+  <div class="card"><span class="label">${T("What you can do now","ما تستطيع فعله الآن")}</span>
+   ${started.length||tops.length?`<div class="list">${started.map(x=>`<a class="li" href="#p/${esc(x.id)}"><div class="grow"><div class="t">${esc(L(x.can))}</div><div class="s">${esc(L(x))}</div></div>${levelPill(x.id)}</a>`).join("")}
+   ${tops.map(x=>`<a class="li" href="#topic/${esc(x.t.id)}"><div class="grow"><div class="t">${T(`You recognise ${x.n} words about ${esc(L(x.t)).toLowerCase()}`,`تعرف ${x.n} كلمة في موضوع «${esc(L(x.t))}»`)}</div></div>${CHEV}</a>`).join("")}</div>`
+   :`<p class="lead">${T("This fills in as you practise: each principle shows what it lets you do.","يمتلئ هذا مع التدريب: كل مبدأ يُظهر ما يمكّنك منه.")}</p>`}
+  </div>
+  ${storageOK?"":`<div class="card"><p>${T("This browser is not saving progress (private mode?). Open the app normally to keep your progress.","هذا المتصفح لا يحفظ التقدم (وضع خاص؟). افتح التطبيق بشكل عادي لحفظ تقدمك.")}</p></div>`}`;
+}
+function vTopics(){
+  return `<h1>${T("Topics","المواضيع")}</h1><p class="lead">${T("Everyday words, grouped by where you'll need them. All open, in any order.","كلمات يومية مجمّعة حسب المكان الذي ستحتاجها فيه. كلها مفتوحة وبأي ترتيب.")}</p>
+  <div class="card"><div class="list">${TOP.map(t=>{const ws=wordsOf(t.id),n=recognised(ws);
+    return `<a class="li" href="#topic/${esc(t.id)}"><div class="grow"><div class="t">${esc(L(t))}</div><div class="s">${n?T(`You recognise ${n} of ${ws.length}`,`تعرف ${n} من ${ws.length}`):T(`${ws.length} words`,`${ws.length} كلمة`)}</div>${n?`<div class="meter"><i style="width:${Math.round(n/ws.length*100)}%"></i></div>`:""}</div>${CHEV}</a>`}).join("")}</div></div>`;
+}
+function vTopic(id){
+  const t=TOPm[id],ws=wordsOf(id),ph=phrasesOf(id);
+  const ps=[...new Set([...ws,...ph].flatMap(w=>w.ps))];
+  const fresh=ws.filter(w=>!seenOrDrilled(w)).length;
+  return `<a class="back" href="#topics">← ${T("Topics","المواضيع")}</a><h1>${esc(L(t))}</h1>
+  <div class="card"><div class="row">
+   ${fresh?`<button type="button" class="btn primary" data-act="learn" data-id="${esc(id)}">${T(`Learn ${Math.min(fresh,5)} new words`,`تعلّم ${Math.min(fresh,5)} كلمات جديدة`)}</button>`:""}
+   <button type="button" class="btn${fresh?"":" primary"}" data-act="tpractice" data-id="${esc(id)}">${T("Practise this topic","تدرّب على هذا الموضوع")}</button></div>
+   ${ps.length?`<span class="label">${T("Principles you'll meet here","مبادئ ستجدها هنا")}</span>${pchips(ps)}`:""}</div>
+  <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to see its meaning.","اضغط على الكلمة لترى معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
+  ${ph.length?`<div class="card"><span class="label">${T("Phrases","العبارات")}</span><div>${ph.map(wordRow).join("")}</div></div>`:""}`;
+}
+function vPrinciples(){
+  const groups=["grammar","words","sound"];
+  return `<h1>${T("Principles","المبادئ")}</h1><p class="lead">${T("How Russian is built. Learn one rule, unlock many words and sentences.","كيف تُبنى الروسية. تعلّم قاعدة واحدة تفتح لك كلمات وجملًا كثيرة.")}</p>
+  ${groups.map(g=>{const ps=PR.filter(p=>p.kind===g);if(!ps.length)return "";
+   return `<div class="card"><span class="label">${kindName(g)}</span><div class="list">${ps.map(p=>`<a class="li" href="#p/${esc(p.id)}"><div class="grow"><div class="t">${esc(L(p))}</div><div class="s">${esc(L(p.can))}</div></div>${levelPill(p.id)}${CHEV}</a>`).join("")}</div></div>`}).join("")}`;
+}
+function vPrinciple(id){
+  const p=PRm[id],tg=taggedWith(id),pat=p.drill==="pattern"||p.drill==="read";
+  const byTopic={};tg.forEach(w=>(byTopic[w.topic]=byTopic[w.topic]||[]).push(w));
+  return `<a class="back" href="#principles">← ${T("Principles","المبادئ")}</a>
+  <p class="kind" style="margin-top:10px">${kindName(p.kind)}</p><h1 style="margin-top:2px">${esc(L(p))}</h1>
+  <p class="lead">${esc(L(p.can))}</p>
+  <div class="card body">${md(L(p.body))}</div>
+  ${p.bridge?`<div class="card bridge body"><span class="label">${T("From what you already know","ممّا تعرفه أصلًا")}</span><p>${md(L(p.bridge))}</p></div>`:""}
+  ${p.ex&&p.ex.length?`<div class="card"><span class="label">${T("Examples","أمثلة")}</span><span class="tap-hint">${T("Tap to see the meaning.","اضغط لترى المعنى.")}</span><div>${p.ex.map(x=>{const it={key:wkey(x[0]),ru:x[0],en:x[1],ar:x[2]};const k=x[0].includes(" ")?"S:"+plain(x[0]):it.key;return `<div class="word">${spk(k,x[0])}<button type="button" class="reveal" data-reveal><span class="w ru">${esc(x[0])}</span><span class="m" hidden>${M(it)}</span></button></div>`}).join("")}</div></div>`:""}
+  ${p.list&&p.list.length?`<div class="card"><button type="button" class="btn primary wide" data-act="ppractice" data-id="${esc(id)}">${T("Practise this principle","تدرّب على هذا المبدأ")}</button>${levelPill(id)?`<div class="row">${levelPill(id)}</div>`:""}</div>`:""}
+  ${pat?`<div class="card"><span class="label">${T(`Words this rule gives you: ${p.list.length}`,`كلمات تمنحك إياها هذه القاعدة: ${p.list.length}`)}</span><div>${p.list.map(x=>`<div class="word">${spk(x.akey,x.ru)}<button type="button" class="reveal" data-reveal><span class="w ru">${esc(x.ru)}</span><span class="m" hidden>${esc(x.en)} · <span class="ar">${esc(x.ar)}</span></span></button></div>`).join("")}</div></div>`:""}
+  ${tg.length?`<div class="card"><span class="label">${T("In your topics","في مواضيعك")}</span>${Object.keys(byTopic).map(t=>`<a class="pill" href="#topic/${esc(t)}" style="align-self:flex-start">${esc(tname(t))}</a><div>${byTopic[t].map(wordRow).join("")}</div>`).join("")}</div>`:""}`;
+}
+function vReads(){
+  return `<h1>${T("Read","القراءة")}</h1><p class="lead">${T("Short texts made of words from your topics. The translation waits behind a tap.","نصوص قصيرة من كلمات مواضيعك. الترجمة تنتظر خلف ضغطة.")}</p>
+  <div class="card"><div class="list">${READS.map(r=>`<a class="li" href="#r/${esc(r.id)}"><div class="grow"><div class="t">${esc(L(r))}</div><div class="s">${esc(tname(r.topic))}</div></div>${S.read[r.id]?`<span class="pill good">${T("Read","مقروء")}</span>`:""}${CHEV}</a>`).join("")}</div></div>`;
+}
+function vReading(id){
+  const r=READS.find(x=>x.id===id);if(!r)return vReads();
+  return `<a class="back" href="#read">← ${T("Read","القراءة")}</a><h1>${esc(L(r))}</h1>
+  <div class="card reading"><span class="tap-hint">${T("Tap a line to check the meaning.","اضغط على السطر لتتأكد من المعنى.")}</span><div>${r.lines.map(l=>`<div class="line">${spk("S:"+plain(l[0]),l[0])}<button type="button" class="reveal" data-reveal><span class="rl ru">${RUt(l[0])}</span><span class="m" hidden>${esc(S.lang==="ar"?l[2]:l[1])}</span></button></div>`).join("")}</div></div>
+  <div class="card"><button type="button" class="btn${S.read[id]?"":" primary"} wide" data-act="markread" data-id="${esc(id)}">${S.read[id]?T("Read ✓","مقروء ✓"):T("I've read it","قرأته")}</button></div>`;
+}
+function vMore(){
+  const nA=Object.keys(AUD).length;
+  return `<h1>${T("More","المزيد")}</h1>
+  <div class="card"><span class="label">${T("Settings","الإعدادات")}</span>
+   <div class="switch"><span>${T("Explanations in","لغة الشرح")}</span><div class="seg"><button type="button" data-lang="en" aria-pressed="${S.lang==="en"}">English</button><button type="button" data-lang="ar" aria-pressed="${S.lang==="ar"}" class="ar">العربية</button></div></div>
+   <div class="switch"><span>${T("Stress marks","علامات النبر")}</span><div class="seg"><button type="button" data-act="stress" data-v="0" aria-pressed="${!S.stressAll}">${T("Fade when known","تختفي عند المعرفة")}</button><button type="button" data-act="stress" data-v="1" aria-pressed="${S.stressAll}">${T("Always","دائمًا")}</button></div></div>
+   <div class="switch"><span>${T("Phone voice when there's no recording","صوت الهاتف عند غياب التسجيل")}</span><div class="seg"><button type="button" data-act="tts" data-v="1" aria-pressed="${S.tts}">${T("On","تشغيل")}</button><button type="button" data-act="tts" data-v="0" aria-pressed="${!S.tts}">${T("Off","إيقاف")}</button></div></div>
+  </div>
+  <div class="card"><span class="label">${T("Recordings","التسجيلات")}</span>
+   <p>${T(`${nA} items have a real voice.`,`${nA} عنصرًا بصوت حقيقي.`)} ${T("A speaker records them on the recorder page, then the file goes into the app's GitHub folder (or import it here to hear it on this phone now).","يسجّلها متحدّث في صفحة التسجيل، ثم يوضع الملف في مجلد التطبيق على GitHub (أو استورده هنا لتسمعه على هذا الهاتف الآن).")}</p>
+   <div class="row"><a class="btn small" href="record.html">${T("Recorder, voice 1","صفحة التسجيل، الصوت 1")}</a><a class="btn small" href="record.html?speaker=2">${T("Voice 2","الصوت 2")}</a></div>
+   <label class="btn small" style="align-self:flex-start">${T("Import a recordings file","استيراد ملف تسجيلات")}<input type="file" accept=".json,application/json" data-act="impaudio" class="sr"></label><p class="msg" id="audmsg"></p></div>
+  <div class="card"><span class="label">${T("Add a lesson pack","إضافة حزمة دروس")}</span>
+   <p class="lead">${T("Paste a pack Claude wrote for you (JSON). It adds topics, principles, words or readings without touching your progress.","الصق حزمة كتبها لك Claude (بصيغة JSON). تضيف مواضيع أو مبادئ أو كلمات أو قراءات دون المساس بتقدمك.")}</p>
+   <textarea id="packtxt" spellcheck="false" placeholder='{"id":"…","title":"…","words":[…]}'></textarea>
+   <div class="row"><button type="button" class="btn small primary" data-act="addpack">${T("Add pack","أضف الحزمة")}</button></div><p class="msg" id="packmsg"></p>
+   ${PACKS.length?`<div class="list">${PACKS.map((p,i)=>`<div class="li"><div class="grow"><div class="t">${esc(p.title||p.id)}</div><div class="s">${(p.words||[]).length} ${T("words","كلمة")} · ${(p.principles||[]).length} ${T("principles","مبادئ")}</div></div><button type="button" class="btn small" data-act="rmpack" data-i="${i}">${T("Remove","إزالة")}</button></div>`).join("")}</div>`:""}</div>
+  <div class="card"><span class="label">${T("Your progress","تقدمك")}</span>
+   <p class="lead">${T("Progress lives on this phone. Updates never erase it. Keep a backup if you change phones.","التقدم محفوظ على هذا الهاتف ولا تمسحه التحديثات. احتفظ بنسخة احتياطية إذا غيّرت الهاتف.")}</p>
+   <div class="row"><button type="button" class="btn small" data-act="backup">${T("Save a backup file","حفظ نسخة احتياطية")}</button><label class="btn small">${T("Restore from backup","استعادة من نسخة")}<input type="file" accept=".json,application/json" data-act="restore" class="sr"></label></div><p class="msg" id="bkmsg"></p></div>
+  <div class="card"><span class="label">${T("About","حول التطبيق")}</span>
+   <p>${T("Koren (Корень, “root”) teaches Russian to Arabic and English speakers through how the language is built. Code: AGPL-3.0. Lessons: CC BY-NC-SA 4.0. Recordings belong to the people who made them.","«كورين» (Корень، أي «جذر») يعلّم الروسية للمتحدثين بالعربية والإنجليزية من خلال طريقة بناء اللغة. الشيفرة: AGPL-3.0. الدروس: CC BY-NC-SA 4.0. التسجيلات ملك أصحابها.")}</p>
+   <p class="lead">${T("Course version","نسخة الدروس")} ${esc(BASE.version)}</p></div>`;
+}
+
+/* ================= practice: building questions ================= */
+const lenScore=(a,b)=>Math.abs(plain(a).length-plain(b).length)+(plain(a).split(" ").length===plain(b).split(" ").length?0:6);
+function pickDistr(it,pool,field){ /* similar length and word count; never the same meaning */
+  const mean=x=>(x.en+"|"+x.ar),seen=new Set([mean(it),plain(it.ru)]);
+  const cand=shuffle(pool).filter(x=>x!==it&&!seen.has(mean(x))&&!seen.has(plain(x.ru)))
+    .sort((a,b)=>lenScore(a[field],it[field])-lenScore(b[field],it[field])).slice(0,6);
+  const out=[];for(const x of shuffle(cand)){const k=mean(x)+plain(x.ru);if(!seen.has(k)){seen.add(k);out.push(x)}if(out.length===3)break}
+  return out;
+}
+function poolFor(it){const same=(it.kind==="p"?PHRASES:WORDS).filter(x=>x.topic===it.topic);return same.length>=6?same:same.concat(it.kind==="p"?PHRASES:WORDS)}
+function wordQ(it,type){
+  const pool=poolFor(it);
+  if(type==="pm")return {t:"pm",it,opts:shuffle([it,...pickDistr(it,pool,S.lang)])};
+  if(type==="pr"||type==="lp")return {t:type,it,opts:shuffle([it,...pickDistr(it,pool,"ru")])};
+  return {t:type,it};
+}
+function reviewTypeFor(it){
+  const b=(S.srs[it.key]||{}).b||0,listen=canPlay(it.key);
+  if(it.kind==="p")return b<2?"pm":(listen&&Math.random()<.5?"lp":"pr");
+  if(b<=1)return "pm";if(b===2)return listen&&Math.random()<.5?"lp":"pr";
+  return listen&&Math.random()<.4?"lt":"ty";
+}
+function stressVariants(ru){
+  const p=plain(ru);if(/ё/i.test(p))return null;
+  const idx=[...p].map((c,i)=>/[аеиоуыэюяАЕИОУЫЭЮЯ]/.test(c)?i:-1).filter(i=>i>=0);if(idx.length<2)return null;
+  const mk=i=>p.slice(0,i+1)+"́"+p.slice(i+1);
+  const others=shuffle(idx.map(mk).filter(v=>v!==ru)).slice(0,3);
+  return shuffle([ru,...others]);
+}
+function principleQ(x,mode){
+  const p=PRm[x.pid];
+  if(p.drill==="form")return {t:"form",x,opts:shuffle([x.ans,...x.wrong])};
+  if(p.drill==="stress"){const v=stressVariants(x.ru);return v?{t:"stress",x,opts:v}:null}
+  const others=shuffle(p.list.filter(y=>y!==x)).sort((a,b)=>lenScore(a.ru,x.ru)-lenScore(b.ru,x.ru)).slice(0,5);
+  const d=shuffle(others).slice(0,3);
+  if(p.drill==="read")return {t:"read",x,opts:shuffle([x,...d])};
+  if(mode==="type")return {t:"pty",x};
+  if(mode==="mean")return {t:"pmean",x,opts:shuffle([x,...d])};
+  return {t:"pat",x,opts:shuffle([x,...d])};
+}
+function principleQs(pid,n){
+  const p=PRm[pid];if(!p||!p.list||!p.list.length)return [];
+  const d=today();
+  const ranked=shuffle(p.list).sort((a,b)=>{const ra=S.srs[a.key],rb=S.srs[b.key];const sa=ra?(ra.d<=d?0:2)+ra.b/10:1,sb=rb?(rb.d<=d?0:2)+rb.b/10:1;return sa-sb});
+  const pick=ranked.slice(0,n);
+  return pick.map((x,i)=>principleQ(x,p.drill==="pattern"?(i<n/2?"pick":i<n*.75?"mean":"type"):null)).filter(Boolean);
+}
+function topicQs(id,learnNew){
+  const ws=wordsOf(id),ph=phrasesOf(id),q=[];
+  let fresh=ws.filter(w=>!seenOrDrilled(w)).slice(0,5);
+  let set=fresh;
+  if(learnNew&&fresh.length)fresh.forEach(w=>q.push({t:"intro",it:w}));
+  if(!learnNew||!fresh.length){
+    const d=today();
+    set=shuffle(ws.filter(w=>seenOrDrilled(w))).sort((a,b)=>((S.srs[a.key]||{}).b||0)-((S.srs[b.key]||{}).b||0)).slice(0,6);
+    if(set.length<4){const add=ws.filter(w=>!set.includes(w)).slice(0,4-set.length);add.forEach(w=>q.push({t:"intro",it:w}));set=set.concat(add)}
+  }
+  shuffle(set).forEach(w=>q.push(wordQ(w,"pm")));
+  shuffle(set).slice(0,4).forEach(w=>q.push(wordQ(w,canPlay(w.key)&&Math.random()<.5?"lp":"pr")));
+  shuffle(set).slice(0,2).forEach(w=>q.push(wordQ(w,"ty")));
+  const phr=shuffle(ph.filter(x=>x.ps.length||true)).slice(0,1);phr.forEach(x=>q.push(wordQ(x,"pm")));
+  const older=dueKeys().filter(k=>ITEMS[k]&&ITEMS[k].topic!==id).slice(0,2);
+  older.forEach(k=>q.push(wordQ(ITEMS[k],reviewTypeFor(ITEMS[k]))));
+  return q;
+}
+function reviewQs(n){
+  return dueKeys().slice(0,n).map(k=>ITEMS[k]?wordQ(ITEMS[k],reviewTypeFor(ITEMS[k])):principleQ(PITEMS[k],["pick","mean","type"][Math.floor(Math.random()*3)])).filter(Boolean);
+}
+function startQ(list,title){
+  if(!list.length)return;
+  Q={list,i:0,answered:false,title,right:0,touched:new Set(),finished:false,factShown:0};
+  if(location.hash==="#drill")render();else location.hash="#drill";
+  autoPlay();
+}
+function sessionList(){
+  const q=reviewQs(8);
+  const p=nextPrinciple();if(p)q.push(...principleQs(p.id,5));
+  const t=nextTopic();if(t)q.push(...topicQs(t.id,true).slice(0,10));
+  return q;
+}
+
+/* ================= practice: drawing a question ================= */
+const ansOf=q=>q.t==="form"?q.x.ans:q.t==="stress"?q.x.ru:(q.x||q.it).ru;
+function renderQ(){
+  const view=$("#view");
+  if(Q.finished)return view.innerHTML=renderEnd();
+  const q=Q.list[Q.i],pct=Math.round(Q.i/Q.list.length*100);
+  let body="";
+  const meaningOf=x=>esc(S.lang==="ar"?x.ar:x.en);
+  if(q.t==="intro"){const it=q.it;S.seen[it.key]=1;save();
+    body=`<p class="prompt">${T("New word","كلمة جديدة")} · ${esc(tname(it.topic))}</p><div class="big ru">${esc(it.ru)}</div><div class="center">${spk(it.key,it.ru,true)}</div>
+     <button type="button" class="btn" data-reveal-mean>${T("Show meaning","أظهر المعنى")}</button><p class="hint" id="introm" hidden style="font-size:20px">${M(it)}</p>${pchips(it.ps)}
+     <button type="button" class="btn primary wide" data-act="next">${T("Next","التالي")}</button>`;
+  }else{
+    let head="",opts="";
+    const optBtn=(val,label,cls)=>`<button type="button" class="opt ${cls||""}" data-ans="${esc(val)}">${label}</button>`;
+    if(q.t==="pm"){head=`<p class="prompt">${T("What does it mean?","ما معناها؟")}</p><div class="big ru">${RUw(q.it)}</div><div class="center">${spk(q.it.key,q.it.ru)}</div>`;
+      opts=q.opts.map(o=>optBtn(o.ru,M(o))).join("")}
+    else if(q.t==="pr"){head=`<p class="prompt">${T("Which one is it?","أيّها؟")}</p><div class="big">${M(q.it)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${RUw(o)}</span>`)).join("")}
+    else if(q.t==="lp"){head=`<p class="prompt">${T("Listen and pick","استمع واختر")}</p><div class="center">${spk(q.it.key,q.it.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${RUw(o)}</span>`)).join("")}
+    else if(q.t==="ty"||q.t==="lt"){head=q.t==="ty"?`<p class="prompt">${T("Type it in Russian","اكتبها بالروسية")}</p><div class="big">${M(q.it)}</div>`:`<p class="prompt">${T("Listen and type","استمع واكتب")}</p><div class="center">${spk(q.it.key,q.it.ru,true)}</div>`}
+    else if(q.t==="form"){const x=q.x;
+      head=`<p class="prompt">${T("Fill the gap","املأ الفراغ")}</p><div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?`<p class="hint ru">(${esc(x.hint)})</p>`:`<p class="hint">${meaningOf(x)}</p>`}`;
+      opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
+    else if(q.t==="pat"){head=`<p class="prompt">${T("Which is the Russian word?","ما الكلمة الروسية؟")}</p><div class="big latin" dir="ltr">${esc(q.x.en)}</div>${S.lang==="ar"?`<p class="hint ar">${esc(q.x.ar)}</p>`:""}`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${esc(o.ru)}</span>`)).join("")}
+    else if(q.t==="pmean"){head=`<p class="prompt">${T("What does it mean?","ما معناها؟")}</p><div class="big ru">${esc(q.x.ru)}</div><div class="center">${spk(q.x.akey,q.x.ru)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,meaningOf(o))).join("")}
+    else if(q.t==="pty"){head=`<p class="prompt">${T("Use the rule: type it in Russian","طبّق القاعدة: اكتبها بالروسية")}</p><div class="big latin" dir="ltr">${esc(q.x.en)}</div>${S.lang==="ar"?`<p class="hint ar">${esc(q.x.ar)}</p>`:""}`}
+    else if(q.t==="stress"){head=`<p class="prompt">${T("Where is the stress?","أين النبر؟")}</p><div class="center">${spk(q.x.akey,q.x.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
+    else if(q.t==="read"){head=`<p class="prompt">${T("You see this sign. What is it?","ترى هذه اللافتة. ما هي؟")}</p><div class="sign">${esc(q.x.ru)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,meaningOf(o))).join("")}
+    const typing=q.t==="ty"||q.t==="lt"||q.t==="pty";
+    body=head+(typing?`<input class="typein ru" id="typein" lang="ru" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="${T("Russian keyboard","لوحة المفاتيح الروسية")}"><button type="button" class="btn primary wide" data-act="check">${T("Check","تحقّق")}</button>`:`<div class="opts">${opts}</div>`)+`<div id="fb"></div>`;
+  }
+  view.innerHTML=`<div class="drill"><div class="dtop"><button type="button" class="x" data-act="quit" aria-label="${T("Close","إغلاق")}">×</button><div class="meter"><i style="width:${pct}%"></i></div></div>${body}</div>`;
+  const ti=$("#typein");if(ti)setTimeout(()=>{try{ti.focus()}catch(e){}},50);
+}
+function autoPlay(){
+  if(!Q||Q.finished)return;const q=Q.list[Q.i];if(!q)return;
+  if(q.t==="intro"||q.t==="lp"||q.t==="lt")play(q.it.key,q.it.ru);
+  else if(q.t==="stress")play(q.x.akey,q.x.ru);
+}
+function answer(given){
+  if(Q.answered)return;Q.answered=true;
+  const q=Q.list[Q.i],right=ansOf(q);
+  const ok=q.t==="ty"||q.t==="lt"||q.t==="pty"?norm(given)===norm(right):given===right;
+  const item=q.it||q.x,key=item.key;
+  grade(key,ok);if(q.x)pstat(q.x.pid,ok);if(ok)Q.right++;Q.touched.add(key);save();
+  document.querySelectorAll("[data-ans]").forEach(b=>{b.disabled=true;if(b.dataset.ans===right)b.classList.add("ok");else if(b.dataset.ans===given)b.classList.add("dim")});
+  const ti=$("#typein");if(ti)ti.disabled=true;
+  const audioKey=q.x?(q.x.akey):item.key,audioText=q.t==="form"?q.x.full:right;
+  const meaning=esc(S.lang==="ar"?item.ar:item.en);
+  const links=q.x?[q.x.pid]:item.ps;
+  let html="";
+  if(ok){
+    html=`<div class="fb"><div class="row"><span class="yes">✓ ${q.t==="form"?`<span class="ru">${esc(q.x.full)}</span>`:T("Yes","نعم")}</span>${spk(audioKey,audioText)}</div>`;
+    if(FACTS.length&&Math.random()<.18&&Q.factShown<2){Q.factShown++;const f=FACTS[Math.floor(Math.random()*FACTS.length)];html+=`<p class="fact">${esc(L(f))}</p>`}
+    html+=`</div>`;
+  }else{
+    html=`<div class="fb"><div class="row" style="justify-content:space-between"><div><div class="label">${T("The answer","الإجابة")}</div><div style="font-size:22px" class="ru">${esc(q.t==="form"?q.x.full:right)}</div><div class="lead">${meaning}</div></div>${spk(audioKey,audioText)}</div>
+     ${links.length?`<div class="chips">${links.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Open the card:","افتح البطاقة:")} ${esc(pname(p))}</a>`).join("")}</div>`:""}</div>`;
+    play(audioKey,audioText);
+  }
+  html+=`<button type="button" class="btn primary wide" data-act="next">${Q.i+1<Q.list.length?T("Next","التالي"):T("Finish","إنهاء")}</button>`;
+  $("#fb").innerHTML=html;
+  const nb=$('#fb [data-act="next"]');if(nb)setTimeout(()=>{try{nb.focus({preventScroll:false});nb.scrollIntoView({block:"nearest",behavior:"smooth"})}catch(e){}},30);
+}
+function nextQ(){
+  if(Q.i+1>=Q.list.length){Q.finished=true;renderQ();return}
+  Q.i++;Q.answered=false;renderQ();autoPlay();
+}
+function renderEnd(){
+  const r=nextReading(),p=nextPrinciple();
+  return `<div class="drill"><h1>${T("Done for now","انتهينا الآن")}</h1>
+   <p class="lead">${T(`You worked with ${Q.touched.size} words and patterns. They'll come back for review at the right time.`,`تدرّبت على ${Q.touched.size} من الكلمات والأنماط. ستعود للمراجعة في الوقت المناسب.`)}</p>
+   <div class="card"><span class="label">${T("If you have a few more minutes","إن كان لديك بضع دقائق أخرى")}</span><div class="list">
+    ${r?`<a class="li" href="#r/${esc(r.id)}"><div class="grow"><div class="t">${esc(L(r))}</div><div class="s">${T("A short reading","قراءة قصيرة")}</div></div>${CHEV}</a>`:""}
+    ${p?`<a class="li" href="#p/${esc(p.id)}"><div class="grow"><div class="t">${esc(L(p))}</div><div class="s">${esc(L(p.can))}</div></div>${CHEV}</a>`:""}
+   </div></div>
+   <button type="button" class="btn wide" data-act="quit">${T("Back to Today","العودة إلى اليوم")}</button></div>`;
+}
+
+/* ================= events ================= */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button,a,[data-reveal]");if(!t)return;
+  if(t.dataset.lang){S.lang=t.dataset.lang;save();render();return}
+  if(t.dataset.go){e.preventDefault();if(location.hash===t.dataset.go)render();else location.hash=t.dataset.go;return}
+  if(t.dataset.play){e.stopPropagation();play(t.dataset.play,t.dataset.text,t);return}
+  if(t.dataset.say!==undefined&&t.classList.contains("say")){play(wkey(t.dataset.say),t.dataset.say);return}
+  if(t.hasAttribute("data-reveal")){const m=t.querySelector(".m");if(m)m.hidden=!m.hidden;return}
+  if(t.hasAttribute("data-reveal-mean")){const m=$("#introm");if(m)m.hidden=false;t.remove();return}
+  if(t.dataset.ans!==undefined){answer(t.dataset.ans);return}
+  const a=t.dataset.act;if(!a)return;
+  if(a==="session"){const l=sessionList();if(l.length)startQ(l,"session");return}
+  if(a==="learn")return startQ(topicQs(t.dataset.id,true),"topic");
+  if(a==="tpractice")return startQ(topicQs(t.dataset.id,false),"topic");
+  if(a==="ppractice")return startQ(principleQs(t.dataset.id,8),"principle");
+  if(a==="check"){const v=($("#typein")||{}).value||"";if(!v.trim())return;answer(v);return}
+  if(a==="next"){nextQ();return}
+  if(a==="quit"){Q=null;location.hash="#today";return}
+  if(a==="markread"){S.read[t.dataset.id]=S.read[t.dataset.id]?0:1;save();render();return}
+  if(a==="stress"){S.stressAll=t.dataset.v==="1";save();render();return}
+  if(a==="tts"){S.tts=t.dataset.v==="1";save();render();return}
+  if(a==="addpack"){addPack();return}
+  if(a==="rmpack"){const i=+t.dataset.i;if(t.dataset.sure){PACKS.splice(i,1);savePacks();build();render()}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط مرة أخرى للإزالة")}return}
+  if(a==="backup"){backup();return}
+});
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter"||!Q)return;
+  if(e.target.id==="typein"&&!Q.answered){e.preventDefault();const v=e.target.value;if(v.trim())answer(v);return}
+  if(Q.answered&&!e.target.closest("a")){const nb=$('#fb [data-act="next"]');if(nb){e.preventDefault();nextQ()}}
+});
+document.addEventListener("change",async e=>{
+  const t=e.target;if(!t.dataset||!t.files||!t.files[0])return;
+  const f=t.files[0];let o=null;try{o=JSON.parse(await f.text())}catch(err){}
+  if(t.dataset.act==="impaudio"){
+    const m=$("#audmsg");if(!o||o.app!=="koren-audio"){m.textContent=T("That isn't a Koren recordings file.","هذا ليس ملف تسجيلات لكورين.");return}
+    const sp=+o.speaker===2?2:1;try{await idbSet(sp===1?"audio":"audio2",o)}catch(err){}
+    const n=addClips(o,"local",sp);m.textContent=T(`Added ${n} recordings (voice ${sp}).`,`أُضيف ${n} تسجيلًا (الصوت ${sp}).`);return;
+  }
+  if(t.dataset.act==="restore"){
+    const m=$("#bkmsg");if(!o||o.app!=="koren-backup"||!o.state){m.textContent=T("That isn't a Koren backup file.","هذا ليس ملف نسخة احتياطية لكورين.");return}
+    S=Object.assign(S,o.state);if(Array.isArray(o.packs))PACKS=o.packs;save();savePacks();build();render();
+    const m2=$("#bkmsg");if(m2)m2.textContent=T("Progress restored.","تمت استعادة التقدم.");
+  }
+});
+function addPack(){
+  const m=$("#packmsg"),txt=($("#packtxt")||{}).value||"";let o;
+  try{o=JSON.parse(txt)}catch(e){m.textContent=T("That isn't valid JSON. Copy the whole pack, from { to }.","هذا ليس JSON صالحًا. انسخ الحزمة كاملة من { إلى }.");return}
+  if(!o||typeof o!=="object"||!o.id){m.textContent=T("A pack needs an \"id\".","الحزمة تحتاج إلى \"id\".");return}
+  const i=PACKS.findIndex(p=>p.id===o.id);if(i>=0)PACKS[i]=o;else PACKS.push(o);
+  if(!savePacks()){m.textContent=T("Couldn't save the pack on this phone.","تعذّر حفظ الحزمة على هذا الهاتف.");return}
+  build();render();const m2=$("#packmsg");if(m2)m2.textContent=T("Pack added.","أُضيفت الحزمة.");
+}
+function backup(){
+  const data=JSON.stringify({app:"koren-backup",v:1,made:new Date().toISOString(),state:S,packs:PACKS});
+  const file=new File([data],"koren-backup-"+new Date().toISOString().slice(0,10)+".json",{type:"application/json"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Koren backup"}).catch(()=>{});return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();a.remove();
+  const m=$("#bkmsg");if(m)m.textContent=T("Backup saved to your downloads.","حُفظت النسخة في التنزيلات.");
+}
+window.addEventListener("hashchange",()=>{render();window.scrollTo(0,0)});
+render();loadAudio();
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
