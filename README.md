@@ -21,6 +21,8 @@ The order of the path is `path` in `course.js`.
 
 **Writing and reading drills.** Typed gaps, building sentences from word tiles (with one wrong form mixed in), gap-fills in real sentences, listen-and-type, and a “Practise this text” mode on every reading.
 
+**Women by default.** The Arabic speaks to the learner in the feminine, and the Russian she says about herself is feminine (Я студе́нтка). More → Settings → “Speak to me as” switches both to the masculine. In `course.js` this is written ⟦feminine|masculine⟧; `tools/check.mjs` checks both versions and flags Arabic commands written only in the masculine. Pairs like тури́стка / тури́ст and учи́тельница / учи́тель are listed feminine first, and the readings share jobs and chores between women and men.
+
 ## Files
 
 - `index.html` — the app

@@ -90,7 +90,7 @@ details.sec>summary::-webkit-details-marker{display:none}
 <script src="course.js"></script>
 <script>
 "use strict";
-const C=window.COURSE,$=s=>document.querySelector(s);
+const C0=window.COURSE,$=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const MAXS={W:6,P:12,S:12};
 /* speaker 2 (or 3) records into its own storage and file: record.html?speaker=2 */
@@ -100,7 +100,11 @@ const FILE=SP===1?"koren-audio.json":`koren-audio-${SP}.json`;
 const plain=s=>String(s).replace(/\u0301/g,"");
 const wkey=ru=>"W:"+plain(ru).toLowerCase();
 const SECTIONS=[],SEEN=new Set();
-const add=(t,items,rec)=>{items=items.filter(i=>!SEEN.has(i.key)&&SEEN.add(i.key));if(items.length)SECTIONS.push({t,items,rec:rec||""})};
+const add=(t,items,rec)=>{items=items.filter(i=>!SEEN.has(i.key)&&SEEN.add(i.key));if(!items.length)return;const old=SECTIONS.find(x=>x.t===t);if(old)old.items.push(...items);else SECTIONS.push({t,items,rec:rec||""})};
+/* gendered sentences (⟦feminine|masculine⟧): both versions get recorded */
+const GM=/⟦([^|⟧]*)\|([^⟧]*)⟧/g;
+const GR=(v,g)=>typeof v==="string"?v.replace(GM,g==="m"?"$2":"$1"):Array.isArray(v)?v.map(x=>GR(x,g)):v&&typeof v==="object"?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,GR(x,g)])):v;
+for(const C of [GR(C0,"f"),GR(C0,"m")]){
 C.topics.forEach(tp=>add("Topic · "+tp.en,
   C.words.filter(w=>w[3]===tp.id).map(w=>({key:wkey(w[0]),ru:w[0],en:w[1]}))
   .concat(C.phrases.filter(p=>p[3]===tp.id).map(p=>({key:"P:"+plain(p[0]),ru:p[0],en:p[1],ph:1})))));
@@ -114,6 +118,7 @@ C.principles.forEach(p=>{const it=[];[(p.body||{}).en||"",...(p.parts||[]).map(x
   const txt=x.replace(/\s*→\s*/g,", ").trim(),k=/\s/.test(plain(txt))?"S:"+plain(txt):"W:"+plain(txt).toLowerCase();it.push({key:k,ru:txt,en:"example in the card",ph:/\s/.test(txt)?1:0});return m});
   add("Card examples · "+p.en,it,"Examples from the explanation card. Say each one naturally; for single letters say just the sound.")});
 (C.readings||[]).forEach(r=>add("Reading · "+r.en,r.lines.map(l=>({key:"S:"+plain(l[0]),ru:l[0],en:l[1],ph:1})),"A short text: read each line naturally, as if telling it to a friend."));
+}
 const ALL=SECTIONS.flatMap(s=>s.items);
 /* ---- storage (IndexedDB on this phone) ---- */
 function db(){return new Promise((res,rej)=>{const r=indexedDB.open(SP===1?"koren-rec":"koren-rec-"+SP,1);r.onupgradeneeded=()=>r.result.createObjectStore("clips");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}

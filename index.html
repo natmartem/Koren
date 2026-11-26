@@ -191,12 +191,19 @@ const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(M
 const today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
 
 /* ================= state ================= */
-let S={v:1,lang:"en",srs:{},seen:{},ps:{},done:{},stressAll:false,tts:true,auto:true,read:{}};
+let S={v:1,lang:"en",gender:"f",srs:{},seen:{},ps:{},done:{},stressAll:false,tts:true,auto:true,read:{}};
 let storageOK=true;
 try{const raw=localStorage.getItem("koren-state");if(raw){const o=JSON.parse(raw);if(o&&typeof o==="object")S=Object.assign(S,o)}}catch(e){}
 try{localStorage.setItem("koren-probe","1");localStorage.removeItem("koren-probe")}catch(e){storageOK=false}
 const save=()=>{try{localStorage.setItem("koren-state",JSON.stringify(S))}catch(e){storageOK=false}};
-const T=(en,ar)=>S.lang==="ar"?ar:en;
+/* Gendered text: ⟦feminine|masculine⟧ anywhere in course or app text. Women are the default;
+   Settings → "Speak to me as" switches the Arabic address and the Russian the learner says about herself. */
+const GM=/⟦([^|⟧]*)\|([^⟧]*)⟧/g;
+const G=s=>typeof s==="string"&&s.includes("⟦")?s.replace(GM,S.gender==="m"?"$2":"$1"):s;
+let ALTS=new Map(); /* typed answers: the other gender's version of a gendered sentence is accepted too */
+const GX=v=>{if(typeof v==="string"){if(!v.includes("⟦"))return v;const r=G(v);if(/[а-яё]/i.test(v)&&!v.includes("<")&&v.length<300){const o=v.replace(GM,S.gender==="m"?"$1":"$2");ALTS.set(norm(r),norm(o))}return r}
+  if(Array.isArray(v))return v.map(GX);if(v&&typeof v==="object"){const o={};for(const k in v)o[k]=GX(v[k]);return o}return v};
+const T=(en,ar)=>S.lang==="ar"?G(ar):en;
 /* song lyrics: pasted by the learner, kept on this phone only */
 let LYR={};
 try{const o=JSON.parse(localStorage.getItem("koren-lyrics")||"{}");if(o&&typeof o==="object"&&!Array.isArray(o))LYR=o}catch(e){}
@@ -206,6 +213,7 @@ const saveLyr=()=>{try{localStorage.setItem("koren-lyrics",JSON.stringify(LYR));
 const BASE=window.COURSE||{topics:[],principles:[],words:[],phrases:[],readings:[],facts:[]};
 let PACKS=[];
 try{const a=JSON.parse(localStorage.getItem("koren-packs")||"[]");if(Array.isArray(a))PACKS=a}catch(e){}
+const PACKSRAW=()=>PACKS;
 const savePacks=()=>{try{localStorage.setItem("koren-packs",JSON.stringify(PACKS));return true}catch(e){return false}};
 let TOP=[],PR=[],WORDS=[],PHRASES=[],READS=[],FACTS=[],ITEMS={},PITEMS={},TOPm={},PRm={};
 /* combination tables (from course.js) and lookups built from them */
@@ -218,6 +226,7 @@ const clean=t=>t.replace(/[.,!?«»"“”:;…()]/g,"");
 const wkey=ru=>"W:"+plain(ru).toLowerCase();
 const pkey=ru=>"P:"+plain(ru);
 function build(){
+  ALTS=new Map();const BASE=GX(window.COURSE||{topics:[],principles:[],words:[],phrases:[],readings:[],facts:[]}),PACKS=GX(PACKSRAW());
   const c={topics:[...BASE.topics],principles:[...BASE.principles],words:[...BASE.words],phrases:[...BASE.phrases],readings:[...(BASE.readings||[])],facts:[...(BASE.facts||[])],songs:[...(BASE.songs||[])],nouns:[...(BASE.nouns||[])],adjs:[...(BASE.adjs||[])],verbs:[...(BASE.verbs||[])]};
   PACKS.forEach(p=>{
     (p.topics||[]).forEach(t=>{const i=c.topics.findIndex(x=>x.id===t.id);if(i<0)c.topics.push(t);else c.topics[i]=Object.assign({},c.topics[i],t)});
@@ -331,7 +340,7 @@ function generate(c){
     }
   });
   /* verb endings: every verb with every person */
-  const PERS=[["Я",0],["Ты",1],["Он",2],["Она́",2],["Мы",3],["Вы",4],["Они́",5]];
+  const PERS=[["Я",0],["Ты",1],["Она́",2],["Он",2],["Мы",3],["Вы",4],["Они́",5]];
   VERBS.forEach((v,vi)=>PERS.forEach(([pn,k],pi)=>{
     if(!v.forms[k])return;const compl=v.compl.length?" "+v.compl[(vi+pi)%v.compl.length]:"",neg=(vi*7+pi)%6===0;
     const cands=[...v.forms.filter((_,j)=>j!==k),v.inf],rot=(vi+pi)%cands.length;
@@ -345,7 +354,7 @@ function generate(c){
       const o={pid:"stress",part:"",tag:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
 }
 build();
-const APP_VERSION="1.3";
+const APP_VERSION="1.4";
 
 /* ================= feedback notes (localStorage "koren-feedback") =================
    A note box under each drill question, drill result, topic, principle and reading.
@@ -396,7 +405,7 @@ function loadVoices(){try{const v=speechSynthesis.getVoices().filter(x=>/^ru/i.t
 if("speechSynthesis" in window){loadVoices();try{speechSynthesis.onvoiceschanged=loadVoices}catch(e){}}
 const hasA=k=>!!(AUD[k]&&AUD[k].length);
 const canPlay=k=>hasA(k)||ttsOK();
-const hearBtn=(k,text)=>canPlay(k)?`<button type="button" class="hear" data-play="${esc(k)}" data-text="${esc(plain(text))}">${SPK}${T("Hear it","استمع")}</button>`:"";
+const hearBtn=(k,text)=>canPlay(k)?`<button type="button" class="hear" data-play="${esc(k)}" data-text="${esc(plain(text))}">${SPK}${T("Hear it","استمع⟦ي|⟧")}</button>`:"";
 const spk=(k,text,big)=>canPlay(k)?`<button type="button" class="spk${big?" big":""}" data-play="${esc(k)}" data-text="${esc(plain(text))}" aria-label="${T("Play","تشغيل")}">${SPK}</button>`:"";
 function speak(text){
   if(!ttsOK())return;
@@ -455,7 +464,7 @@ function grade(key,ok){
 }
 function pstat(pid,ok){const s=S.ps[pid]||{n:0,r:[]};s.n++;s.r.push(ok?1:0);if(s.r.length>10)s.r=s.r.slice(-10);S.ps[pid]=s}
 function level(pid){const s=S.ps[pid];if(!s||!s.n)return 0;const last=s.r.slice(-8),ok=last.reduce((a,b)=>a+b,0);return s.n>=10&&ok>=7?2:1}
-const levelPill=pid=>{const l=level(pid);return l===2?`<span class="pill good">${T("Comfortable","مرتاح فيه")}</span>`:l===1?`<span class="pill">${T("Practising","قيد التدريب")}</span>`:""};
+const levelPill=pid=>{const l=level(pid);return l===2?`<span class="pill good">${T("Comfortable","مرتاح⟦ة|⟧ فيه")}</span>`:l===1?`<span class="pill">${T("Practising","قيد التدريب")}</span>`:""};
 const recognised=list=>list.filter(w=>(S.srs[w.key]||{}).b>=2).length;
 const seenOrDrilled=it=>S.seen[it.key]||S.srs[it.key];
 function dueKeys(){const d=today();return Object.keys(S.srs).filter(k=>S.srs[k].d<=d&&(ITEMS[k]||PITEMS[k])).sort((a,b)=>S.srs[a].d-S.srs[b].d)}
@@ -616,30 +625,30 @@ function vPath(){
   const cur=curStep(),done=STEPS.filter(stepDone).length;
   const from=cur?Math.max(0,cur.i-2):Math.max(0,STEPS.length-5),win=STEPS.slice(from,from+8);
   return `<h1>${T("Your path","مسارك")}</h1>
-  <p class="lead">${T("Everything in the course is on this path, in small lessons. Tap Start, and Next at the end of each lesson.","كل ما في الدورة موجود في هذا المسار، في دروس صغيرة. اضغط «ابدأ»، ثم «التالي» في نهاية كل درس.")}</p>
+  <p class="lead">${T("Everything in the course is on this path, in small lessons. Tap Start, and Next at the end of each lesson.","كل ما في الدورة موجود في هذا المسار، في دروس صغيرة. اضغط⟦ي|⟧ «⟦ابدئي|ابدأ⟧»، ثم «التالي» في نهاية كل درس.")}</p>
   <div class="card">${cur?`<span class="label">${T(`Step ${cur.i+1} of ${STEPS.length}`,`الخطوة ${cur.i+1} من ${STEPS.length}`)} · ${esc(stepKind(cur))}</span>
    <h2 style="font-size:20px">${esc(stepName(cur))}</h2><p class="lead">${esc(stepSub(cur))}</p>
-   <button type="button" class="btn primary wide" data-act="step" data-id="${esc(cur.id)}">${done?T("Continue","تابع"):T("Start","ابدأ")}</button>
+   <button type="button" class="btn primary wide" data-act="step" data-id="${esc(cur.id)}">${done?T("Continue","تابع⟦ي|⟧"):T("Start","⟦ابدئي|ابدأ⟧")}</button>
    <div class="meter"><i style="width:${Math.round(done/STEPS.length*100)}%"></i></div><p class="count">${T(`${done} of ${STEPS.length} steps done`,`أنجزت ${done} من ${STEPS.length} خطوة`)}</p>`
-   :`<h2>${T("You've finished the whole path","أنهيت المسار كله")}</h2><p class="lead">${T("Everything is learned. Keep it fresh in Practice.","تعلّمت كل شيء. حافظ عليه في التدريب.")}</p><button type="button" class="btn primary wide" data-go="#practice">${T("Go to Practice","إلى التدريب")}</button>`}</div>
+   :`<h2>${T("You've finished the whole path","أنهيت المسار كله")}</h2><p class="lead">${T("Everything is learned. Keep it fresh in Practice.","تعلّمت كل شيء. حافظ⟦ي|⟧ عليه في التدريب.")}</p><button type="button" class="btn primary wide" data-go="#practice">${T("Go to Practice","إلى التدريب")}</button>`}</div>
   <div class="card"><div class="list">${win.map(x=>stepRow(x,cur)).join("")}</div>
-   <details class="fb-list"><summary>${T("See the whole path","أظهر المسار كاملًا")} (${STEPS.length})</summary><div class="list">${STEPS.map(x=>stepRow(x,cur)).join("")}</div></details></div>
-  ${storageOK?"":`<div class="card"><p>${T("This browser is not saving progress (private mode?). Open the app normally to keep your progress.","هذا المتصفح لا يحفظ التقدم (وضع خاص؟). افتح التطبيق بشكل عادي لحفظ تقدمك.")}</p></div>`}`;
+   <details class="fb-list"><summary>${T("See the whole path","أظهر⟦ي|⟧ المسار كاملًا")} (${STEPS.length})</summary><div class="list">${STEPS.map(x=>stepRow(x,cur)).join("")}</div></details></div>
+  ${storageOK?"":`<div class="card"><p>${T("This browser is not saving progress (private mode?). Open the app normally to keep your progress.","هذا المتصفح لا يحفظ التقدم (وضع خاص؟). افتح⟦ي|⟧ التطبيق بشكل عادي لحفظ تقدمك.")}</p></div>`}`;
 }
 function vPractice(){
   const P=poolOf(),pr=PR.filter(x=>unlocked(x.id)),tops=TOP.map(t=>({t,n:poolOf({topic:t.id}).size})).filter(x=>x.n>0);
   const tops2=TOP.map(x=>({t:x,n:recognised(wordsOf(x.id))})).filter(x=>x.n>0);
   return `<h1>${T("Practice","التدريب")}</h1>
   <p class="lead">${T("Review only: everything here comes from steps you've done on the path. Nothing new.","مراجعة فقط: كل ما هنا من خطوات أنجزتها في المسار. لا شيء جديد.")}</p>
-  <div class="card">${P.size?`<p class="count">${T(`${P.size} things to practise`,`${P.size} عنصرًا للتدريب`)}</p><button type="button" class="btn primary wide" data-act="practice">${T("Start practice","ابدأ التدريب")}</button>`
+  <div class="card">${P.size?`<p class="count">${T(`${P.size} things to practise`,`${P.size} عنصرًا للتدريب`)}</p><button type="button" class="btn primary wide" data-act="practice">${T("Start practice","⟦ابدئي|ابدأ⟧ التدريب")}</button>`
    :`<p class="lead">${T("This fills up as you go along the path.","يمتلئ هذا كلما تقدّمت في المسار.")}</p><button type="button" class="btn primary wide" data-go="#path">${T("Go to the path","إلى المسار")}</button>`}</div>
   ${pr.length?`<div class="card"><span class="label">${T("By principle","حسب المبدأ")}</span><div class="list">${pr.map(x=>`<button type="button" class="li" data-act="practice" data-pid="${esc(x.id)}"><div class="grow"><div class="t">${esc(L(x))}</div><div class="s">${esc(L(x.can))}</div></div>${levelPill(x.id)}${CHEV}</button>`).join("")}</div></div>`:""}
-  ${tops.length?`<div class="card"><span class="label">${T("By topic","حسب الموضوع")}</span><div class="list">${tops.map(x=>`<button type="button" class="li" data-act="practice" data-topic="${esc(x.t.id)}"><div class="grow"><div class="t">${esc(L(x.t))}</div><div class="s">${T(`You recognise ${recognised(wordsOf(x.t.id))} of ${wordsOf(x.t.id).length} words`,`تعرف ${recognised(wordsOf(x.t.id))} من ${wordsOf(x.t.id).length} كلمة`)}</div></div>${CHEV}</button>`).join("")}</div></div>`:""}`;
+  ${tops.length?`<div class="card"><span class="label">${T("By topic","حسب الموضوع")}</span><div class="list">${tops.map(x=>`<button type="button" class="li" data-act="practice" data-topic="${esc(x.t.id)}"><div class="grow"><div class="t">${esc(L(x.t))}</div><div class="s">${T(`You recognise ${recognised(wordsOf(x.t.id))} of ${wordsOf(x.t.id).length} words`,`تعرف⟦ين|⟧ ${recognised(wordsOf(x.t.id))} من ${wordsOf(x.t.id).length} كلمة`)}</div></div>${CHEV}</button>`).join("")}</div></div>`:""}`;
 }
 function vTopics(){
-  return `<h1>${T("Topics","المواضيع")}</h1><p class="lead">${T("Everyday words, grouped by where you'll need them. Reference only: learning happens on the path.","كلمات يومية مجمّعة حسب المكان الذي ستحتاجها فيه. للمرجع فقط: التعلّم يحدث في المسار.")}</p>
+  return `<h1>${T("Topics","المواضيع")}</h1><p class="lead">${T("Everyday words, grouped by where you'll need them. Reference only: learning happens on the path.","كلمات يومية مجمّعة حسب المكان الذي ستحتاج⟦ين|⟧ها فيه. للمرجع فقط: التعلّم يحدث في المسار.")}</p>
   <div class="card"><div class="list">${TOP.map(t=>{const ws=wordsOf(t.id),n=recognised(ws);
-    return `<a class="li" href="#topic/${esc(t.id)}"><div class="grow"><div class="t">${esc(L(t))}</div><div class="s">${n?T(`You recognise ${n} of ${ws.length}`,`تعرف ${n} من ${ws.length}`):T(`${ws.length} words`,`${ws.length} كلمة`)}</div>${n?`<div class="meter"><i style="width:${Math.round(n/ws.length*100)}%"></i></div>`:""}</div>${CHEV}</a>`}).join("")}</div></div>
+    return `<a class="li" href="#topic/${esc(t.id)}"><div class="grow"><div class="t">${esc(L(t))}</div><div class="s">${n?T(`You recognise ${n} of ${ws.length}`,`تعرف⟦ين|⟧ ${n} من ${ws.length}`):T(`${ws.length} words`,`${ws.length} كلمة`)}</div>${n?`<div class="meter"><i style="width:${Math.round(n/ws.length*100)}%"></i></div>`:""}</div>${CHEV}</a>`}).join("")}</div></div>
   <div class="card"><span class="label">${T("Readings","القراءات")}</span><div class="list">${READS.map(r=>`<a class="li" href="#r/${esc(r.id)}"><div class="grow"><div class="t">${esc(L(r))}</div><div class="s">${esc(tname(r.topic))}</div></div>${S.read[r.id]?`<span class="pill good">✓</span>`:""}${CHEV}</a>`).join("")}</div></div>`;
 }
 function vTopic(id){
@@ -648,9 +657,9 @@ function vTopic(id){
   const fresh=ws.filter(w=>!seenOrDrilled(w)).length;
   return `<a class="back" href="#topics">← ${T("Topics","المواضيع")}</a><h1>${esc(L(t))}</h1>
   <div class="card"><div class="row">
-   ${poolOf({topic:id}).size?`<button type="button" class="btn primary" data-act="practice" data-topic="${esc(id)}">${T("Practise what you've learned here","تدرّب على ما تعلّمته هنا")}</button>`:t.song?`<span class="lead">${T("These words are taught in Songs.","تُعلَّم هذه الكلمات في الأغاني.")}</span><a class="btn small" href="#songs">${T("Open Songs","افتح الأغاني")}</a>`:`<span class="lead">${T("Words here are taught on the path.","تُعلَّم كلمات هذا الموضوع في المسار.")}</span>`}</div>
-   ${ps.length?`<span class="label">${T("Principles you'll meet here","مبادئ ستجدها هنا")}</span>${pchips(ps)}`:""}</div>
-  <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning.","اضغط على الكلمة لتسمعها وترى معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
+   ${poolOf({topic:id}).size?`<button type="button" class="btn primary" data-act="practice" data-topic="${esc(id)}">${T("Practise what you've learned here","تدرّب⟦ي|⟧ على ما تعلّمته هنا")}</button>`:t.song?`<span class="lead">${T("These words are taught in Songs.","تُعلَّم هذه الكلمات في الأغاني.")}</span><a class="btn small" href="#songs">${T("Open Songs","افتح⟦ي|⟧ الأغاني")}</a>`:`<span class="lead">${T("Words here are taught on the path.","تُعلَّم كلمات هذا الموضوع في المسار.")}</span>`}</div>
+   ${ps.length?`<span class="label">${T("Principles you'll meet here","مبادئ ستجد⟦ين|⟧ها هنا")}</span>${pchips(ps)}`:""}</div>
+  <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning.","اضغط⟦ي|⟧ على الكلمة لتسمع⟦ي|⟧ها وتر⟦ي|ى⟧ معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
   ${ph.length?`<div class="card"><span class="label">${T("Phrases","العبارات")}</span><div>${ph.map(x=>{const need=x.ps.filter(p=>!unlocked(p));
     return wordRow(x)+(need.length?`<div class="chips" style="margin:-4px 0 6px">${need.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Taught on the path after:","يُعلَّم في المسار بعد:")} ${esc(pname(p))}</a>`).join("")}</div>`:"")}).join("")}</div></div>`:""}
   ${READS.some(r=>r.topic===id)?`<div class="card"><span class="label">${T("Readings","القراءات")}</span><div class="list">${READS.filter(r=>r.topic===id).map(r=>`<a class="li" href="#r/${esc(r.id)}"><div class="grow"><div class="t">${esc(L(r))}</div></div>${CHEV}</a>`).join("")}</div></div>`:""}
@@ -658,7 +667,7 @@ function vTopic(id){
 }
 function vPrinciples(){
   const groups=["grammar","words","sound"];
-  return `<h1>${T("Principles","المبادئ")}</h1><p class="lead">${T("How Russian is built. Learn one rule, unlock many words and sentences.","كيف تُبنى الروسية. تعلّم قاعدة واحدة تفتح لك كلمات وجملًا كثيرة.")}</p>
+  return `<h1>${T("Principles","المبادئ")}</h1><p class="lead">${T("How Russian is built. Learn one rule, unlock many words and sentences.","كيف تُبنى الروسية. تعلّم⟦ي|⟧ قاعدة واحدة تفتح لك كلمات وجملًا كثيرة.")}</p>
   ${groups.map(g=>{const ps=PR.filter(p=>p.kind===g);if(!ps.length)return "";
    return `<div class="card"><span class="label">${kindName(g)}</span><div class="list">${ps.map(p=>`<a class="li" href="#p/${esc(p.id)}"><div class="grow"><div class="t">${esc(L(p))}</div><div class="s">${esc(L(p.can))}</div></div>${levelPill(p.id)}${CHEV}</a>`).join("")}</div></div>`}).join("")}`;
 }
@@ -670,9 +679,9 @@ function vPrinciple(id){
   <p class="lead">${esc(L(p.can))}</p>
   <div class="card body">${md(L(p.body))}</div>
   ${(p.parts||[]).map(pt=>`<div class="card body"><span class="label">${esc(L(pt))}</span>${md(L(pt.body))}</div>`).join("")}
-  ${p.bridge?`<div class="card bridge body"><span class="label">${T("From what you already know","ممّا تعرفه أصلًا")}</span><p>${md(L(p.bridge))}</p></div>`:""}
-  ${p.ex&&p.ex.length?`<div class="card"><span class="label">${T("Examples","أمثلة")}</span><span class="tap-hint">${T("Tap to see the meaning.","اضغط لترى المعنى.")}</span><div>${p.ex.map(x=>{const it={key:wkey(x[0]),ru:x[0],en:x[1],ar:x[2]};const k=x[0].includes(" ")?"S:"+plain(x[0]):it.key;return `<div class="word">${spk(k,x[0])}<button type="button" class="reveal" data-reveal><span class="w ru">${esc(x[0])}</span><span class="m" hidden>${M(it)}</span></button></div>`}).join("")}</div></div>`:""}
-  ${p.list&&p.list.length?`<div class="card"><button type="button" class="btn primary wide" data-act="ppractice" data-id="${esc(id)}">${T("Practise this principle","تدرّب على هذا المبدأ")}</button><p class="count">${p.drill==="form"?T(`${p.list.length} sentences to practise, built from your topics.`,`${p.list.length} جملة للتدريب، مبنية من مواضيعك.`):T(`${p.list.length} words to practise.`,`${p.list.length} كلمة للتدريب.`)}</p>${levelPill(id)?`<div class="row">${levelPill(id)}</div>`:""}</div>`:""}
+  ${p.bridge?`<div class="card bridge body"><span class="label">${T("From what you already know","ممّا تعرف⟦ين|⟧ه أصلًا")}</span><p>${md(L(p.bridge))}</p></div>`:""}
+  ${p.ex&&p.ex.length?`<div class="card"><span class="label">${T("Examples","أمثلة")}</span><span class="tap-hint">${T("Tap to see the meaning.","اضغط⟦ي|⟧ لتر⟦ي|ى⟧ المعنى.")}</span><div>${p.ex.map(x=>{const it={key:wkey(x[0]),ru:x[0],en:x[1],ar:x[2]};const k=x[0].includes(" ")?"S:"+plain(x[0]):it.key;return `<div class="word">${spk(k,x[0])}<button type="button" class="reveal" data-reveal><span class="w ru">${esc(x[0])}</span><span class="m" hidden>${M(it)}</span></button></div>`}).join("")}</div></div>`:""}
+  ${p.list&&p.list.length?`<div class="card"><button type="button" class="btn primary wide" data-act="ppractice" data-id="${esc(id)}">${T("Practise this principle","تدرّب⟦ي|⟧ على هذا المبدأ")}</button><p class="count">${p.drill==="form"?T(`${p.list.length} sentences to practise, built from your topics.`,`${p.list.length} جملة للتدريب، مبنية من مواضيعك.`):T(`${p.list.length} words to practise.`,`${p.list.length} كلمة للتدريب.`)}</p>${levelPill(id)?`<div class="row">${levelPill(id)}</div>`:""}</div>`:""}
   ${pat?`<div class="card"><span class="label">${T(`Words this rule gives you: ${p.list.length}`,`كلمات تمنحك إياها هذه القاعدة: ${p.list.length}`)}</span><div>${p.list.map(x=>`<div class="word">${spk(x.akey,x.ru)}<button type="button" class="reveal" data-reveal><span class="w ru">${esc(x.ru)}</span><span class="m" hidden>${esc(x.en)} · <span class="ar">${esc(x.ar)}</span></span></button></div>`).join("")}</div></div>`:""}
   ${tg.length?`<div class="card"><span class="label">${T("In your topics","في مواضيعك")}</span>${Object.keys(byTopic).map(t=>`<a class="pill" href="#topic/${esc(t)}" style="align-self:flex-start">${esc(tname(t))}</a><div>${byTopic[t].map(wordRow).join("")}</div>`).join("")}</div>`:""}
   ${fbBox("p:"+id,()=>({kind:"principle",src:`Principle “${p.en}” (id ${id}), explanations shown in ${S.lang==="ar"?"Arabic":"English"}`}))}`;
@@ -684,8 +693,8 @@ function vReads(){
 function vReading(id){
   const r=READS.find(x=>x.id===id);if(!r)return vReads();
   return `<a class="back" href="#read">← ${T("Read","القراءة")}</a><h1>${esc(L(r))}</h1>
-  <div class="card reading"><div class="row" style="justify-content:space-between"><span class="tap-hint">${T("Tap a line to hear it and check the meaning.","اضغط على السطر لتسمعه وتتأكد من معناه.")}</span>${canPlay("S:"+plain(r.lines[0][0]))?`<button type="button" class="btn small" data-act="playall" data-id="${esc(id)}">▶ ${T("Play all","تشغيل الكل")}</button>`:""}</div><div>${r.lines.map(l=>`<div class="line">${spk("S:"+plain(l[0]),l[0])}<button type="button" class="reveal" data-reveal><span class="rl ru">${RUt(l[0])}</span><span class="m" hidden>${esc(S.lang==="ar"?l[2]:l[1])}</span></button></div>`).join("")}</div></div>
-  <div class="card"><button type="button" class="btn primary wide" data-act="rpractice" data-id="${esc(id)}">${T("Practise this text","تدرّب على هذا النص")}</button>
+  <div class="card reading"><div class="row" style="justify-content:space-between"><span class="tap-hint">${T("Tap a line to hear it and check the meaning.","اضغط⟦ي|⟧ على السطر لتسمع⟦ي|⟧ه وتتأكد⟦ي|⟧ من معناه.")}</span>${canPlay("S:"+plain(r.lines[0][0]))?`<button type="button" class="btn small" data-act="playall" data-id="${esc(id)}">▶ ${T("Play all","تشغيل الكل")}</button>`:""}</div><div>${r.lines.map(l=>`<div class="line">${spk("S:"+plain(l[0]),l[0])}<button type="button" class="reveal" data-reveal><span class="rl ru">${RUt(l[0])}</span><span class="m" hidden>${esc(S.lang==="ar"?l[2]:l[1])}</span></button></div>`).join("")}</div></div>
+  <div class="card"><button type="button" class="btn primary wide" data-act="rpractice" data-id="${esc(id)}">${T("Practise this text","تدرّب⟦ي|⟧ على هذا النص")}</button>
    <p class="count">${T("Meaning, gaps, building and typing with these exact lines.","المعنى والفراغات وترتيب الجمل والكتابة، بهذه السطور نفسها.")}</p>
    <button type="button" class="btn wide" data-act="markread" data-id="${esc(id)}">${S.read[id]?T("Read ✓","مقروء ✓"):T("I've read it","قرأته")}</button></div>
   ${fbBox("r:"+id,()=>({kind:"reading",src:`Reading “${r.en}” (id ${id})`}))}`;
@@ -701,9 +710,9 @@ const TK=(s,song,poem)=>isPoem(s)?poem:song; /* the same sentence for a song or 
 const songNext=s=>s.lessons.findIndex((_,i)=>!S.done[sdKey(s.id,i)]);
 function vSongs(){
   return `<h1>${T("Culture","ثقافة")}</h1>
-  <p class="lead">${T("Songs and poems, easiest first. Listen or read, learn the words in small lessons, then come back to the original. Words you learn here count as known on your path and come back in Practice.","أغانٍ وقصائد، من الأسهل إلى الأصعب. استمع أو اقرأ، وتعلّم الكلمات في دروس صغيرة، ثم عُد إلى النص الأصلي. الكلمات التي تتعلّمها هنا تُحسب معروفة في مسارك وتعود في التدريب.")}</p>
+  <p class="lead">${T("Songs and poems, easiest first. Listen or read, learn the words in small lessons, then come back to the original. Words you learn here count as known on your path and come back in Practice.","أغانٍ وقصائد، من الأسهل إلى الأصعب. استمع⟦ي|⟧ أو اقرأ، وتعلّم⟦ي|⟧ الكلمات في دروس صغيرة، ثم ⟦عودي|عُد⟧ إلى النص الأصلي. الكلمات التي تتعلّم⟦ين|⟧ها هنا تُحسب معروفة في مسارك وتعود في التدريب.")}</p>
   <div class="card">${SONGS.length?`<div class="list">${SONGS.map(s=>{const ws=songWords(s),n=recognised(ws),d=s.lessons.filter((_,i)=>S.done[sdKey(s.id,i)]).length;
-    return `<a class="li" href="#song/${esc(s.id)}"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s">${isPoem(s)?T("Poem","قصيدة"):T("Song","أغنية")} · <span class="ru">${esc(s.by)}</span> · ${T(`${d} of ${s.lessons.length} lessons`,`${d} من ${s.lessons.length} دروس`)}${n?` · ${T(`you recognise ${n} of ${ws.length} words`,`تعرف ${n} من ${ws.length} كلمة`)}`:""}</div>${d?`<div class="meter"><i style="width:${Math.round(d/s.lessons.length*100)}%"></i></div>`:""}</div>${d===s.lessons.length?`<span class="pill good">✓</span>`:""}${CHEV}</a>`}).join("")}</div>`
+    return `<a class="li" href="#song/${esc(s.id)}"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s">${isPoem(s)?T("Poem","قصيدة"):T("Song","أغنية")} · <span class="ru">${esc(s.by)}</span> · ${T(`${d} of ${s.lessons.length} lessons`,`${d} من ${s.lessons.length} دروس`)}${n?` · ${T(`you recognise ${n} of ${ws.length} words`,`تعرف⟦ين|⟧ ${n} من ${ws.length} كلمة`)}`:""}</div>${d?`<div class="meter"><i style="width:${Math.round(d/s.lessons.length*100)}%"></i></div>`:""}</div>${d===s.lessons.length?`<span class="pill good">✓</span>`:""}${CHEV}</a>`}).join("")}</div>`
    :`<p class="lead">${T("Nothing here yet.","لا شيء هنا بعد.")}</p>`}</div>`;
 }
 /* ---- lyrics: pasted by the learner, any common format ----
@@ -763,7 +772,7 @@ function lyrAddTr(id,txt){
 let LYRMSG=null; /* {id,text,open}: shown once on the song page */
 function lyrSet(id,txt){
   const L=lyrParse(txt),n=L.filter(x=>x.ru).length,nt=L.filter(x=>x.tr).length;
-  if(!n){LYRMSG={id,text:T("No Russian lines found there. Copy the Russian text of the song and try again.","لم أجد سطورًا روسية. انسخ النص الروسي للأغنية وحاول مرة أخرى."),open:true};return false}
+  if(!n){LYRMSG={id,text:T("No Russian lines found there. Copy the Russian text of the song and try again.","لم أجد سطورًا روسية. انسخ⟦ي|⟧ النص الروسي للأغنية وحاول⟦ي|⟧ مرة أخرى."),open:true};return false}
   LYR[id]=lyrText(L);const ok=saveLyr();
   LYRMSG={id,text:!ok?T("Couldn't save: storage is full or blocked.","تعذّر الحفظ: التخزين ممتلئ أو محظور."):nt?T(`Added ${n} lines, ${nt} with a translation.`,`أُضيف ${n} سطرًا، منها ${nt} مع ترجمة.`):T(`Added ${n} lines. You can add a translation too.`,`أُضيف ${n} سطرًا. يمكنك إضافة ترجمة أيضًا.`)};
   return true;
@@ -771,10 +780,10 @@ function lyrSet(id,txt){
 async function lyrPaste(id,mode){
   let txt=null;
   try{txt=await navigator.clipboard.readText()}catch(e){}
-  if(txt===null)LYRMSG={id,text:T("Your phone didn't let Koren read the clipboard. Paste into the box below instead (tap and hold, then Paste), and tap Save.","لم يسمح هاتفك لكورين بقراءة الحافظة. الصق في المربع أدناه (اضغط مطوّلًا ثم «لصق»)، ثم اضغط «احفظ»."),open:true};
-  else if(!txt.trim())LYRMSG={id,text:T("The clipboard is empty. Copy the text first, then tap Paste.","الحافظة فارغة. انسخ النص أولًا ثم اضغط «الصق».")};
+  if(txt===null)LYRMSG={id,text:T("Your phone didn't let Koren read the clipboard. Paste into the box below instead (tap and hold, then Paste), and tap Save.","لم يسمح هاتفك لكورين بقراءة الحافظة. الصق⟦ي|⟧ في المربع أدناه (اضغط⟦ي|⟧ مطوّلًا ثم «لصق»)، ثم اضغط⟦ي|⟧ «احفظ⟦ي|⟧»."),open:true};
+  else if(!txt.trim())LYRMSG={id,text:T("The clipboard is empty. Copy the text first, then tap Paste.","الحافظة فارغة. انسخ⟦ي|⟧ النص أولًا ثم اضغط⟦ي|⟧ «الصق⟦ي|⟧».")};
   else if(mode==="tr"){const r=lyrAddTr(id,txt),ok=saveLyr();
-    LYRMSG={id,text:!ok?T("Couldn't save: storage is full or blocked.","تعذّر الحفظ: التخزين ممتلئ أو محظور."):r.t===r.n?T(`Translation added to all ${r.n} lines.`,`أُضيفت الترجمة إلى ${r.n} سطرًا.`):T(`Translation added: ${r.t} lines for ${r.n} Russian lines. If they don't line up, fix them in “Edit by hand”.`,`أُضيفت الترجمة: ${r.t} سطرًا لـ ${r.n} سطرًا روسيًا. إذا لم تتطابق، صحّحها في «التعديل يدويًا».`)}}
+    LYRMSG={id,text:!ok?T("Couldn't save: storage is full or blocked.","تعذّر الحفظ: التخزين ممتلئ أو محظور."):r.t===r.n?T(`Translation added to all ${r.n} lines.`,`أُضيفت الترجمة إلى ${r.n} سطرًا.`):T(`Translation added: ${r.t} lines for ${r.n} Russian lines. If they don't line up, fix them in “Edit by hand”.`,`أُضيفت الترجمة: ${r.t} سطرًا لـ ${r.n} سطرًا روسيًا. إذا لم تتطابق، صحّح⟦ي|⟧ها في «التعديل يدويًا».`)}}
   else lyrSet(id,txt);
   render();const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"});
 }
@@ -783,27 +792,27 @@ const lyrMark=ru=>String(ru).split(/(\s+)/).map(tok=>!tok.trim()?tok:knownTok(to
 function lyricsCard(s){
   const id=s.id,txt=LYR[id]||"",L=lyrParse(txt),lines=L.filter(x=>x.ru),nt=lines.filter(x=>x.tr).length,msg=LYRMSG&&LYRMSG.id===id?LYRMSG:null;
   const link=(u,label)=>u?`<a href="${esc(u)}" target="_blank" rel="noopener">${label}</a>`:"";
-  const ruLink=s.lyrics?link(s.lyrics,TK(s,T("Open the lyrics","افتح الكلمات"),T("Open the poem","افتح القصيدة"))):T("Find the lyrics online, for example on LyricsTranslate or Genius.","ابحث عن الكلمات على الإنترنت، مثلًا في LyricsTranslate أو Genius.");
+  const ruLink=s.lyrics?link(s.lyrics,TK(s,T("Open the lyrics","افتح⟦ي|⟧ الكلمات"),T("Open the poem","افتح⟦ي|⟧ القصيدة"))):T("Find the lyrics online, for example on LyricsTranslate or Genius.","ابحث⟦ي|⟧ عن الكلمات على الإنترنت، مثلًا في LyricsTranslate أو Genius.");
   const LBL=TK(s,T("Lyrics","كلمات الأغنية"),T("The poem","القصيدة"));
-  const trLink=link(s.translation||s.lyrics,T("Open a translation","افتح ترجمة"));
-  const why=`<p class="lead">${TK(s,T("Lyrics are copyrighted, so Koren doesn't include them.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها «كورين»."),T("Koren doesn't include texts it doesn't hold the rights to.","«كورين» لا يتضمّن نصوصًا لا يملك حقوقها."))} ${T("Add the text for your own study: it stays on this phone only, never uploaded to GitHub or added to feedback.","أضف النص لدراستك الشخصية: يبقى على هذا الهاتف فقط، ولا يُرفع إلى GitHub ولا يُضاف إلى الملاحظات.")}</p>`;
+  const trLink=link(s.translation||s.lyrics,T("Open a translation","افتح⟦ي|⟧ ترجمة"));
+  const why=`<p class="lead">${TK(s,T("Lyrics are copyrighted, so Koren doesn't include them.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها «كورين»."),T("Koren doesn't include texts it doesn't hold the rights to.","«كورين» لا يتضمّن نصوصًا لا يملك حقوقها."))} ${T("Add the text for your own study: it stays on this phone only, never uploaded to GitHub or added to feedback.","⟦أضيفي|أضف⟧ النص لدراستك الشخصية: يبقى على هذا الهاتف فقط، ولا يُرفع إلى GitHub ولا يُضاف إلى الملاحظات.")}</p>`;
   const P=(mode,label,primary)=>`<button type="button" class="btn small${primary?" primary":""}" data-act="lyrpaste" data-id="${esc(id)}" data-mode="${mode}">${label}</button>`;
-  const editor=`<details class="fbk"${msg&&msg.open?" open":""}><summary>✎ ${lines.length?T("Edit by hand","التعديل يدويًا"):T("Or paste or type by hand","أو الصق أو اكتب يدويًا")}</summary><div class="fbk-in">
+  const editor=`<details class="fbk"${msg&&msg.open?" open":""}><summary>✎ ${lines.length?T("Edit by hand","التعديل يدويًا"):T("Or paste or type by hand","أو الصق⟦ي|⟧ أو اكتب⟦ي|⟧ يدويًا")}</summary><div class="fbk-in">
    <p class="tap-hint">${T("Any format works: Russian only, Russian | translation, alternating lines, or Russian first and the translation after.","أي صيغة تصلح: الروسية وحدها، أو الروسية | الترجمة، أو سطر بسطر، أو الروسية أولًا ثم الترجمة.")}</p>
    <textarea class="fbk-ta" id="lyr-${esc(id)}" rows="8" spellcheck="false" aria-label="${LBL}">${esc(txt)}</textarea>
-   <div class="row"><button type="button" class="btn small primary" data-act="lyrsave" data-id="${esc(id)}">${T("Save","احفظ")}</button>${txt?`<button type="button" class="btn small" data-act="lyrrm" data-id="${esc(id)}">${T("Remove the text","احذف النص")}</button>`:""}</div></div></details>`;
+   <div class="row"><button type="button" class="btn small primary" data-act="lyrsave" data-id="${esc(id)}">${T("Save","احفظ⟦ي|⟧")}</button>${txt?`<button type="button" class="btn small" data-act="lyrrm" data-id="${esc(id)}">${T("Remove the text","احذف⟦ي|⟧ النص")}</button>`:""}</div></div></details>`;
   const note=msg?`<p class="msg" aria-live="polite">${esc(msg.text)}</p>`:"";
   if(!lines.length)return `<div class="card" id="lyrics"><span class="label">${LBL}</span>${why}
    <ol class="body" style="margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:8px">
-    <li>${ruLink}${s.lyrics?T(", then select the Russian text and copy it.","، ثم حدّد النص الروسي وانسخه."):""}</li>
-    <li>${T("Come back and tap:","عُد واضغط:")} ${P("ru",TK(s,T("Paste lyrics","الصق الكلمات"),T("Paste the poem","الصق القصيدة")),true)}</li>
-    <li>${T("Optional: copy a translation and paste it the same way. It lines up with the Russian lines by itself.","اختياري: انسخ ترجمة والصقها بالطريقة نفسها. ستتطابق مع السطور الروسية تلقائيًا.")}</li></ol>
+    <li>${ruLink}${s.lyrics?T(", then select the Russian text and copy it.","، ثم حدّد⟦ي|⟧ النص الروسي وانسخ⟦ي|⟧ه."):""}</li>
+    <li>${T("Come back and tap:","⟦عودي|عُد⟧ واضغط⟦ي|⟧:")} ${P("ru",TK(s,T("Paste lyrics","الصق⟦ي|⟧ الكلمات"),T("Paste the poem","الصق⟦ي|⟧ القصيدة")),true)}</li>
+    <li>${T("Optional: copy a translation and paste it the same way. It lines up with the Russian lines by itself.","اختياري: انسخ⟦ي|⟧ ترجمة والصق⟦ي|⟧ها بالطريقة نفسها. ستتطابق مع السطور الروسية تلقائيًا.")}</li></ol>
    ${note}${editor}</div>`;
   return `<div class="card reading" id="lyrics"><div class="row" style="justify-content:space-between"><span class="label">${LBL}</span>${canPlay("S:"+plain(lines[0].ru))?`<button type="button" class="btn small" data-act="lyrplay" data-id="${esc(id)}">▶ ${T("Play all","تشغيل الكل")}</button>`:""}</div>
-   <span class="tap-hint">${T("Underlined: words you already know.","تحت الخط: كلمات تعرفها.")} ${nt?T("Tap a line to see the translation.","اضغط على السطر لترى الترجمة."):T("Tap the speaker to hear a line.","اضغط على السمّاعة لتسمع السطر.")}</span>
+   <span class="tap-hint">${T("Underlined: words you already know.","تحت الخط: كلمات تعرف⟦ين|⟧ها.")} ${nt?T("Tap a line to see the translation.","اضغط⟦ي|⟧ على السطر لتر⟦ي|ى⟧ الترجمة."):T("Tap the speaker to hear a line.","اضغط⟦ي|⟧ على السمّاعة لتسمع⟦ي|⟧ السطر.")}</span>
    ${note}
    <div>${L.map(l=>l.head?`<p class="label" style="margin-top:12px">${esc(l.head)}</p>`:l.gap?`<div style="height:10px"></div>`:`<div class="line">${spk("S:"+plain(l.ru),l.ru)}<button type="button" class="reveal" data-reveal><span class="rl ru">${lyrMark(l.ru)}</span>${l.tr?`<span class="m" hidden>${esc(l.tr)}</span>`:""}</button></div>`).join("")}</div>
-   ${nt<lines.length?`<div class="row" style="margin-top:6px">${trLink}${P("tr",T("Paste a translation","الصق ترجمة"),true)}</div><p class="tap-hint">${T("Copy a translation of the whole song, then tap Paste: it lines up with the Russian lines.","انسخ ترجمة الأغنية كاملة ثم اضغط «الصق»: ستتطابق مع السطور الروسية.")}</p>`:""}
+   ${nt<lines.length?`<div class="row" style="margin-top:6px">${trLink}${P("tr",T("Paste a translation","الصق⟦ي|⟧ ترجمة"),true)}</div><p class="tap-hint">${T("Copy a translation of the whole song, then tap Paste: it lines up with the Russian lines.","انسخ⟦ي|⟧ ترجمة الأغنية كاملة ثم اضغط⟦ي|⟧ «الصق⟦ي|⟧»: ستتطابق مع السطور الروسية.")}</p>`:""}
    ${editor}</div>`;
 }
 function vSong(id){
@@ -812,17 +821,17 @@ function vSong(id){
     return `<button type="button" class="li" data-act="song" data-id="${esc(id)}" data-li="${i}"><span class="pill${d?" good":""}" style="min-width:34px;justify-content:center;${cur?"background:var(--accent);color:var(--accent-ink)":""}">${d?"✓":i+1}</span><div class="grow"><div class="t">${esc(L(l))}</div><div class="s ru">${esc((l.words||[]).slice(0,4).map(plain).join(", "))}${(l.words||[]).length>4?"…":""}</div></div>${CHEV}</button>`};
   return `<a class="back" href="#songs">← ${T("Culture","ثقافة")}</a>
   <h1 class="ru">${esc(s.ru)}</h1>
-  <button type="button" class="reveal" data-reveal style="background:none;border:0;padding:0;text-align:start;display:flex;flex-direction:column;gap:2px"><span class="lead"><span class="ru">${esc(s.by)}</span>${s.year?" · "+esc(s.year):""} · <span class="tap-hint">${T("tap for the title's meaning","اضغط لمعنى العنوان")}</span></span><span class="m" hidden style="font-size:17px">${esc(L(s))}</span></button>
+  <button type="button" class="reveal" data-reveal style="background:none;border:0;padding:0;text-align:start;display:flex;flex-direction:column;gap:2px"><span class="lead"><span class="ru">${esc(s.by)}</span>${s.year?" · "+esc(s.year):""} · <span class="tap-hint">${T("tap for the title's meaning","اضغط⟦ي|⟧ لمعنى العنوان")}</span></span><span class="m" hidden style="font-size:17px">${esc(L(s))}</span></button>
   ${s.video?`<div class="card"><div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(s.video)}" title="${esc(plain(s.ru))}, ${esc(plain(s.by))}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-   <a href="https://www.youtube.com/watch?v=${encodeURIComponent(s.video)}" target="_blank" rel="noopener">${T("If the video doesn't load, open it on YouTube","إذا لم يعمل الفيديو، افتحه على يوتيوب")}</a></div>`:""}
+   <a href="https://www.youtube.com/watch?v=${encodeURIComponent(s.video)}" target="_blank" rel="noopener">${T("If the video doesn't load, open it on YouTube","إذا لم يعمل الفيديو، افتح⟦ي|⟧ه على يوتيوب")}</a></div>`:""}
   ${(s.notes||[]).map(n=>`<div class="card body"><span class="label">${esc(L(n))}</span>${md(L(n.body))}</div>`).join("")}
-  <div class="card"><span class="label">${TK(s,T("Learn the song's words","تعلّم كلمات الأغنية"),T("Learn the poem's words","تعلّم كلمات القصيدة"))}</span>
-   ${nx<0?`<p class="lead">${TK(s,T("All lessons done. Listen again: you'll recognise much more now.","أنهيت كل الدروس. استمع مرة أخرى: ستعرف أكثر بكثير الآن."),T("All lessons done. Read the poem again: you'll recognise much more now.","أنهيت كل الدروس. اقرأ القصيدة مرة أخرى: ستعرف أكثر بكثير الآن."))}</p><button type="button" class="btn primary wide" data-act="songpractice" data-id="${esc(id)}">${TK(s,T("Practise this song","تدرّب على هذه الأغنية"),T("Practise this poem","تدرّب على هذه القصيدة"))}</button>`
-     :`<button type="button" class="btn primary wide" data-act="song" data-id="${esc(id)}" data-li="${nx}">${started?T("Continue","تابع"):T("Start","ابدأ")}: ${esc(L(s.lessons[nx]))}</button>`}
+  <div class="card"><span class="label">${TK(s,T("Learn the song's words","تعلّم⟦ي|⟧ كلمات الأغنية"),T("Learn the poem's words","تعلّم⟦ي|⟧ كلمات القصيدة"))}</span>
+   ${nx<0?`<p class="lead">${TK(s,T("All lessons done. Listen again: you'll recognise much more now.","أنهيت كل الدروس. استمع⟦ي|⟧ مرة أخرى: ستعرف⟦ين|⟧ أكثر بكثير الآن."),T("All lessons done. Read the poem again: you'll recognise much more now.","أنهيت كل الدروس. ⟦اقرئي|اقرأ⟧ القصيدة مرة أخرى: ستعرف⟦ين|⟧ أكثر بكثير الآن."))}</p><button type="button" class="btn primary wide" data-act="songpractice" data-id="${esc(id)}">${TK(s,T("Practise this song","تدرّب⟦ي|⟧ على هذه الأغنية"),T("Practise this poem","تدرّب⟦ي|⟧ على هذه القصيدة"))}</button>`
+     :`<button type="button" class="btn primary wide" data-act="song" data-id="${esc(id)}" data-li="${nx}">${started?T("Continue","تابع⟦ي|⟧"):T("Start","⟦ابدئي|ابدأ⟧")}: ${esc(L(s.lessons[nx]))}</button>`}
    <div class="list">${s.lessons.map(lessonRow).join("")}</div>
-   <p class="count">${T(`You recognise ${recognised(ws)} of ${ws.length} words.`,`تعرف ${recognised(ws)} من ${ws.length} كلمة.`)}</p></div>
+   <p class="count">${T(`You recognise ${recognised(ws)} of ${ws.length} words.`,`تعرف⟦ين|⟧ ${recognised(ws)} من ${ws.length} كلمة.`)}</p></div>
   ${lyricsCard(s)}
-  <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning.","اضغط على الكلمة لتسمعها وترى معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
+  <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning.","اضغط⟦ي|⟧ على الكلمة لتسمع⟦ي|⟧ها وتر⟦ي|ى⟧ معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
   ${ph.length?`<div class="card"><span class="label">${T("Sentences","الجمل")}</span><div>${ph.map(x=>{const need=x.ps.filter(p=>!unlocked(p));
     return wordRow(x)+(need.length?`<div class="chips" style="margin:-4px 0 6px">${need.map(p=>`<a class="pill root" href="#p/${esc(p.split(":")[0])}">${T("Practised after:","يُتدرَّب عليها بعد:")} ${esc(pname(p))}</a>`).join("")}</div>`:"")}).join("")}</div></div>`:""}
   ${(s.ps||[]).length?`<div class="card"><span class="label">${TK(s,T("Grammar in this song","القواعد في هذه الأغنية"),T("Grammar in this poem","القواعد في هذه القصيدة"))}</span><p class="lead">${T("Each card explains one building block it uses.","كل بطاقة تشرح قطعة بناء واحدة مستخدمة فيها.")}</p>${pchips(s.ps)}</div>`:""}
@@ -854,24 +863,26 @@ function vMore(){
   ${fbCard()}
   <div class="card"><span class="label">${T("Settings","الإعدادات")}</span>
    <div class="switch"><span>${T("Explanations in","لغة الشرح")}</span><div class="seg"><button type="button" data-lang="en" aria-pressed="${S.lang==="en"}">English</button><button type="button" data-lang="ar" aria-pressed="${S.lang==="ar"}" class="ar">العربية</button></div></div>
+   <div class="switch"><span>${T("Speak to me as","⟦خاطبيني|خاطبني⟧ بصيغة")}</span><div class="seg"><button type="button" data-gender="f" aria-pressed="${S.gender!=="m"}">${T("A woman","المؤنث")}</button><button type="button" data-gender="m" aria-pressed="${S.gender==="m"}">${T("A man","المذكّر")}</button></div></div>
+   <p style="color:var(--mute);font-size:14px;margin:2px 0 10px">${T("Changes the Arabic instructions and the Russian you say about yourself: <span class="ru" dir="ltr">Я студе́нтка / Я студе́нт</span>. Typed answers accept both.","تغيّر صيغة الإرشادات العربية والجمل الروسية التي تقول⟦ينها|ها⟧ عن نفس⟦كِ|ك⟧: <span class="ru" dir="ltr">Я студе́нтка / Я студе́нт</span>. والإجابات المكتوبة تُقبل بالصيغتين.")}</p>
    <div class="switch"><span>${T("Stress marks","علامات النبر")}</span><div class="seg"><button type="button" data-act="stress" data-v="0" aria-pressed="${!S.stressAll}">${T("Fade when known","تختفي عند المعرفة")}</button><button type="button" data-act="stress" data-v="1" aria-pressed="${S.stressAll}">${T("Always","دائمًا")}</button></div></div>
    <div class="switch"><span>${T("Play sound automatically","تشغيل الصوت تلقائيًا")}</span><div class="seg"><button type="button" data-act="auto" data-v="1" aria-pressed="${autoOn()}">${T("On","تشغيل")}</button><button type="button" data-act="auto" data-v="0" aria-pressed="${!autoOn()}">${T("Off","إيقاف")}</button></div></div>
    <div class="switch"><span>${T("Phone voice when there's no recording","صوت الهاتف عند غياب التسجيل")}</span><div class="seg"><button type="button" data-act="tts" data-v="1" aria-pressed="${S.tts}">${T("On","تشغيل")}</button><button type="button" data-act="tts" data-v="0" aria-pressed="${!S.tts}">${T("Off","إيقاف")}</button></div></div>
   </div>
   ${SONGS.length?`<div class="card"><span class="label">${T("Lyrics and poem texts","كلمات الأغاني ونصوص القصائد")}</span>
-   <p class="lead">${T("Lyrics are copyrighted, so the app doesn't include them. Paste them on each page with one tap: they stay on this phone only, for your own study.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها التطبيق. الصقها في كل صفحة بضغطة واحدة: تبقى على هذا الهاتف فقط، لدراستك الشخصية.")}</p>
-   <div class="list">${SONGS.map(s=>`<a class="li" href="#song/${esc(s.id)}/lyrics"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s">${LYR[s.id]?T("Added on this phone","مضافة على هذا الهاتف"):T("Not added yet: tap to add","لم تُضف بعد: اضغط للإضافة")}</div></div>${CHEV}</a>`).join("")}</div></div>`:""}
+   <p class="lead">${T("Lyrics are copyrighted, so the app doesn't include them. Paste them on each page with one tap: they stay on this phone only, for your own study.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها التطبيق. الصق⟦ي|⟧ها في كل صفحة بضغطة واحدة: تبقى على هذا الهاتف فقط، لدراستك الشخصية.")}</p>
+   <div class="list">${SONGS.map(s=>`<a class="li" href="#song/${esc(s.id)}/lyrics"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s">${LYR[s.id]?T("Added on this phone","مضافة على هذا الهاتف"):T("Not added yet: tap to add","لم تُضف بعد: اضغط⟦ي|⟧ للإضافة")}</div></div>${CHEV}</a>`).join("")}</div></div>`:""}
   <div class="card"><span class="label">${T("Recordings","التسجيلات")}</span>
-   <p>${T(`${nA} items have a real voice.`,`${nA} عنصرًا بصوت حقيقي.`)} ${T("A speaker records them on the recorder page, then the file goes into the app's GitHub folder (or import it here to hear it on this phone now).","يسجّلها متحدّث في صفحة التسجيل، ثم يوضع الملف في مجلد التطبيق على GitHub (أو استورده هنا لتسمعه على هذا الهاتف الآن).")}</p>
+   <p>${T(`${nA} items have a real voice.`,`${nA} عنصرًا بصوت حقيقي.`)} ${T("A speaker records them on the recorder page, then the file goes into the app's GitHub folder (or import it here to hear it on this phone now).","يسجّلها متحدّث في صفحة التسجيل، ثم يوضع الملف في مجلد التطبيق على GitHub (أو ⟦استورديه|استورده⟧ هنا لتسمع⟦ي|⟧ه على هذا الهاتف الآن).")}</p>
    <div class="row"><a class="btn small" href="record.html">${T("Recorder, voice 1","صفحة التسجيل، الصوت 1")}</a><a class="btn small" href="record.html?speaker=2">${T("Voice 2","الصوت 2")}</a></div>
    <label class="btn small" style="align-self:flex-start">${T("Import a recordings file","استيراد ملف تسجيلات")}<input type="file" accept=".json,application/json" data-act="impaudio" class="sr"></label><p class="msg" id="audmsg"></p></div>
   <div class="card"><span class="label">${T("Add a lesson pack","إضافة حزمة دروس")}</span>
-   <p class="lead">${T("Paste a pack Claude wrote for you (JSON). It adds topics, principles, words or readings without touching your progress.","الصق حزمة كتبها لك Claude (بصيغة JSON). تضيف مواضيع أو مبادئ أو كلمات أو قراءات دون المساس بتقدمك.")}</p>
+   <p class="lead">${T("Paste a pack Claude wrote for you (JSON). It adds topics, principles, words or readings without touching your progress.","الصق⟦ي|⟧ حزمة كتبها لك Claude (بصيغة JSON). تضيف مواضيع أو مبادئ أو كلمات أو قراءات دون المساس بتقدمك.")}</p>
    <textarea id="packtxt" spellcheck="false" placeholder='{"id":"…","title":"…","words":[…]}'></textarea>
-   <div class="row"><button type="button" class="btn small primary" data-act="addpack">${T("Add pack","أضف الحزمة")}</button></div><p class="msg" id="packmsg"></p>
+   <div class="row"><button type="button" class="btn small primary" data-act="addpack">${T("Add pack","⟦أضيفي|أضف⟧ الحزمة")}</button></div><p class="msg" id="packmsg"></p>
    ${PACKS.length?`<div class="list">${PACKS.map((p,i)=>`<div class="li"><div class="grow"><div class="t">${esc(p.title||p.id)}</div><div class="s">${(p.words||[]).length} ${T("words","كلمة")} · ${(p.principles||[]).length} ${T("principles","مبادئ")}</div></div><button type="button" class="btn small" data-act="rmpack" data-i="${i}">${T("Remove","إزالة")}</button></div>`).join("")}</div>`:""}</div>
   <div class="card"><span class="label">${T("Your progress","تقدمك")}</span>
-   <p class="lead">${T("Progress lives on this phone. Updates never erase it. Keep a backup if you change phones.","التقدم محفوظ على هذا الهاتف ولا تمسحه التحديثات. احتفظ بنسخة احتياطية إذا غيّرت الهاتف.")}</p>
+   <p class="lead">${T("Progress lives on this phone. Updates never erase it. Keep a backup if you change phones.","التقدم محفوظ على هذا الهاتف ولا تمسحه التحديثات. احتفظ⟦ي|⟧ بنسخة احتياطية إذا غيّرت الهاتف.")}</p>
    <div class="row"><button type="button" class="btn small" data-act="backup">${T("Save a backup file","حفظ نسخة احتياطية")}</button><label class="btn small">${T("Restore from backup","استعادة من نسخة")}<input type="file" accept=".json,application/json" data-act="restore" class="sr"></label></div><p class="msg" id="bkmsg"></p></div>
   <div class="card"><span class="label">${T("About","حول التطبيق")}</span>
    <p>${T("Koren (Корень, “root”) teaches Russian to Arabic and English speakers through how the language is built. Code: AGPL-3.0. Lessons: CC BY-NC-SA 4.0. Recordings belong to the people who made them.","«كورين» (Корень، أي «جذر») يعلّم الروسية للمتحدثين بالعربية والإنجليزية من خلال طريقة بناء اللغة. الشيفرة: AGPL-3.0. الدروس: CC BY-NC-SA 4.0. التسجيلات ملك أصحابها.")}</p>
@@ -1049,7 +1060,7 @@ function renderQ(){
   const meaningOf=x=>esc(S.lang==="ar"?x.ar:x.en);
   if(q.t==="text"){const r=READS.find(x=>x.id===q.rid);
     body=`<p class="prompt">${T("New reading","قراءة جديدة")} · ${esc(tname(r.topic))}</p><h1 style="margin:0">${esc(L(r))}</h1>
-     <div class="card reading" style="margin:0"><div class="row" style="justify-content:space-between"><span class="tap-hint">${T("Read it, tap a line to hear it and check the meaning.","اقرأ النص، واضغط على السطر لتسمعه وتتأكد من معناه.")}</span>${canPlay("S:"+plain(r.lines[0][0]))?`<button type="button" class="btn small" data-act="playall" data-id="${esc(r.id)}">▶ ${T("Play all","تشغيل الكل")}</button>`:""}</div>
+     <div class="card reading" style="margin:0"><div class="row" style="justify-content:space-between"><span class="tap-hint">${T("Read it, tap a line to hear it and check the meaning.","⟦اقرئي|اقرأ⟧ النص، واضغط⟦ي|⟧ على السطر لتسمع⟦ي|⟧ه وتتأكد⟦ي|⟧ من معناه.")}</span>${canPlay("S:"+plain(r.lines[0][0]))?`<button type="button" class="btn small" data-act="playall" data-id="${esc(r.id)}">▶ ${T("Play all","تشغيل الكل")}</button>`:""}</div>
      <div>${r.lines.map(l=>`<div class="line">${spk("S:"+plain(l[0]),l[0])}<button type="button" class="reveal" data-reveal><span class="rl ru">${RUt(l[0])}</span><span class="m" hidden>${esc(S.lang==="ar"?l[2]:l[1])}</span></button></div>`).join("")}</div></div>
      <button type="button" class="btn primary wide" data-act="next">${T("I've read it, let's practise","قرأته، لنتدرّب")}</button>`;
   }else if(q.t==="card"&&q.part){const p=PRm[q.pid],pt=partOf(q.pid,q.part);
@@ -1058,11 +1069,11 @@ function renderQ(){
      <button type="button" class="btn primary wide" data-act="next">${T("Got it, let's practise","فهمت، لنتدرّب")}</button>`;
   }else if(q.t==="card"){const p=PRm[q.pid];
     body=`<p class="prompt">${T("New principle","مبدأ جديد")} · ${kindName(p.kind)}</p><h1 style="margin:0">${esc(L(p))}</h1><p class="lead">${esc(L(p.can))}</p>
-     <div class="card body" style="margin:0">${md(L(p.body))}</div>${p.bridge?`<div class="card bridge body" style="margin:0"><span class="label">${T("From what you already know","ممّا تعرفه أصلًا")}</span><p>${md(L(p.bridge))}</p></div>`:""}
+     <div class="card body" style="margin:0">${md(L(p.body))}</div>${p.bridge?`<div class="card bridge body" style="margin:0"><span class="label">${T("From what you already know","ممّا تعرف⟦ين|⟧ه أصلًا")}</span><p>${md(L(p.bridge))}</p></div>`:""}
      <button type="button" class="btn primary wide" data-act="next">${T("Got it, let's practise","فهمت، لنتدرّب")}</button>`;
   }else if(q.t==="snote"){const s=SONGm[q.sid],l=s.lessons[q.li];
     body=`<p class="prompt">${isPoem(s)?T("Poem","قصيدة"):T("Song","أغنية")} · <span class="ru">${esc(s.ru)}</span> · ${T(`lesson ${q.li+1} of ${s.lessons.length}`,`الدرس ${q.li+1} من ${s.lessons.length}`)}</p><h1 style="margin:0">${esc(L(l))}</h1>
-     <div class="card body" style="margin:0">${md(L(l.body))}</div>${l.bridge?`<div class="card bridge body" style="margin:0"><span class="label">${T("From what you already know","ممّا تعرفه أصلًا")}</span><p>${md(L(l.bridge))}</p></div>`:""}
+     <div class="card body" style="margin:0">${md(L(l.body))}</div>${l.bridge?`<div class="card bridge body" style="margin:0"><span class="label">${T("From what you already know","ممّا تعرف⟦ين|⟧ه أصلًا")}</span><p>${md(L(l.bridge))}</p></div>`:""}
      <button type="button" class="btn primary wide" data-act="next">${T("Got it, let's practise","فهمت، لنتدرّب")}</button>`;
   }else if(q.t==="intro"){const it=q.it;S.seen[it.key]=1;save();
     body=`<p class="prompt">${T("New word","كلمة جديدة")} · ${esc(tname(it.topic))}</p><div class="big ru">${esc(it.ru)}</div><div class="center">${spk(it.akey||it.key,it.ru,true)}</div>
@@ -1074,25 +1085,25 @@ function renderQ(){
     if(q.t==="pm"){head=`<p class="prompt">${T("What does it mean?","ما معناها؟")}</p><div class="big ru"${q.it.kind==="l"?' style="font-size:24px"':""}>${q.it.kind==="l"?RUt(q.it.ru):RUw(q.it)}</div><div class="center">${spk(q.it.akey||q.it.key,q.it.ru)}</div>`;
       opts=q.opts.map(o=>optBtn(o.ru,M(o))).join("")}
     else if(q.t==="pr"){head=`<p class="prompt">${T("Which one is it?","أيّها؟")}</p><div class="big">${M(q.it)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${RUw(o)}</span>`)).join("")}
-    else if(q.t==="lp"){head=`<p class="prompt">${T("Listen and pick","استمع واختر")}</p><div class="center">${spk(q.it.akey||q.it.key,q.it.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${RUw(o)}</span>`)).join("")}
-    else if(q.t==="ty"||q.t==="lt"){head=q.t==="ty"?`<p class="prompt">${T("Type it in Russian","اكتبها بالروسية")}</p><div class="say-it">${M(q.it)}</div>${hearBtn(q.it.akey||q.it.key,q.it.ru)}`:`<p class="prompt">${T("Listen and type","استمع واكتب")}</p><div class="center">${spk(q.it.akey||q.it.key,q.it.ru,true)}</div>`}
+    else if(q.t==="lp"){head=`<p class="prompt">${T("Listen and pick","استمع⟦ي|⟧ و⟦اختاري|اختر⟧")}</p><div class="center">${spk(q.it.akey||q.it.key,q.it.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${RUw(o)}</span>`)).join("")}
+    else if(q.t==="ty"||q.t==="lt"){head=q.t==="ty"?`<p class="prompt">${T("Type it in Russian","اكتب⟦ي|⟧ها بالروسية")}</p><div class="say-it">${M(q.it)}</div>${hearBtn(q.it.akey||q.it.key,q.it.ru)}`:`<p class="prompt">${T("Listen and type","استمع⟦ي|⟧ واكتب⟦ي|⟧")}</p><div class="center">${spk(q.it.akey||q.it.key,q.it.ru,true)}</div>`}
     else if(q.t==="form"){const x=q.x;
-      head=`<p class="prompt">${T("Fill the gap","املأ الفراغ")}</p><div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?`<p class="hint ru">(${esc(x.hint)})</p>`:`<p class="hint">${meaningOf(x)}</p>`}`;
+      head=`<p class="prompt">${T("Fill the gap","⟦املئي|املأ⟧ الفراغ")}</p><div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?`<p class="hint ru">(${esc(x.hint)})</p>`:`<p class="hint">${meaningOf(x)}</p>`}`;
       opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
     else if(q.t==="fty"){const x=q.x;
-      head=`<p class="prompt">${/\s/.test(plain(x.ans))?T("Type the missing words","اكتب الكلمات الناقصة"):T("Type the missing word","اكتب الكلمة الناقصة")}</p>${x.gen?"":`<div class="say-it">${meaningOf(x)}</div>`}<div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?`<p class="base">${T("Use","استخدم")}: <span class="ru">${esc(x.hint)}</span>${x.gen?` · ${esc(S.lang==="ar"?x.ar.split(" — ").pop():x.en.split(" — ").pop())}`:""}</p>`:""}${hearBtn(x.akey,x.full)}`}
-    else if(q.t==="gap"){head=`<p class="prompt">${T("Fill the gap","املأ الفراغ")}</p><div class="frame ru">${esc(q.frame).replace("…",'<span class="blank">…</span>')}</div><p class="hint">${meaningOf(q.it)}</p>`;
+      head=`<p class="prompt">${/\s/.test(plain(x.ans))?T("Type the missing words","اكتب⟦ي|⟧ الكلمات الناقصة"):T("Type the missing word","اكتب⟦ي|⟧ الكلمة الناقصة")}</p>${x.gen?"":`<div class="say-it">${meaningOf(x)}</div>`}<div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?`<p class="base">${T("Use","استخدم⟦ي|⟧")}: <span class="ru">${esc(x.hint)}</span>${x.gen?` · ${esc(S.lang==="ar"?x.ar.split(" — ").pop():x.en.split(" — ").pop())}`:""}</p>`:""}${hearBtn(x.akey,x.full)}`}
+    else if(q.t==="gap"){head=`<p class="prompt">${T("Fill the gap","⟦املئي|املأ⟧ الفراغ")}</p><div class="frame ru">${esc(q.frame).replace("…",'<span class="blank">…</span>')}</div><p class="hint">${meaningOf(q.it)}</p>`;
       opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
     else if(q.t==="build"){const used=new Set(q.built);
-      head=`<p class="prompt">${T("Build the sentence","رتّب الجملة")}</p><div class="big" style="font-size:22px">${meaningOf(q.it)}</div>
-       <div class="built">${q.built.length?q.built.map((ti,j)=>`<button type="button" class="tile on" data-unbuild="${j}">${esc(q.tiles[ti])}</button>`).join(""):`<span class="tap-hint">${T("Tap the words in order. One word doesn't belong.","اضغط على الكلمات بالترتيب. كلمة واحدة زائدة.")}</span>`}</div>
+      head=`<p class="prompt">${T("Build the sentence","رتّب⟦ي|⟧ الجملة")}</p><div class="big" style="font-size:22px">${meaningOf(q.it)}</div>
+       <div class="built">${q.built.length?q.built.map((ti,j)=>`<button type="button" class="tile on" data-unbuild="${j}">${esc(q.tiles[ti])}</button>`).join(""):`<span class="tap-hint">${T("Tap the words in order. One word doesn't belong.","اضغط⟦ي|⟧ على الكلمات بالترتيب. كلمة واحدة زائدة.")}</span>`}</div>
        <div class="tiles">${q.tiles.map((t,ti)=>`<button type="button" class="tile" data-tile="${ti}" ${used.has(ti)?"disabled":""}>${esc(t)}</button>`).join("")}</div>
        <button type="button" class="btn primary wide" data-act="bcheck" ${q.built.length?"":"disabled"}>${T("Check","تحقّق")}</button>`}
     else if(q.t==="pat"){head=`<p class="prompt">${T("Which is the Russian word?","ما الكلمة الروسية؟")}</p><div class="big latin" dir="ltr">${esc(q.x.en)}</div>${S.lang==="ar"?`<p class="hint ar">${esc(q.x.ar)}</p>`:""}`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${esc(o.ru)}</span>`)).join("")}
     else if(q.t==="pmean"){head=`<p class="prompt">${T("What does it mean?","ما معناها؟")}</p><div class="big ru">${esc(q.x.ru)}</div><div class="center">${spk(q.x.akey,q.x.ru)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,meaningOf(o))).join("")}
-    else if(q.t==="pty"){head=`<p class="prompt">${T("Use the rule: type it in Russian","طبّق القاعدة: اكتبها بالروسية")}</p><div class="big latin" dir="ltr">${esc(q.x.en)}</div>${S.lang==="ar"?`<p class="hint ar">${esc(q.x.ar)}</p>`:""}`+hearBtn(q.x.akey,q.x.ru)}
+    else if(q.t==="pty"){head=`<p class="prompt">${T("Use the rule: type it in Russian","طبّق⟦ي|⟧ القاعدة: اكتب⟦ي|⟧ها بالروسية")}</p><div class="big latin" dir="ltr">${esc(q.x.en)}</div>${S.lang==="ar"?`<p class="hint ar">${esc(q.x.ar)}</p>`:""}`+hearBtn(q.x.akey,q.x.ru)}
     else if(q.t==="stress"){head=`<p class="prompt">${T("Where is the stress?","أين النبر؟")}</p><div class="center">${spk(q.x.akey,q.x.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
-    else if(q.t==="read"){head=`<p class="prompt">${T("You see this sign. What is it?","ترى هذه اللافتة. ما هي؟")}</p><div class="sign">${esc(q.x.ru)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,meaningOf(o))).join("")}
+    else if(q.t==="read"){head=`<p class="prompt">${T("You see this sign. What is it?","تر⟦ين|ى⟧ هذه اللافتة. ما هي؟")}</p><div class="sign">${esc(q.x.ru)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,meaningOf(o))).join("")}
     const typing=q.t==="ty"||q.t==="lt"||q.t==="pty"||q.t==="fty";
     body=head+(q.t==="build"?`<div id="fb"></div>`:typing?`<input class="typein ru" id="typein" lang="ru" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="${T("Russian keyboard","لوحة المفاتيح الروسية")}"><button type="button" class="btn primary wide" data-act="check">${T("Check","تحقّق")}</button><div id="fb"></div>`:`<div class="opts">${opts}</div><div id="fb"></div>`);
   }
@@ -1112,7 +1123,7 @@ function autoPlay(){
 function answer(given){
   if(Q.answered)return;Q.answered=true;
   const q=Q.list[Q.i],right=ansOf(q);
-  const ok=TYPED.includes(q.t)?norm(given)===norm(right):given===right;
+  const ok=TYPED.includes(q.t)?(norm(given)===norm(right)||ALTS.get(norm(right))===norm(given)):given===right;
   const item=q.it||q.x,key=item.key;
   grade(key,ok);if(q.x){pstat(q.x.pid,ok);if(q.x.part)pstat(q.x.pid+":"+q.x.part,ok)}if(ok)Q.right++;Q.touched.add(key);Q.res[Q.i]=ok;save();fbRefresh("q:"+Q.qid+":"+Q.i);
   document.querySelectorAll("[data-ans]").forEach(b=>{b.disabled=true;if(b.dataset.ans===right)b.classList.add("ok");else if(b.dataset.ans===given)b.classList.add("dim")});
@@ -1129,7 +1140,7 @@ function answer(given){
     html+=`</div>`;
   }else{
     html=`<div class="fb"><div class="row" style="justify-content:space-between"><div><div class="label">${T("The answer","الإجابة")}</div><div style="font-size:22px" class="ru">${esc(fullText)}</div>${q.t==="fty"||q.t==="build"?`<div class="lead">${T("You wrote","كتبت")}: <span class="ru">${esc(given)}</span></div>`:""}<div class="lead">${meaning}</div></div>${spk(audioKey,audioText)}</div>
-     ${links.length?`<div class="chips">${links.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Open the card:","افتح البطاقة:")} ${esc(pname(p))}</a>`).join("")}</div>`:""}</div>`;
+     ${links.length?`<div class="chips">${links.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Open the card:","افتح⟦ي|⟧ البطاقة:")} ${esc(pname(p))}</a>`).join("")}</div>`:""}</div>`;
   }
   if(autoOn()||!ok)play(audioKey,audioText); /* hear the right answer, whole sentence where there is one */
   html+=`<button type="button" class="btn primary wide" data-act="next">${Q.i+1<Q.list.length?T("Next","التالي"):T("Finish","إنهاء")}</button>`;
@@ -1153,7 +1164,7 @@ function renderEnd(){
      <button type="button" class="btn primary wide" data-act="step" data-id="${esc(nx.id)}">${T("Next","التالي")}</button></div>`:""}
    ${sg&&snx>=0?`<div class="card"><span class="label">${T(`Next: lesson ${snx+1} of ${sg.lessons.length}`,`التالي: الدرس ${snx+1} من ${sg.lessons.length}`)}</span><h2>${esc(L(sg.lessons[snx]))}</h2>
      <button type="button" class="btn primary wide" data-act="song" data-id="${esc(sg.id)}" data-li="${snx}">${T("Next","التالي")}</button></div>`:""}
-   ${sg&&snx<0?`<div class="card"><h2>${TK(sg,T("You've learned the song's words","تعلّمت كلمات الأغنية"),T("You've learned the poem's words","تعلّمت كلمات القصيدة"))}</h2><p class="lead">${TK(sg,T("Play the song again: you'll recognise much more now.","شغّل الأغنية مرة أخرى: ستعرف أكثر بكثير الآن."),T("Read the poem again: you'll recognise much more now.","اقرأ القصيدة مرة أخرى: ستعرف أكثر بكثير الآن."))}</p></div>`:""}
+   ${sg&&snx<0?`<div class="card"><h2>${TK(sg,T("You've learned the song's words","تعلّمت كلمات الأغنية"),T("You've learned the poem's words","تعلّمت كلمات القصيدة"))}</h2><p class="lead">${TK(sg,T("Play the song again: you'll recognise much more now.","شغّل⟦ي|⟧ الأغنية مرة أخرى: ستعرف⟦ين|⟧ أكثر بكثير الآن."),T("Read the poem again: you'll recognise much more now.","⟦اقرئي|اقرأ⟧ القصيدة مرة أخرى: ستعرف⟦ين|⟧ أكثر بكثير الآن."))}</p></div>`:""}
    ${Q.title==="practice"?`<button type="button" class="btn primary wide" data-act="again">${T("Another round","جولة أخرى")}</button>`:""}
    <button type="button" class="btn wide" data-act="quit">${fromPath?T("Back to the path","العودة إلى المسار"):sg?TK(sg,T("Back to the song","العودة إلى الأغنية"),T("Back to the poem","العودة إلى القصيدة")):Q.title==="practice"?T("Back to Practice","العودة إلى التدريب"):T("Back","رجوع")}</button>
    ${fbBox("d:"+Q.qid,()=>{const qs=Q.list.filter(q=>q.t!=="intro"&&q.t!=="card"&&q.t!=="text"),wr=Q.list.map((q,i)=>Q.res[i]===false?(q.t==="form"||q.t==="fty"?q.x.full:(q.x||q.it).ru):null).filter(Boolean);return {kind:"drill",src:Q.src,score:`${Q.right}/${qs.length} right`,wrong:wr.join(", ")}})}</div>`;
@@ -1163,6 +1174,7 @@ function renderEnd(){
 document.addEventListener("click",e=>{
   const t=e.target.closest("button,a,[data-reveal]");if(!t)return;
   if(t.dataset.lang){S.lang=t.dataset.lang;save();render();return}
+  if(t.dataset.gender){S.gender=t.dataset.gender==="m"?"m":"f";save();build();render();return}
   if(t.dataset.go){e.preventDefault();if(location.hash===t.dataset.go)render();else location.hash=t.dataset.go;return}
   if(t.dataset.play){e.stopPropagation();stopSeq();play(t.dataset.play,t.dataset.text,t);return}
   if(t.dataset.say!==undefined&&t.classList.contains("say")){const txt=t.dataset.say.replace(/\s*→\s*/g,", ");stopSeq();play(/\s/.test(txt.trim())?"S:"+txt.trim():wkey(txt),txt,t);return}
@@ -1184,7 +1196,7 @@ document.addEventListener("click",e=>{
   if(a==="lyrsave"){const id=t.dataset.id,ta=document.getElementById("lyr-"+id),v=ta?ta.value:"";
     if(v.trim())lyrSet(id,v);else{delete LYR[id];saveLyr();LYRMSG=null}
     render();const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"});return}
-  if(a==="lyrrm"){if(t.dataset.sure){delete LYR[t.dataset.id];saveLyr();render();const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"})}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط مرة أخرى للحذف")}return}
+  if(a==="lyrrm"){if(t.dataset.sure){delete LYR[t.dataset.id];saveLyr();render();const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"})}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط⟦ي|⟧ مرة أخرى للحذف")}return}
   if(a==="practice"){const f=t.dataset.pid?{pid:t.dataset.pid}:t.dataset.topic?{topic:t.dataset.topic}:null;
     const l=practiceQs(f,15);if(!l.length)return;startQ(l,"practice",f?f.pid?`Practice: principle ${f.pid}`:`Practice: topic ${f.topic}`:"Mixed practice");if(Q)Q.filter=f;return}
   if(a==="ppractice")return startQ(principleQs(t.dataset.id,8),"principle",`Principle practice “${(PRm[t.dataset.id]||{}).en}” (id ${t.dataset.id})`);
@@ -1199,11 +1211,11 @@ document.addEventListener("click",e=>{
   if(a==="tts"){S.tts=t.dataset.v==="1";save();render();return}
   if(a==="auto"){S.auto=t.dataset.v==="1";save();render();return}
   if(a==="addpack"){addPack();return}
-  if(a==="rmpack"){const i=+t.dataset.i;if(t.dataset.sure){PACKS.splice(i,1);savePacks();build();render()}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط مرة أخرى للإزالة")}return}
+  if(a==="rmpack"){const i=+t.dataset.i;if(t.dataset.sure){PACKS.splice(i,1);savePacks();build();render()}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط⟦ي|⟧ مرة أخرى للإزالة")}return}
   if(a==="backup"){backup();return}
   if(a==="fbcopy"){copyPrompt();return}
   if(a==="fbrm"){FB=FB.filter(x=>x.id!==t.dataset.id);saveFB();const op=!!$(".fb-list[open]");render();if(op){const d=$(".fb-list");if(d)d.open=true}return}
-  if(a==="fbclear"){if(t.dataset.sure){FB=[];saveFB();render();const m=$("#fbmsg");if(m)m.textContent=T("All notes cleared.","حُذفت كل الملاحظات.")}else{t.dataset.sure="1";t.textContent=T(`Tap again to delete ${FB.length} notes`,`اضغط مرة أخرى لحذف ${FB.length} ملاحظة`)}return}
+  if(a==="fbclear"){if(t.dataset.sure){FB=[];saveFB();render();const m=$("#fbmsg");if(m)m.textContent=T("All notes cleared.","حُذفت كل الملاحظات.")}else{t.dataset.sure="1";t.textContent=T(`Tap again to delete ${FB.length} notes`,`اضغط⟦ي|⟧ مرة أخرى لحذف ${FB.length} ملاحظة`)}return}
 });
 document.addEventListener("keydown",e=>{
   if(e.key!=="Enter"||!Q||(e.target.matches&&e.target.matches("[data-fb]")))return;
@@ -1226,7 +1238,7 @@ document.addEventListener("change",async e=>{
 });
 function addPack(){
   const m=$("#packmsg"),txt=($("#packtxt")||{}).value||"";let o;
-  try{o=JSON.parse(txt)}catch(e){m.textContent=T("That isn't valid JSON. Copy the whole pack, from { to }.","هذا ليس JSON صالحًا. انسخ الحزمة كاملة من { إلى }.");return}
+  try{o=JSON.parse(txt)}catch(e){m.textContent=T("That isn't valid JSON. Copy the whole pack, from { to }.","هذا ليس JSON صالحًا. انسخ⟦ي|⟧ الحزمة كاملة من { إلى }.");return}
   if(!o||typeof o!=="object"||!o.id){m.textContent=T("A pack needs an \"id\".","الحزمة تحتاج إلى \"id\".");return}
   const i=PACKS.findIndex(p=>p.id===o.id);if(i>=0)PACKS[i]=o;else PACKS.push(o);
   if(!savePacks()){m.textContent=T("Couldn't save the pack on this phone.","تعذّر حفظ الحزمة على هذا الهاتف.");return}
@@ -1239,11 +1251,11 @@ function fbWhere(x){const c=x.ctx||{};if(c.kind==="question")return `${c.src} ·
 function fbCard(){
   const list=fbSorted().filter(x=>x.id!=="g"),n=FB.length;
   return `<div class="card" id="fb-card"><span class="label">${T("Feedback for Claude","ملاحظات لـ Claude")} · ${n}</span>
-   <p class="lead">${T("Notes you leave under questions, results, topics, principles and readings gather here. Copy them as one message, paste it into a chat with Claude, and the app gets updated on GitHub.","الملاحظات التي تتركها تحت الأسئلة والنتائج والمواضيع والمبادئ والقراءات تتجمّع هنا. انسخها في رسالة واحدة، والصقها في محادثة مع Claude، فيُحدَّث التطبيق على GitHub.")}</p>
+   <p class="lead">${T("Notes you leave under questions, results, topics, principles and readings gather here. Copy them as one message, paste it into a chat with Claude, and the app gets updated on GitHub.","الملاحظات التي تترك⟦ين|⟧ها تحت الأسئلة والنتائج والمواضيع والمبادئ والقراءات تتجمّع هنا. انسخ⟦ي|⟧ها في رسالة واحدة، والصق⟦ي|⟧ها في محادثة مع Claude، فيُحدَّث التطبيق على GitHub.")}</p>
    ${fbBox("g",()=>({kind:"general",src:"General"}),true)}
-   <div class="row"><button type="button" class="btn small primary" data-act="fbcopy">${T("Copy update prompt","انسخ طلب التحديث")}</button>${n?`<button type="button" class="btn small" data-act="fbclear">${T("Clear all notes","احذف كل الملاحظات")}</button>`:""}</div>
+   <div class="row"><button type="button" class="btn small primary" data-act="fbcopy">${T("Copy update prompt","انسخ⟦ي|⟧ طلب التحديث")}</button>${n?`<button type="button" class="btn small" data-act="fbclear">${T("Clear all notes","احذف⟦ي|⟧ كل الملاحظات")}</button>`:""}</div>
    <textarea id="fb-out" readonly hidden aria-label="Update prompt"></textarea><p class="msg" id="fbmsg" aria-live="polite"></p>
-   ${list.length?`<details class="fb-list"><summary>${T("Show notes","أظهر الملاحظات")} (${list.length})</summary>${list.map(x=>`<div class="fbrow"><div><small>${esc(fbWhere(x))}</small><p>${esc(x.text)}</p></div><button type="button" class="x" data-act="fbrm" data-id="${esc(x.id)}" aria-label="${T("Delete note","احذف الملاحظة")}">×</button></div>`).join("")}</details>`:""}</div>`;
+   ${list.length?`<details class="fb-list"><summary>${T("Show notes","أظهر⟦ي|⟧ الملاحظات")} (${list.length})</summary>${list.map(x=>`<div class="fbrow"><div><small>${esc(fbWhere(x))}</small><p>${esc(x.text)}</p></div><button type="button" class="x" data-act="fbrm" data-id="${esc(x.id)}" aria-label="${T("Delete note","احذف⟦ي|⟧ الملاحظة")}">×</button></div>`).join("")}</details>`:""}</div>`;
 }
 function fbPrompt(){
   const notes=fbSorted(),out=[];
@@ -1272,8 +1284,8 @@ Keep progress, added lesson packs and recordings working, and don't change the a
 }
 async function copyPrompt(){
   const text=fbPrompt(),n=FB.length,m=$("#fbmsg");
-  try{await navigator.clipboard.writeText(text);if(m)m.textContent=n?T(`Copied ${n} note${n>1?"s":""}. Paste into a chat with Claude. Clear them here once the update is in.`,`نُسخت ${n} ملاحظة. الصقها في محادثة مع Claude، ثم احذفها هنا بعد التحديث.`):T("Copied the prompt. There are no notes yet, so add your feedback in the chat.","نُسخ الطلب. لا توجد ملاحظات بعد، فاكتب ملاحظاتك في المحادثة.")}
-  catch(e){const ta=$("#fb-out");if(ta){ta.hidden=false;ta.value=text;ta.focus();ta.select()}if(m)m.textContent=T("Couldn't copy automatically. The text is in the box: select all and copy.","تعذّر النسخ التلقائي. النص في المربع: حدّده كله وانسخه.")}
+  try{await navigator.clipboard.writeText(text);if(m)m.textContent=n?T(`Copied ${n} note${n>1?"s":""}. Paste into a chat with Claude. Clear them here once the update is in.`,`نُسخت ${n} ملاحظة. الصق⟦ي|⟧ها في محادثة مع Claude، ثم احذف⟦ي|⟧ها هنا بعد التحديث.`):T("Copied the prompt. There are no notes yet, so add your feedback in the chat.","نُسخ الطلب. لا توجد ملاحظات بعد، فاكتب⟦ي|⟧ ملاحظاتك في المحادثة.")}
+  catch(e){const ta=$("#fb-out");if(ta){ta.hidden=false;ta.value=text;ta.focus();ta.select()}if(m)m.textContent=T("Couldn't copy automatically. The text is in the box: select all and copy.","تعذّر النسخ التلقائي. النص في المربع: حدّد⟦ي|⟧ه كله وانسخ⟦ي|⟧ه.")}
 }
 function backup(){
   const data=JSON.stringify({app:"koren-backup",v:1,made:new Date().toISOString(),state:S,packs:PACKS,feedback:FB,lyrics:LYR});

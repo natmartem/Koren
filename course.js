@@ -17,6 +17,10 @@
      stress:  [russian with the right stress]
      read:    [RUSSIAN IN CAPITALS AS ON A SIGN, English, Arabic]
    In explanation text, {…} marks Russian (tappable, with sound) and <ar>…</ar> marks Arabic.
+   Women are the default. Write ⟦feminine|masculine⟧ wherever the text depends on the learner's gender:
+   Arabic that talks to her (اضغط⟦ي|⟧، تعرف⟦ين|⟧، ⟦اقرئي|اقرأ⟧) and Russian she says about herself (Я ⟦студе́нтка|студе́нт⟧.).
+   Settings → "Speak to me as" picks one; the recorder lists both versions; typed answers accept both.
+   When a person's gender is free, make her a woman as often as a man, and list feminine forms first (тури́стка / тури́ст).
    Audio keys: "W:" + word without stress marks, "P:" + phrase without stress marks. Do not change an item's Russian once recorded. */
 window.COURSE = {
 version: 2,
@@ -65,20 +69,20 @@ topics: [
 principles: [
 {id:"no-is", kind:"grammar", drill:"form",
  en:"No “is” in the present", ar:"لا فعل «يكون» في المضارع",
- can:{en:"Say “I am…”, “this is…”, “mum is at home”", ar:"تقول «أنا…» و«هذا…» و«أمي في البيت»"},
+ can:{en:"Say “I am…”, “this is…”, “mum is at home”", ar:"تقول⟦ين|⟧ «أنا…» و«هذا…» و«أمي في البيت»"},
  body:{
-  en:`<p>Russian simply drops “am / is / are” in the present: {Я студе́нт.} = I (am a) student. {Э́то Андре́й.} = This (is) Andrey. {Ма́ма до́ма.} = Mum (is) at home.</p>
+  en:`<p>Russian simply drops “am / is / are” in the present: {Я ⟦студе́нтка|студе́нт⟧.} = I (am a) student. {Э́то Андре́й.} = This (is) Andrey. {Ма́ма до́ма.} = Mum (is) at home.</p>
 <p>In writing, a dash often stands where English would put “is” between two nouns: {Па́па — врач.}</p>
 <p>A yes/no question uses the same words; only the voice rises on the key word: {Э́то кни́га?} (Is this a book?) Arabic often does the same without <ar>هل</ar>.</p>`,
-  ar:`<p>الروسية تحذف «يكون» في المضارع تمامًا: {Я студе́нт.} = أنا طالب. {Э́то Андре́й.} = هذا أندريه. {Ма́ма до́ма.} = أمي في البيت.</p>
+  ar:`<p>الروسية تحذف «يكون» في المضارع تمامًا: {Я ⟦студе́нтка|студе́нт⟧.} = أنا ⟦طالبة|طالب⟧. {Э́то Андре́й.} = هذا أندريه. {Ма́ма до́ма.} = أمي في البيت.</p>
 <p>في الكتابة توضع شَرطة أحيانًا بين الاسمين: {Па́па — врач.} = أبي طبيب.</p>
 <p>سؤال «نعم / لا» يستخدم الكلمات نفسها، وترتفع نبرة الصوت فقط على الكلمة المهمّة: {Э́то кни́га?} هل هذا كتاب؟ كما نسأل في العربية أحيانًا بلا «هل».</p>`},
  bridge:{
-  en:`This is the Arabic nominal sentence: <ar>أنا طالب</ar>, <ar>هذا أخي</ar>. You already think this way. Only English insists on “am”.`,
-  ar:`هذه هي الجملة الاسمية تمامًا: <ar>أنا طالب</ar>، <ar>هذا أخي</ar>. أنت تفكّر هكذا أصلًا. الإنجليزية وحدها تحتاج إلى am.`},
- ex:[["Я студе́нт.","I'm a student.","أنا طالب."],["Э́то Андре́й.","This is Andrey.","هذا أندريه."],["Ма́ма до́ма.","Mum is at home.","أمي في البيت."]],
+  en:`This is the Arabic nominal sentence: <ar>أنا ⟦طالبة|طالب⟧</ar>, <ar>هذا أخي</ar>. You already think this way. Only English insists on “am”.`,
+  ar:`هذه هي الجملة الاسمية تمامًا: <ar>أنا ⟦طالبة|طالب⟧</ar>، <ar>هذا أخي</ar>. أنت⟦ِ|⟧ تفكّر⟦ين|⟧ هكذا أصلًا. الإنجليزية وحدها تحتاج إلى am.`},
+ ex:[["Я ⟦студе́нтка|студе́нт⟧.","I'm a student.","أنا ⟦طالبة|طالب⟧."],["Э́то Андре́й.","This is Andrey.","هذا أندريه."],["Ма́ма до́ма.","Mum is at home.","أمي في البيت."]],
  items:[
-  ["…","","Я студе́нт.","Я есть студе́нт.","Я студе́нта.","Я быть студе́нт.","I am a student.","أنا طالب."],
+  ["…","","Я ⟦студе́нтка|студе́нт⟧.","Я есть ⟦студе́нтка|студе́нт⟧.","Я ⟦студе́нтку|студе́нта⟧.","Я быть ⟦студе́нтка|студе́нт⟧.","I am a student.","أنا ⟦طالبة|طالب⟧."],
   ["…","","Э́то Андре́й.","Э́то есть Андре́й.","Э́то Андре́я.","Э́то быть Андре́й.","This is Andrey.","هذا أندريه."],
   ["…","","Ма́ма до́ма.","Ма́ма есть до́ма.","Ма́му до́ма.","Ма́ма быть до́ма.","Mum is at home.","أمي في البيت."],
   ["…","","Он врач.","Он есть врач.","Он врача́.","Он быть врач.","He is a doctor.","هو طبيب."],
@@ -91,14 +95,14 @@ principles: [
  ]},
 
 {id:"ya-form", kind:"grammar", drill:"form",
- en:"Verb endings: я, ты, он, мы, вы, они", ar:"نهايات الفعل: я، ты، он، мы، вы، они",
- can:{en:"Say who does what: I, you, he, she, we, they live, work, read", ar:"تقول من يفعل ماذا: أنا، أنت، هو، هي، نحن، هم"},
+ en:"Verb endings: я, ты, она, он, мы, вы, они", ar:"نهايات الفعل: я، ты، она، он، мы، вы، они",
+ can:{en:"Say who does what: I, you, she, he, we, they live, work, read", ar:"تقول⟦ين|⟧ من يفعل ماذا: أنا، أنتِ، هي، هو، نحن، هم"},
  body:{
   en:`<p>You already know {ви́жу}, {люблю́}, {хочу́}: the “I” form ends in {-у} or {-ю}. Each person has its own ending:</p>
-<ul><li>{я зна́ю} · {ты зна́ешь} · {он зна́ет}</li><li>{мы зна́ем} · {вы зна́ете} · {они́ зна́ют}</li></ul>
+<ul><li>{я зна́ю} · {ты зна́ешь} · {она́ зна́ет} · {он зна́ет}</li><li>{мы зна́ем} · {вы зна́ете} · {они́ зна́ют}</li></ul>
 <p>“Not” goes right before the verb: {Я не зна́ю.}</p>`,
-  ar:`<p>أنت تعرف {ви́жу} و{люблю́} و{хочу́}: صيغة «أنا» تنتهي بـ {-у} أو {-ю}. ولكل ضمير نهايته:</p>
-<ul><li>{я зна́ю} أعرف · {ты зна́ешь} تعرف · {он зна́ет} يعرف</li><li>{мы зна́ем} نعرف · {вы зна́ете} تعرفون · {они́ зна́ют} يعرفون</li></ul>
+  ar:`<p>أنت⟦ِ|⟧ تعرف⟦ين|⟧ {ви́жу} و{люблю́} و{хочу́}: صيغة «أنا» تنتهي بـ {-у} أو {-ю}. ولكل ضمير نهايته:</p>
+<ul><li>{я зна́ю} أعرف · {ты зна́ешь} تعرفين / تعرف · {она́ зна́ет} تعرف · {он зна́ет} يعرف</li><li>{мы зна́ем} نعرف · {вы зна́ете} تعرفون · {они́ зна́ют} يعرفون</li></ul>
 <p>«لا» تأتي قبل الفعل مباشرة: {Я не зна́ю.} لا أعرف.</p>`},
  parts:[
   {id:"i", en:"The и-family and changing stems", ar:"عائلة и والجذوع المتغيّرة",
@@ -134,7 +138,7 @@ principles: [
   ["Ты … по-ру́сски?","говори́ть","говори́шь","говорю́","говори́т","говоря́т","Do you speak Russian?","هل تتكلّم الروسية؟","i"],
   ["Они́ … в о́фисе.","рабо́тать","рабо́тают","рабо́таю","рабо́таешь","рабо́тает","They work in an office.","يعملون في مكتب."],
   ["Она́ не … мя́со.","есть","ест","ем","ешь","едя́т","She doesn't eat meat.","هي لا تأكل اللحم.","i"],
-  ["Вы … ко́фе?","хоте́ть","хоти́те","хочу́","хо́чет","хотя́т","Would you like coffee?","هل تريد قهوة؟","i"],
+  ["Вы … ко́фе?","хоте́ть","хоти́те","хочу́","хо́чет","хотя́т","Would you like coffee?","هل تريدين قهوة؟","i"],
   ["Я хочу́ … .","спать","спать","сплю","спит","спят","I want to sleep.","أريد أن أنام.","inf"],
   ["Я могу́ … по-ру́сски.","чита́ть","чита́ть","чита́ю","чита́ет","чита́ют","I can read Russian.","أستطيع القراءة بالروسية.","inf"],
   ["Мне на́до … .","рабо́тать","рабо́тать","рабо́таю","рабо́тает","рабо́тают","I need to work.","يجب أن أعمل.","inf"]
@@ -142,12 +146,12 @@ principles: [
 
 {id:"v-prep", kind:"grammar", drill:"form",
  en:"в / на + where: the -е ending", ar:"в / на + المكان: النهاية ‎-е",
- can:{en:"Say where you are or where something is", ar:"تقول أين أنت أو أين يوجد الشيء"},
+ can:{en:"Say where you are or where something is", ar:"تقول⟦ين|⟧ أين أنت أو أين يوجد الشيء"},
  body:{
   en:`<p>To say where, use {в} (in) or {на} (on, at) and end the place word in {-е}:</p>
 <ul><li>{Москва́ → в Москве́}</li><li>{парк → в па́рке}</li><li>{рабо́та → на рабо́те}</li></ul>
 <p>{в} is inside: a city, a room, a shop. {на} is on a surface or at an open place: {на столе́}, {на у́лице}.</p>`,
-  ar:`<p>للتعبير عن المكان استخدم {в} (في) أو {на} (على، عند) واجعل اسم المكان ينتهي بـ {-е}:</p>
+  ar:`<p>للتعبير عن المكان استخدم⟦ي|⟧ {в} (في) أو {на} (على، عند) واجعل⟦ي|⟧ اسم المكان ينتهي بـ {-е}:</p>
 <ul><li>{Москва́ → в Москве́}</li><li>{парк → в па́рке}</li><li>{рабо́та → на рабо́те}</li></ul>
 <p>{в} داخل مكان: مدينة، غرفة، متجر. {на} على سطح أو في مكان مفتوح: {на столе́}، {на у́лице}.</p>`},
  parts:[
@@ -198,19 +202,19 @@ principles: [
 
 {id:"acc-masc", kind:"grammar", drill:"form",
  en:"Objects, masculine: alive or not? And me, you, him", ar:"المفعول به المذكّر: حيّ أم لا؟ وضمائر المفعول",
- can:{en:"Say who or what you see, love or want: he-words, and me, you, him", ar:"تقول من أو ماذا ترى أو تحب أو تريد: الكلمات المذكّرة وضمائر المفعول"},
+ can:{en:"Say who or what you see, love or want: he-words, and me, you, him", ar:"تقول⟦ين|⟧ من أو ماذا تر⟦ين|ى⟧ أو تحب⟦ين|⟧ أو تريد⟦ين|⟧: الكلمات المذكّرة وضمائر المفعول"},
  body:{
   en:`<p>After {ви́жу}, {люблю́}, {хочу́} the thing is an object. For masculine words ask one question: <b>is it alive?</b></p>
 <ul><li>Not alive: no change. {Я ви́жу дом.}</li><li>Alive (people, animals): add {-а}. {Я ви́жу бра́та.} {Я люблю́ кота́.}</li></ul>
 <p>Words in {-о} and {-е} don't change either: {Я ви́жу окно́.}</p>`,
-  ar:`<p>بعد {ви́жу} و{люблю́} و{хочу́} يكون الشيء مفعولًا به. وفي الكلمات المذكّرة اسأل سؤالًا واحدًا: <b>هل هو حيّ؟</b></p>
-<ul><li>غير حيّ: لا يتغيّر. {Я ви́жу дом.} أرى البيت.</li><li>حيّ (إنسان أو حيوان): أضف {-а}. {Я ви́жу бра́та.} أرى أخي. {Я люблю́ кота́.} أحب القط.</li></ul>
+  ar:`<p>بعد {ви́жу} و{люблю́} و{хочу́} يكون الشيء مفعولًا به. وفي الكلمات المذكّرة اسأل⟦ي|⟧ سؤالًا واحدًا: <b>هل هو حيّ؟</b></p>
+<ul><li>غير حيّ: لا يتغيّر. {Я ви́жу дом.} أرى البيت.</li><li>حيّ (إنسان أو حيوان): ⟦أضيفي|أضف⟧ {-а}. {Я ви́жу бра́та.} أرى أخي. {Я люблю́ кота́.} أحب القط.</li></ul>
 <p>والكلمات المنتهية بـ {-о} و{-е} لا تتغيّر أيضًا: {Я ви́жу окно́.}</p>`},
  parts:[
-  {id:"pron", en:"Me, you, him: меня́, тебя́, его́", ar:"ضمائر المفعول: меня́، тебя́، его́",
-   body:{en:`<p>Pronouns have object forms you learn whole: {меня́} (me), {тебя́} (you), {его́} (him), {её} (her), {нас} (us), {вас} (you), {их} (them).</p>
+  {id:"pron", en:"Me, you, her, him: меня́, тебя́, её, его́", ar:"ضمائر المفعول: меня́، тебя́، её، его́",
+   body:{en:`<p>Pronouns have object forms you learn whole: {меня́} (me), {тебя́} (you), {её} (her), {его́} (him), {нас} (us), {вас} (you), {их} (them).</p>
 <p>They usually stand before the verb: {Я тебя́ люблю́.} {Я его́ ви́жу.}</p>`,
-         ar:`<p>للضمائر صيغ مفعول تُحفظ كما هي: {меня́} (ني)، {тебя́} (ك)، {его́} (ه)، {её} (ها)، {нас} (نا)، {вас} (كم)، {их} (هم).</p>
+         ar:`<p>للضمائر صيغ مفعول تُحفظ كما هي: {меня́} (ني)، {тебя́} (ك)، {её} (ها)، {его́} (ه)، {нас} (نا)، {вас} (كم)، {их} (هم).</p>
 <p>وتأتي عادةً قبل الفعل: {Я тебя́ люблю́.} أحبّك. {Я его́ ви́жу.} أراه.</p>`}}
  ],
  bridge:{
@@ -246,7 +250,7 @@ principles: [
 
 {id:"acc-fem", kind:"grammar", drill:"form",
  en:"Objects, feminine: -а → -у, -я → -ю", ar:"المفعول به المؤنث: ‎-а ← ‎-у، ‎-я ← ‎-ю",
- can:{en:"Say who or what you see, love or want (she-words)", ar:"تقول من أو ماذا ترى أو تحب أو تريد (الكلمات المؤنثة)"},
+ can:{en:"Say who or what you see, love or want (she-words)", ar:"تقول⟦ين|⟧ من أو ماذا تر⟦ين|ى⟧ أو تحب⟦ين|⟧ أو تريد⟦ين|⟧ (الكلمات المؤنثة)"},
  body:{
   en:`<p>Here alive or not doesn't matter. A word ending in {-а} or {-я} changes it when it is the object:</p>
 <ul><li>{-а → -у}: {Я люблю́ ма́му.} {Я хочу́ пи́ццу.}</li><li>{-я → -ю}: {Я ви́жу ста́нцию.}</li></ul>`,
@@ -262,7 +266,7 @@ principles: [
  ],
  bridge:{
   en:`Think of the Arabic object fatha again: Russian {-у} is its feminine twin.`,
-  ar:`تذكّر فتحة المفعول به: {-у} هي نظيرتها في المؤنث.`},
+  ar:`تذكّر⟦ي|⟧ فتحة المفعول به: {-у} هي نظيرتها في المؤنث.`},
  ex:[["Я люблю́ ма́му.","I love my mum.","أحب أمي."],["Я хочу́ во́ду.","I want water.","أريد ماءً."],["Я рабо́таю в сре́ду.","I work on Wednesday.","أعمل يوم الأربعاء."]],
  items:[
   ["Я люблю́ … .","ма́ма","ма́му","ма́ма","ма́ме","ма́мой","I love my mum.","أحب أمي."],
@@ -283,26 +287,26 @@ principles: [
  ]},
 
 {id:"moy-tvoy", kind:"grammar", drill:"form",
- en:"мой / моя: he, she, it or many?", ar:"мой / моя: مذكّر أم مؤنث أم محايد أم جمع؟",
- can:{en:"Say my and your with the right ending", ar:"تقول «لي» و«لك» بالنهاية الصحيحة"},
+ en:"моя́ / мой: she, he, it or many?", ar:"моя́ / мой: مؤنث أم مذكّر أم محايد أم جمع؟",
+ can:{en:"Say my and your with the right ending", ar:"تقول⟦ين|⟧ «لي» و«لك» بالنهاية الصحيحة"},
  body:{
   en:`<p>“My” changes to match the thing. Look at its last letter:</p>
-<ul><li>consonant → {мой}: {мой телефо́н}</li><li>{-а} or {-я} → {моя́}: {моя́ кни́га}</li><li>{-о} or {-е} → {моё}: {моё окно́}</li><li>many → {мои́}: {мои́ ключи́}</li></ul>
+<ul><li>{-а} or {-я} → {моя́}: {моя́ кни́га}</li><li>consonant → {мой}: {мой телефо́н}</li><li>{-о} or {-е} → {моё}: {моё окно́}</li><li>many → {мои́}: {мои́ ключи́}</li></ul>
 <p>“Your”, to a friend, works the same: {твой}, {твоя́}, {твоё}, {твои́}.</p>`,
-  ar:`<p>«لي» تتغيّر لتطابق الشيء. انظر إلى حرفه الأخير:</p>
-<ul><li>حرف ساكن ← {мой}: {мой телефо́н} هاتفي</li><li>{-а} أو {-я} ← {моя́}: {моя́ кни́га} كتابي</li><li>{-о} أو {-е} ← {моё}: {моё окно́} نافذتي</li><li>جمع ← {мои́}: {мои́ ключи́} مفاتيحي</li></ul>
-<p>و«لكَ / لكِ» للصديق بالطريقة نفسها: {твой}، {твоя́}، {твоё}، {твои́}.</p>`},
+  ar:`<p>«لي» تتغيّر لتطابق الشيء. انظر⟦ي|⟧ إلى حرفه الأخير:</p>
+<ul><li>{-а} أو {-я} ← {моя́}: {моя́ кни́га} كتابي</li><li>حرف ساكن ← {мой}: {мой телефо́н} هاتفي</li><li>{-о} أو {-е} ← {моё}: {моё окно́} نافذتي</li><li>جمع ← {мои́}: {мои́ ключи́} مفاتيحي</li></ul>
+<p>و«لكِ / لكَ» للصديقة أو الصديق بالطريقة نفسها: {твой}، {твоя́}، {твоё}، {твои́}.</p>`},
  parts:[
   {id:"adj", en:"Describing words: но́вый / но́вая", ar:"الصفات: но́вый / но́вая",
    body:{en:`<p>Describing words take the same four endings as {мой}: {но́вый телефо́н}, {но́вая кни́га}, {но́вое окно́}, {но́вые ключи́}.</p>
 <p>They can also come after, with no “is”: {Кни́га но́вая.} (The book is new.)</p>`,
          ar:`<p>الصفات تأخذ النهايات الأربع نفسها مثل {мой}: {но́вый телефо́н}، {но́вая кни́га}، {но́вое окно́}، {но́вые ключи́}.</p>
 <p>ويمكن أن تأتي بعد الاسم بلا «يكون»: {Кни́га но́вая.} الكتاب جديد.</p>`}},
-  {id:"this", en:"This, his, her: э́тот, его́", ar:"هذا، له، لها: э́тот، его́",
+  {id:"this", en:"This, her, his: э́тот, её, его́", ar:"هذا، لها، له: э́тот، её، его́",
    body:{en:`<p>“This” follows the same pattern: {э́тот го́род}, {э́та у́лица}, {э́то окно́}, {э́ти лю́ди}.</p>
-<p>“His, her, their” never change: {его́ кни́га}, {её брат}, {их дом}.</p>`,
+<p>“Her, his, their” never change: {её брат}, {его́ кни́га}, {их дом}.</p>`,
          ar:`<p>«هذا» يتبع النمط نفسه: {э́тот го́род}، {э́та у́лица}، {э́то окно́}، {э́ти лю́ди}.</p>
-<p>«له، لها، لهم» لا تتغيّر أبدًا: {его́ кни́га} كتابه، {её брат} أخوها، {их дом} بيتهم.</p>`}},
+<p>«لها، له، لهم» لا تتغيّر أبدًا: {её брат} أخوها، {его́ кни́га} كتابه، {их дом} بيتهم.</p>`}},
   {id:"tricky", en:"Gender: the tricky ones", ar:"الجنس: الحالات الصعبة",
    body:{en:`<p>A few words break the ending rule:</p>
 <ul><li>{-ь} can be either: {моя́ дочь}, {мой день}</li><li>men's words in -а are “he”: {мой па́па}, {мой де́душка}</li><li>{ко́фе} is “he”: {мой ко́фе}</li><li>{и́мя} and {вре́мя} are “it”: {моё и́мя}</li></ul>
@@ -342,12 +346,12 @@ principles: [
 
 {id:"nravitsya", kind:"grammar", drill:"form",
  en:"мне нра́вится: “it pleases me”", ar:"мне нра́вится: «يعجبني»",
- can:{en:"Say what you and others like", ar:"تقول ما يعجبك ويعجب الآخرين"},
+ can:{en:"Say what you and others like", ar:"تقول⟦ين|⟧ ما يعجبك ويعجب الآخرين"},
  body:{
   en:`<p>Russian says “it pleases me”: {Мне нра́вится Москва́.} The thing you like is the subject.</p>
-<p>The person: {мне} (me), {тебе́} (you), {ему́} (him), {ей} (her), {нам} (us), {вам} (you), {им} (them). Many things: {нра́вятся}: {Мне нра́вятся цветы́.}</p>`,
+<p>The person: {мне} (me), {тебе́} (you), {ей} (her), {ему́} (him), {нам} (us), {вам} (you), {им} (them). Many things: {нра́вятся}: {Мне нра́вятся цветы́.}</p>`,
   ar:`<p>الروسية تقول «يُعجبني»: {Мне нра́вится Москва́.} تعجبني موسكو. الشيء الذي يعجبك هو الفاعل.</p>
-<p>الشخص: {мне} لي، {тебе́} لك، {ему́} له، {ей} لها، {нам} لنا، {вам} لكم، {им} لهم. وللأشياء الكثيرة: {нра́вятся}: {Мне нра́вятся цветы́.}</p>`},
+<p>الشخص: {мне} لي، {тебе́} لك، {ей} لها، {ему́} له، {нам} لنا، {вам} لكم، {им} لهم. وللأشياء الكثيرة: {нра́вятся}: {Мне нра́вятся цветы́.}</p>`},
  parts:[
   {id:"state", en:"Мне хо́лодно: how I feel", ar:"Мне хо́лодно: كيف أشعر",
    body:{en:`<p>The same “to me” works with state words: {Мне хо́лодно.} (I'm cold.) {Мне бо́льно.} (It hurts.) {Мне на́до рабо́тать.} (I need to work.) For someone else: {Ма́ме тепло́.}</p>
@@ -376,12 +380,12 @@ principles: [
 
 {id:"u-menya", kind:"grammar", drill:"form",
  en:"у меня́ есть: “at me is”", ar:"у меня́ есть: «عندي»",
- can:{en:"Say what you and others have, and don't have", ar:"تقول ما عندك وعند الآخرين، وما ليس عندك"},
+ can:{en:"Say what you and others have, and don't have", ar:"تقول⟦ين|⟧ ما عندك وعند الآخرين، وما ليس عندك"},
  body:{
   en:`<p>Russian says “at me is”: {У меня́ есть брат.} (I have a brother.)</p>
-<p>{у меня́} · {у тебя́} · {у него́} · {у неё} · {у нас} · {у вас} · {у них}</p>`,
+<p>{у меня́} · {у тебя́} · {у неё} · {у него́} · {у нас} · {у вас} · {у них}</p>`,
   ar:`<p>الروسية تقول «عندي يوجد»: {У меня́ есть брат.} عندي أخ.</p>
-<p>{у меня́} عندي · {у тебя́} عندك · {у него́} عنده · {у неё} عندها · {у нас} عندنا · {у вас} عندكم · {у них} عندهم</p>`},
+<p>{у меня́} عندي · {у тебя́} عندك · {у неё} عندها · {у него́} عنده · {у нас} عندنا · {у вас} عندكم · {у них} عندهم</p>`},
  parts:[
   {id:"net", en:"Not having, and у ма́мы", ar:"النفي، وу ма́мы",
    body:{en:`<p>Not having: {У меня́ нет вре́мени.} After {нет} the thing takes the “of” form: {вре́мя → вре́мени}, {маши́на → маши́ны}.</p>
@@ -407,7 +411,7 @@ principles: [
 
 {id:"numbers", kind:"grammar", drill:"form",
  en:"1, 2–4, 5+: the number picks the ending", ar:"1، 2–4، 5+: العدد يختار النهاية",
- can:{en:"Say prices, times and ages correctly", ar:"تقول الأسعار والأوقات والأعمار بشكل صحيح"},
+ can:{en:"Say prices, times and ages correctly", ar:"تقول⟦ين|⟧ الأسعار والأوقات والأعمار بشكل صحيح"},
  body:{
   en:`<p>The number decides the noun's ending:</p>
 <ul><li><b>1</b>: plain form. {оди́н рубль}</li><li><b>2, 3, 4</b>: {два рубля́}, {три часа́}</li><li><b>5 and up</b>: {пять рубле́й}, {шесть часо́в}</li></ul>
@@ -424,7 +428,7 @@ principles: [
  ],
  bridge:{
   en:`You grew up with this: <ar>روبلان</ar>, <ar>ثلاثة كتب</ar> but <ar>أحد عشر كتابًا</ar>. Arabic numbers change the noun too. Russian just draws the lines at 2 and 5.`,
-  ar:`أنت معتاد على هذا: <ar>روبلان</ar>، <ar>ثلاثة كتب</ar> لكن <ar>أحد عشر كتابًا</ar>. الأعداد العربية تغيّر الاسم أيضًا، والروسية ترسم الحدود عند 2 و5.`},
+  ar:`أنت⟦ِ|⟧ معتاد⟦ة|⟧ على هذا: <ar>روبلان</ar>، <ar>ثلاثة كتب</ar> لكن <ar>أحد عشر كتابًا</ar>. الأعداد العربية تغيّر الاسم أيضًا، والروسية ترسم الحدود عند 2 و5.`},
  ex:[["оди́н рубль","one rouble","روبل واحد"],["два рубля́","two roubles","روبلان"],["пять рубле́й","five roubles","خمسة روبلات"]],
  items:[
   ["Оди́н … .","рубль","рубль","рубля́","рубле́й","рублю́","one rouble","روبل واحد"],
@@ -443,7 +447,7 @@ principles: [
 
 {id:"chunks", kind:"grammar", drill:"form",
  en:"Chunks to learn whole", ar:"تعابير تُحفظ كاملة",
- can:{en:"Use everyday expressions before you know all their grammar", ar:"تستخدم تعابير يومية قبل أن تعرف كل قواعدها"},
+ can:{en:"Use everyday expressions before you know all their grammar", ar:"تستخدم⟦ين|⟧ تعابير يومية قبل أن تعرف⟦ي|⟧ كل قواعدها"},
  body:{
   en:`<p>Some everyday expressions use grammar you'll meet later. Learn them whole for now:</p>
 <ul><li>{Как дела́?} How are you? · {О́чень прия́тно.} Nice to meet you.</li>
@@ -451,7 +455,7 @@ principles: [
 <li>{по-ру́сски}, {по-англи́йски}, {по-ара́бски}: in Russian, English, Arabic</li>
 <li>{до́ма} at home · {домо́й} (to) home</li>
 <li>{Извини́те} · {Повтори́те, пожа́луйста} · {До свида́ния} · {До за́втра}</li></ul>`,
-  ar:`<p>بعض التعابير اليومية تستخدم قواعد ستتعلّمها لاحقًا. احفظها كما هي الآن:</p>
+  ar:`<p>بعض التعابير اليومية تستخدم قواعد ستتعلّم⟦ين|⟧ها لاحقًا. احفظ⟦ي|⟧ها كما هي الآن:</p>
 <ul><li>{Как дела́?} كيف حالك؟ · {О́чень прия́тно.} تشرّفنا.</li>
 <li>{Меня́ зову́т…} اسمي… · {Как тебя́ зову́т?} ما اسمك؟</li>
 <li>{по-ру́сски}، {по-англи́йски}، {по-ара́бски}: بالروسية، بالإنجليزية، بالعربية</li>
@@ -470,7 +474,7 @@ principles: [
  ],
  bridge:{
   en:`Arabic has its own fixed pieces nobody analyses while speaking: <ar>صباح الخير</ar>, <ar>إن شاء الله</ar>, <ar>تشرّفنا</ar>. Treat these the same way.`,
-  ar:`في العربية تعابير ثابتة لا يحلّلها أحد أثناء الكلام: <ar>صباح الخير</ar>، <ar>إن شاء الله</ar>، <ar>تشرّفنا</ar>. تعامل مع هذه بالطريقة نفسها.`},
+  ar:`في العربية تعابير ثابتة لا يحلّلها أحد أثناء الكلام: <ar>صباح الخير</ar>، <ar>إن شاء الله</ar>، <ar>تشرّفنا</ar>. تعامل⟦ي|⟧ مع هذه بالطريقة نفسها.`},
  ex:[["Я иду́ домо́й.","I'm going home.","أذهب إلى البيت."],["Ко́фе с молоко́м, пожа́луйста.","Coffee with milk, please.","قهوة بالحليب من فضلك."],["Ве́чером я чита́ю.","In the evening I read.","في المساء أقرأ."]],
  items:[
   ["Я говорю́ … .","","по-ру́сски","ру́сский","по-ру́сский","ру́сски","I speak Russian.","أتكلّم الروسية."],
@@ -491,7 +495,7 @@ principles: [
 
 {id:"tion", kind:"words", drill:"pattern",
  en:"English -tion = Russian -ция", ar:"‎-tion الإنجليزية = ‎-ция الروسية",
- can:{en:"Turn dozens of English -tion words into Russian", ar:"تحوّل عشرات الكلمات الإنجليزية المنتهية بـ ‎-tion إلى الروسية"},
+ can:{en:"Turn dozens of English -tion words into Russian", ar:"تحوّل⟦ين|⟧ عشرات الكلمات الإنجليزية المنتهية بـ ‎-tion إلى الروسية"},
  body:{
   en:`<p>English -tion is Russian {-ция}. One rule, dozens of words: {информа́ция}, {ситуа́ция}, {револю́ция}, {реа́кция}, {ста́нция}.</p>
 <p>They are all feminine: {э́та ситуа́ция}, {моя́ пози́ция}.</p>`,
@@ -521,26 +525,26 @@ principles: [
 
 {id:"ism-ist", kind:"words", drill:"pattern",
  en:"-ism = -изм, -ist = -ист", ar:"‎-ism = ‎-изм، ‎-ist = ‎-ист",
- can:{en:"Name ideas and the people who hold them", ar:"تسمّي الأفكار والأشخاص الذين يحملونها"},
+ can:{en:"Name ideas and the people who hold them", ar:"تسمّ⟦ين|ي⟧ الأفكار والأشخاص الذين يحملونها"},
  body:{
   en:`<p>English -ism becomes {-и́зм} and -ist becomes {-и́ст}, with the stress always on that и: {тури́зм} / {тури́ст}, {оптими́зм} / {оптими́ст}.</p>
-<p>Both are masculine (they end in a consonant). A woman adds {-ка}: {тури́стка}, {журнали́стка}, {пиани́стка}.</p>`,
+<p>A person comes in two forms, {-и́стка} for a woman and {-и́ст} for a man: {тури́стка / тури́ст}, {журнали́стка / журнали́ст}, {пиани́стка / пиани́ст}. Words in {-и́зм} are masculine.</p>`,
   ar:`<p>-ism الإنجليزية تصبح {-и́зм} و-ist تصبح {-и́ст}، والنبر دائمًا على هذه الـ и: {тури́зм} سياحة / {тури́ст} سائح.</p>
-<p>كلتاهما مذكّرة. وللمرأة تُضاف {-ка}: {тури́стка} سائحة، {журнали́стка} صحفية.</p>`},
+<p>وللشخص صيغتان: {-и́стка} للمرأة و{-и́ст} للرجل: {тури́стка / тури́ст} سائحة / سائح، {журнали́стка / журнали́ст} صحفية / صحفي. والكلمات المنتهية بـ {-и́зм} مذكّرة.</p>`},
  bridge:{
-  en:`Arabic builds the doer from a pattern (<ar>سائح</ar> from <ar>سياحة</ar>); Russian builds it by swapping one ending, {-изм → -ист}. The {-ка} for women plays the role of <ar>ة</ar>: <ar>صحفي / صحفية</ar>.`,
-  ar:`العربية تبني الفاعل بوزن (<ar>سائح</ar> من <ar>سياحة</ar>)، والروسية تبدّل نهاية واحدة {-изм → -ист}. و{-ка} للمرأة تقوم مقام <ar>ة</ar>: <ar>صحفي / صحفية</ar>.`},
- ex:[["тури́зм","tourism","سياحة"],["тури́ст","tourist","سائح"],["журнали́стка","journalist (woman)","صحفية"]],
+  en:`Arabic builds the person from a pattern (<ar>سائحة / سائح</ar> from <ar>سياحة</ar>); Russian swaps one ending, {-изм → -истка / -ист}. The {-ка} in the woman's form does the job of Arabic <ar>ة</ar>: <ar>صحفية / صحفي</ar>.`,
+  ar:`العربية تبني الشخص بوزن (<ar>سائحة / سائح</ar> من <ar>سياحة</ar>)، والروسية تبدّل نهاية واحدة {-изм → -истка / -ист}. و{-ка} في صيغة المرأة تقوم مقام <ar>ة</ar>: <ar>صحفية / صحفي</ar>.`},
+ ex:[["тури́зм","tourism","سياحة"],["тури́стка","tourist (woman)","سائحة"],["тури́ст","tourist (man)","سائح"]],
  items:[
-  ["тури́зм","tourism","سياحة"],["тури́ст","tourist","سائح"],["оптими́зм","optimism","تفاؤل"],["оптими́ст","optimist","متفائل"],
-  ["журнали́ст","journalist","صحفي"],["капитали́зм","capitalism","رأسمالية"],["реали́зм","realism","واقعية"],
-  ["пиани́ст","pianist","عازف بيانو"],["гитари́ст","guitarist","عازف غيتار"],["специали́ст","specialist","متخصص"],
-  ["органи́зм","organism","كائن حي"],["пессими́ст","pessimist","متشائم"],["фемини́зм","feminism","النسوية"]
+  ["тури́зм","tourism","سياحة"],["тури́стка","tourist (woman)","سائحة"],["тури́ст","tourist (man)","سائح"],["оптими́зм","optimism","تفاؤل"],["оптими́стка","optimist (woman)","متفائلة"],["оптими́ст","optimist (man)","متفائل"],
+  ["журнали́стка","journalist (woman)","صحفية"],["журнали́ст","journalist (man)","صحفي"],["капитали́зм","capitalism","رأسمالية"],["реали́зм","realism","واقعية"],
+  ["пиани́стка","pianist (woman)","عازفة بيانو"],["пиани́ст","pianist (man)","عازف بيانو"],["гитари́ст","guitarist","عازف غيتار"],["специали́ст","specialist","متخصص"],
+  ["органи́зм","organism","كائن حي"],["пессими́стка","pessimist (woman)","متشائمة"],["пессими́ст","pessimist (man)","متشائم"],["фемини́зм","feminism","النسوية"]
  ]},
 
 {id:"logy", kind:"words", drill:"pattern",
  en:"-logy, -graphy, -ics: the school subjects", ar:"‎-logy و‎-graphy و‎-ics: المواد الدراسية",
- can:{en:"Name fields of study, science and news topics", ar:"تسمّي مجالات الدراسة والعلوم ومواضيع الأخبار"},
+ can:{en:"Name fields of study, science and news topics", ar:"تسمّ⟦ين|ي⟧ مجالات الدراسة والعلوم ومواضيع الأخبار"},
  body:{
   en:`<p>Greek-based subject words line up neatly:</p>
 <ul><li>-logy → {-ло́гия}: {биоло́гия}, {техноло́гия}, {психоло́гия}</li><li>-graphy → {-гра́фия}: {геогра́фия}, {фотогра́фия}</li><li>-cracy → {-кра́тия}: {демокра́тия}</li><li>-ics → {-ика}: {поли́тика}, {эконо́мика}, {фи́зика}, {матема́тика}</li></ul>
@@ -550,7 +554,7 @@ principles: [
 <p>كلها مؤنثة. والنبر على المقطع الذي قبل -ия / -ика.</p>`},
  bridge:{
   en:`Arabic borrowed many of the very same Greek words: <ar>بيولوجيا</ar>, <ar>تكنولوجيا</ar>, <ar>جغرافيا</ar>, <ar>فيزياء</ar>, <ar>ديمقراطية</ar>. Say them aloud and the Russian is right there.`,
-  ar:`العربية استعارت الكلمات اليونانية نفسها: <ar>بيولوجيا</ar>، <ar>تكنولوجيا</ar>، <ar>جغرافيا</ar>، <ar>فيزياء</ar>، <ar>ديمقراطية</ar>. قلها بصوت عالٍ تجد الروسية أمامك.`},
+  ar:`العربية استعارت الكلمات اليونانية نفسها: <ar>بيولوجيا</ar>، <ar>تكنولوجيا</ar>، <ar>جغرافيا</ar>، <ar>فيزياء</ar>، <ar>ديمقراطية</ar>. ⟦قوليها|قلها⟧ بصوت عالٍ ⟦تجدي|تجد⟧ الروسية أمامك.`},
  ex:[["биоло́гия","biology","علم الأحياء"],["геогра́фия","geography","جغرافيا"],["поли́тика","politics","سياسة"]],
  items:[
   ["биоло́гия","biology","علم الأحياء"],["техноло́гия","technology","تكنولوجيا"],["эколо́гия","ecology","علم البيئة"],
@@ -561,32 +565,32 @@ principles: [
 
 {id:"roots", kind:"words", drill:"pattern",
  en:"Root families: one root, many kinds of word", ar:"عائلات الجذور: جذر واحد وأنواع كثيرة من الكلمات",
- can:{en:"Guess new words from a root you know, and switch between action, thing and person", ar:"تخمّن كلمات جديدة من جذر تعرفه، وتنتقل بين الفعل والشيء والشخص"},
+ can:{en:"Guess new words from a root you know, and switch between action, thing and person", ar:"تخمّن⟦ين|⟧ كلمات جديدة من جذر تعرف⟦ين|⟧ه، وتنتقل⟦ين|⟧ بين الفعل والشيء والشخص"},
  body:{
   en:`<p>Like Arabic, Russian builds families of words on one root. The root keeps the meaning; the pieces around it say what kind of word it is:</p>
-<ul><li>{работ-}: {рабо́та} (job), {рабо́таю} (I work), {рабо́тник} (worker)</li>
-<li>{пис-}: {пишу́} (I write), {писа́тель} (writer), {письмо́} (letter)</li>
+<ul><li>{работ-}: {рабо́та} (job), {рабо́таю} (I work), {рабо́тница / рабо́тник} (worker)</li>
+<li>{пис-}: {пишу́} (I write), {писа́тельница / писа́тель} (writer), {письмо́} (letter)</li>
 <li>{е(д)-}: {ем} (I eat), {еда́} (food), {обе́д} (lunch)</li></ul>`,
   ar:`<p>مثل العربية، تبني الروسية عائلات من الكلمات على جذر واحد. الجذر يحمل المعنى، والقطع حوله تقول نوع الكلمة:</p>
-<ul><li>{работ-}: {рабо́та} عمل، {рабо́таю} أعمل، {рабо́тник} عامل</li>
-<li>{пис-}: {пишу́} أكتب، {писа́тель} كاتب، {письмо́} رسالة</li>
+<ul><li>{работ-}: {рабо́та} عمل، {рабо́таю} أعمل، {рабо́тница / рабо́тник} عاملة / عامل</li>
+<li>{пис-}: {пишу́} أكتب، {писа́тельница / писа́тель} كاتبة / كاتب، {письмо́} رسالة</li>
 <li>{е(д)-}: {ем} آكل، {еда́} طعام، {обе́д} غداء</li></ul>`},
  parts:[
   {id:"more", en:"More families", ar:"عائلات أخرى",
-   body:{en:`<ul><li>{уч-}: {учу́} (I learn), {учи́тель}, {учени́к}</li><li>{чит-}: {чита́ю}, {чита́тель}</li><li>{жи(в)-}: {живу́}, {жизнь}</li><li>{люб-}: {люблю́}, {любо́вь}</li><li>{говор-}: {говорю́}, {разгово́р}</li></ul>
+   body:{en:`<ul><li>{уч-}: {учу́} (I learn), {учи́тельница / учи́тель}, {учени́ца / учени́к}</li><li>{чит-}: {чита́ю}, {чита́тельница / чита́тель}</li><li>{жи(в)-}: {живу́}, {жизнь}</li><li>{люб-}: {люблю́}, {любо́вь}</li><li>{говор-}: {говорю́}, {разгово́р}</li></ul>
 <p>Careful: {води́тель} (driver) is from {води́ть} (to drive), not from {вода́}.</p>`,
-         ar:`<ul><li>{уч-}: {учу́} أتعلّم، {учи́тель}، {учени́к}</li><li>{чит-}: {чита́ю}، {чита́тель}</li><li>{жи(в)-}: {живу́}، {жизнь}</li><li>{люб-}: {люблю́}، {любо́вь}</li><li>{говор-}: {говорю́}، {разгово́р}</li></ul>
-<p>انتبه: {води́тель} (سائق) من {води́ть} (يقود)، لا من {вода́}.</p>`}}
+         ar:`<ul><li>{уч-}: {учу́} أتعلّم، {учи́тельница / учи́тель}، {учени́ца / учени́к}</li><li>{чит-}: {чита́ю}، {чита́тельница / чита́тель}</li><li>{жи(в)-}: {живу́}، {жизнь}</li><li>{люб-}: {люблю́}، {любо́вь}</li><li>{говор-}: {говорю́}، {разгово́р}</li></ul>
+<p>انتبه⟦ي|⟧: {води́тель} (سائق) من {води́ть} (يقود)، لا من {вода́}.</p>`}}
  ],
  bridge:{
   en:`This is the idea behind Arabic roots: <ar>كتب</ar> gives <ar>كاتب، كتاب، مكتوب</ar>. In Russian the root stays in one piece, and the additions line up before and after it, left to right.`,
   ar:`هذه فكرة الجذور العربية نفسها: <ar>كتب</ar> تعطي <ar>كاتب، كتاب، مكتوب</ar>. في الروسية يبقى الجذر قطعة واحدة، وتصطفّ الإضافات قبله وبعده من اليسار إلى اليمين.`},
- ex:[["рабо́та","work, job","عمل"],["рабо́таю","I work","أعمل"],["рабо́тник","worker","عامل"]],
+ ex:[["рабо́та","work, job","عمل"],["рабо́таю","I work","أعمل"],["рабо́тница","worker (woman)","عاملة"]],
  items:[
-  ["рабо́та","work, job","عمل","работ"],["рабо́таю","I work","أعمل","работ"],["рабо́тник","worker","عامل","работ"],
-  ["учу́","I learn, I teach","أتعلّم / أعلّم","уч","more"],["учи́тель","teacher","معلّم","уч","more"],["учени́к","pupil","تلميذ","уч","more"],
-  ["пишу́","I write","أكتب","пис"],["писа́тель","writer","كاتب","пис"],["письмо́","letter","رسالة","пис"],
-  ["чита́ю","I read","أقرأ","чит","more"],["чита́тель","reader","قارئ","чит","more"],
+  ["рабо́та","work, job","عمل","работ"],["рабо́таю","I work","أعمل","работ"],["рабо́тница","worker (woman)","عاملة","работ"],["рабо́тник","worker (man)","عامل","работ"],
+  ["учу́","I learn, I teach","أتعلّم / أعلّم","уч","more"],["учи́тельница","teacher (woman)","معلّمة","уч","more"],["учи́тель","teacher (man)","معلّم","уч","more"],["учени́ца","pupil (girl)","تلميذة","уч","more"],["учени́к","pupil (boy)","تلميذ","уч","more"],
+  ["пишу́","I write","أكتب","пис"],["писа́тельница","writer (woman)","كاتبة","пис"],["писа́тель","writer (man)","كاتب","пис"],["письмо́","letter","رسالة","пис"],
+  ["чита́ю","I read","أقرأ","чит","more"],["чита́тельница","reader (woman)","قارئة","чит","more"],["чита́тель","reader (man)","قارئ","чит","more"],
   ["живу́","I live","أعيش","жив","more"],["жизнь","life","حياة","жив","more"],
   ["люблю́","I love","أحبّ","люб","more"],["любо́вь","love","حبّ","люб","more"],
   ["говорю́","I speak","أتكلّم","говор","more"],["разгово́р","conversation","محادثة","говор","more"],
@@ -595,14 +599,14 @@ principles: [
 
 {id:"hod", kind:"words", drill:"pattern",
  en:"One root, many doors: ход (go)", ar:"جذر واحد وأبواب كثيرة: ход (المشي)",
- can:{en:"Read metro signs and unlock words by their prefix", ar:"تقرأ لافتات المترو وتفهم الكلمات من سوابقها"},
+ can:{en:"Read metro signs and unlock words by their prefix", ar:"⟦تقرئين|تقرأ⟧ لافتات المترو وتفهم⟦ين|⟧ الكلمات من سوابقها"},
  body:{
   en:`<p>Russian words are built in a row: <b>prefix + root + ending</b>. The root {ход} means going on foot. Change the prefix and you change the direction:</p>
 <ul><li>{в-} in → {вход} entrance, {входи́ть} to go in</li><li>{вы-} out → {вы́ход} exit, {выходи́ть} to go out</li><li>{пере-} across → {перехо́д} crossing, {переходи́ть} to cross</li><li>{при-} arriving → {приходи́ть} to come</li><li>{у-} away → {уходи́ть} to leave</li><li>{до-} reaching → {дохо́д} income (what reaches you)</li></ul>
 <p>These prefixes work on other roots too: {е́хать} (go by transport) → {въезд}, {вы́езд}, {прие́хать}. Learn the prefix once, use it everywhere.</p>`,
-  ar:`<p>الكلمات الروسية تُبنى في صفّ: <b>سابقة + جذر + نهاية</b>. الجذر {ход} يعني المشي. غيّر السابقة يتغيّر الاتجاه:</p>
+  ar:`<p>الكلمات الروسية تُبنى في صفّ: <b>سابقة + جذر + نهاية</b>. الجذر {ход} يعني المشي. غيّر⟦ي|⟧ السابقة يتغيّر الاتجاه:</p>
 <ul><li>{в-} إلى الداخل ← {вход} مدخل، {входи́ть} يدخل</li><li>{вы-} إلى الخارج ← {вы́ход} مخرج، {выходи́ть} يخرج</li><li>{пере-} عبر ← {перехо́д} ممرّ عبور، {переходи́ть} يعبر</li><li>{при-} وصول ← {приходи́ть} يأتي</li><li>{у-} ابتعاد ← {уходи́ть} يغادر</li><li>{до-} بلوغ ← {дохо́д} دخل (ما يصل إليك)</li></ul>
-<p>هذه السوابق تعمل مع جذور أخرى أيضًا: {е́хать} (يذهب بوسيلة نقل) ← {прие́хать} يصل. تعلّم السابقة مرة واستخدمها في كل مكان.</p>`},
+<p>هذه السوابق تعمل مع جذور أخرى أيضًا: {е́хать} (يذهب بوسيلة نقل) ← {прие́хать} يصل. تعلّم⟦ي|⟧ السابقة مرة واستخدم⟦ي|⟧ها في كل مكان.</p>`},
  bridge:{
   en:`Arabic makes “entrance” and “exit” from two different roots (<ar>دخل</ar>, <ar>خرج</ar>) poured into the same pattern: <ar>مدخل / مخرج</ar>. Russian does the opposite: one root, different prefixes. English has a taste of it: income, outcome.`,
   ar:`العربية تصنع «مدخل» و«مخرج» من جذرين مختلفين (<ar>دخل</ar>، <ar>خرج</ar>) في وزن واحد. الروسية تفعل العكس: جذر واحد وسوابق مختلفة.`},
@@ -615,24 +619,27 @@ principles: [
 
 {id:"doer", kind:"words", drill:"pattern",
  en:"The doer: -тель, -ник", ar:"الفاعل: ‎-тель و‎-ник",
- can:{en:"Make the word for a person from what they do", ar:"تصنع اسم الشخص من عمله"},
+ can:{en:"Make the word for a person from what they do", ar:"تصنع⟦ين|⟧ اسم الشخص من عمله"},
  body:{
-  en:`<p>Take a verb, drop {-ть}, add {-тель}: {учи́ть → учи́тель} (teach → teacher), {писа́ть → писа́тель}, {води́ть → води́тель} (drive → driver), {чита́ть → чита́тель}.</p>
-<p>{-ник} and {-ик} do the same from nouns: {рабо́та → рабо́тник}, {по́мощь → помо́щник}, {учени́к}.</p>`,
-  ar:`<p>خذ فعلًا، احذف {-ть}، وأضف {-тель}: {учи́ть → учи́тель} (يعلّم ← معلّم)، {писа́ть → писа́тель} (يكتب ← كاتب)، {води́ть → води́тель} (يقود ← سائق).</p>
-<p>و{-ник} تفعل الشيء نفسه من الأسماء: {рабо́та → рабо́тник} عامل، {по́мощь → помо́щник} مساعد.</p>`},
+  en:`<p>Take a verb, drop {-ть}, and add {-тельница} for a woman or {-тель} for a man: {учи́ть → учи́тельница / учи́тель} (teach → teacher), {писа́ть → писа́тельница / писа́тель} (write → writer), {чита́ть → чита́тельница / чита́тель} (read → reader).</p>
+<p>From nouns, {-ница} and {-ник} do the same: {рабо́та → рабо́тница / рабо́тник} (worker), {по́мощь → помо́щница / помо́щник} (helper), {учени́ца / учени́к} (pupil).</p>
+<p>A few words serve everyone: {води́тель} (drive → driver) and {врач} (doctor) are used for women too, and formal speech says {учи́тель} for any teacher.</p>`,
+  ar:`<p>⟦خذي|خذ⟧ فعلًا، احذف⟦ي|⟧ {-ть}، و⟦أضيفي|أضف⟧ {-тельница} للمرأة أو {-тель} للرجل: {учи́ть → учи́тельница / учи́тель} (يعلّم ← معلّمة / معلّم)، {писа́ть → писа́тельница / писа́тель} (يكتب ← كاتبة / كاتب)، {чита́ть → чита́тельница / чита́тель} (يقرأ ← قارئة / قارئ).</p>
+<p>و{-ница} و{-ник} تفعلان الشيء نفسه من الأسماء: {рабо́та → рабо́тница / рабо́тник} عاملة / عامل، {по́мощь → помо́щница / помо́щник} مساعدة / مساعد، {учени́ца / учени́к} تلميذة / تلميذ.</p>
+<p>وبعض الكلمات للجميع: {води́тель} (يقود ← سائقة أو سائق) و{врач} (طبيبة أو طبيب) تُقالان للمرأة أيضًا، وفي الكلام الرسمي تُقال {учи́тель} لكل من يعلّم.</p>`},
  bridge:{
-  en:`This is the Russian <ar>فاعل</ar>: <ar>كتب → كاتب</ar>, <ar>قرأ → قارئ</ar>. In English it's -er: write → writer.`,
-  ar:`هذا هو وزن <ar>فاعل</ar> في الروسية: <ar>كتب ← كاتب</ar>، <ar>قرأ ← قارئ</ar>.`},
- ex:[["учи́тель","teacher","معلّم"],["писа́тель","writer","كاتب"],["рабо́тник","worker","عامل"]],
+  en:`This is the Russian <ar>فاعل</ar>: <ar>كتب → كاتبة / كاتب</ar>, <ar>قرأ → قارئة / قارئ</ar>. Arabic marks the woman with <ar>ة</ar>; Russian with {-ница}. In English it's -er: write → writer.`,
+  ar:`هذا هو وزن <ar>فاعل</ar> في الروسية: <ar>كتب ← كاتبة / كاتب</ar>، <ar>قرأ ← قارئة / قارئ</ar>. العربية تميّز المرأة بـ <ar>ة</ar>، والروسية بـ {-ница}.`},
+ ex:[["учи́тельница","teacher (woman)","معلّمة"],["учи́тель","teacher (man)","معلّم"],["рабо́тница","worker (woman)","عاملة"]],
  items:[
-  ["учи́тель","teacher","معلّم"],["писа́тель","writer","كاتب"],["води́тель","driver","سائق"],["чита́тель","reader","قارئ"],
-  ["зри́тель","viewer","مشاهد"],["роди́тели","parents","الوالدان"],["рабо́тник","worker","عامل"],["помо́щник","helper","مساعد"],["учени́к","pupil","تلميذ"]
+  ["учи́тельница","teacher (woman)","معلّمة"],["учи́тель","teacher (man)","معلّم"],["писа́тельница","writer (woman)","كاتبة"],["писа́тель","writer (man)","كاتب"],["води́тель","driver","سائقة / سائق"],
+  ["чита́тельница","reader (woman)","قارئة"],["чита́тель","reader (man)","قارئ"],["зри́тель","viewer","مشاهد"],["роди́тели","parents","الوالدان"],
+  ["рабо́тница","worker (woman)","عاملة"],["рабо́тник","worker (man)","عامل"],["помо́щница","helper (woman)","مساعدة"],["помо́щник","helper (man)","مساعد"],["учени́ца","pupil (girl)","تلميذة"],["учени́к","pupil (boy)","تلميذ"]
  ]},
 
 {id:"stress", kind:"sound", drill:"stress",
  en:"Stress moves, and о sounds like а", ar:"النبر يتحرّك، والـ о تُنطق مثل а",
- can:{en:"Say new words with the right stress and understand fast speech", ar:"تنطق الكلمات الجديدة بالنبر الصحيح وتفهم الكلام السريع"},
+ can:{en:"Say new words with the right stress and understand fast speech", ar:"تنطق⟦ين|⟧ الكلمات الجديدة بالنبر الصحيح وتفهم⟦ين|⟧ الكلام السريع"},
  body:{
   en:`<p>Every Russian word has one strong syllable, and it can be anywhere: {мо́ре}, {вода́}, {телефо́н}. It can even move inside one word: {рука́}, {ру́ку}.</p>
 <p>Only the stressed {о} sounds like o. Everywhere else it sounds like {а}: {молоко́} is said [малако́], {хорошо́} [харашо́], {Москва́} [Масква́].</p>
@@ -641,7 +648,7 @@ principles: [
   ar:`<p>لكل كلمة روسية مقطع قوي واحد، وقد يقع في أي مكان: {мо́ре}، {вода́}، {телефо́н}. بل قد يتحرّك داخل الكلمة نفسها: {рука́}، {ру́ку}.</p>
 <p>الـ {о} المنبورة وحدها تُنطق o. في غير ذلك تُنطق {а}: {молоко́} تُقال [малако́]، {хорошо́} [харашо́].</p>
 <p>الـ {е} والـ {я} غير المنبورتين تميلان إلى {и}: {сестра́} [систра́].</p>
-<p>التطبيق يضع علامة النبر على كل كلمة جديدة، ثم تختفي عندما تعرف الكلمة، كما تُحذف في النصوص الأصلية.</p>`},
+<p>التطبيق يضع علامة النبر على كل كلمة جديدة، ثم تختفي عندما تعرف⟦ين|⟧ الكلمة، كما تُحذف في النصوص الأصلية.</p>`},
  bridge:{
   en:`Stress marks are the Russian <ar>حركات</ar>: learners' books print them, native texts drop them. You learned to read Arabic without vowel signs; the same trick works here.`,
   ar:`علامات النبر هي <ar>حركات</ar> الروسية: كتب المتعلّمين تطبعها والنصوص الأصلية تحذفها. تعلّمت قراءة العربية بلا تشكيل، والحيلة نفسها تعمل هنا.`},
@@ -651,7 +658,7 @@ principles: [
 
 {id:"lookalike", kind:"sound", drill:"read",
  en:"Letters that pretend to be Latin", ar:"حروف تتنكّر في شكل حروف لاتينية",
- can:{en:"Read signs without being fooled by В, Н, Р, С, У, Х", ar:"تقرأ اللافتات دون أن تخدعك В وН وР وС وУ وХ"},
+ can:{en:"Read signs without being fooled by В, Н, Р, С, У, Х", ar:"⟦تقرئين|تقرأ⟧ اللافتات دون أن تخدعك В وН وР وС وУ وХ"},
  body:{
   en:`<p>Some Russian capitals look like English letters but say something else:</p>
 <ul><li>{В} = v · {Н} = n · {Р} = r (rolled) · {С} = s · {У} = oo · {Х} = kh, like Arabic <ar>خ</ar> · {Е} = ye</li></ul>
@@ -659,7 +666,7 @@ principles: [
 <p>The honest friends: {А}, {К}, {М}, {О}, {Т} sound as they look.</p>`,
   ar:`<p>بعض الحروف الروسية الكبيرة تشبه الإنجليزية لكنها تُنطق بشكل آخر:</p>
 <ul><li>{В} = و (v) · {Н} = ن · {Р} = ر · {С} = س · {У} = و طويلة · {Х} = <ar>خ</ar> · {Е} = يِه</li></ul>
-<p>فـ {РЕСТОРАН} تُقرأ «ريستوران» وتعني مطعم، و{ВХОД} هو المدخل. اللافتات الحقيقية بالحروف الكبيرة، فتدرّب عليها كذلك.</p>
+<p>فـ {РЕСТОРАН} تُقرأ «ريستوران» وتعني مطعم، و{ВХОД} هو المدخل. اللافتات الحقيقية بالحروف الكبيرة، فتدرّب⟦ي|⟧ عليها كذلك.</p>
 <p>الأصدقاء الصادقون: {А} و{К} و{М} و{О} و{Т} تُنطق كما تبدو.</p>`},
  bridge:{
   en:`Your Arabic ear is a gift here: {Х} is simply <ar>خ</ar>, and {Р} is the rolled <ar>ر</ar>. English speakers struggle with both.`,
@@ -689,19 +696,24 @@ nouns: [
 ["дочь","daughter","ابنة","f","P","","дочь","до́чери","до́чери","дочере́й"],
 ["муж","husband","زوج","m","P","","му́жа","му́жа","му́жу",""],
 ["жена́","wife","زوجة","f","P","","жену́","жены́","жене́",""],
-["друг","friend","صديق","m","P","","дру́га","дру́га","дру́гу","друзе́й"],
 ["подру́га","friend (woman)","صديقة","f","P","","подру́гу","подру́ги","подру́ге","подру́г"],
+["друг","friend (man)","صديق","m","P","","дру́га","дру́га","дру́гу","друзе́й"],
 ["ба́бушка","grandmother","جدّة","f","P","","ба́бушку","ба́бушки","ба́бушке",""],
 ["де́душка","grandfather","جدّ","m","P","","де́душку","де́душки","де́душке",""],
-["сосе́д","neighbour","جار","m","P","","сосе́да","сосе́да","сосе́ду","сосе́дей"],
+["сосе́дка","neighbour (woman)","جارة","f","P","","сосе́дку","сосе́дки","сосе́дке","сосе́док"],
+["сосе́д","neighbour (man)","جار","m","P","","сосе́да","сосе́да","сосе́ду","сосе́дей"],
 ["кот","cat","قطّ","m","P","","кота́","кота́","коту́","кото́в"],
 ["ко́шка","cat (female)","قطّة","f","P","","ко́шку","ко́шки","ко́шке","ко́шек"],
-["учи́тель","teacher","معلّم","m","P","","учи́теля","учи́теля","учи́телю","учителе́й"],
-["студе́нт","student","طالب","m","P","","студе́нта","студе́нта","студе́нту","студе́нтов"],
+["учи́тельница","teacher (woman)","معلّمة","f","P","","учи́тельницу","учи́тельницы","учи́тельнице","учи́тельниц"],
+["учи́тель","teacher (man)","معلّم","m","P","","учи́теля","учи́теля","учи́телю","учителе́й"],
+["студе́нтка","student (woman)","طالبة","f","P","","студе́нтку","студе́нтки","студе́нтке","студе́нток"],
+["студе́нт","student (man)","طالب","m","P","","студе́нта","студе́нта","студе́нту","студе́нтов"],
 ["врач","doctor","طبيب","m","P","","врача́","врача́","врачу́","враче́й"],
 ["води́тель","driver","سائق","m","P","","води́теля","води́теля","води́телю","води́телей"],
-["тури́ст","tourist","سائح","m","P","","тури́ста","тури́ста","тури́сту","тури́стов"],
-["журнали́ст","journalist","صحفي","m","P","","журнали́ста","журнали́ста","журнали́сту","журнали́стов"],
+["тури́стка","tourist (woman)","سائحة","f","P","","тури́стку","тури́стки","тури́стке","тури́сток"],
+["тури́ст","tourist (man)","سائح","m","P","","тури́ста","тури́ста","тури́сту","тури́стов"],
+["журнали́стка","journalist (woman)","صحفية","f","P","","журнали́стку","журнали́стки","журнали́стке","журнали́сток"],
+["журнали́ст","journalist (man)","صحفي","m","P","","журнали́ста","журнали́ста","журнали́сту","журнали́стов"],
 ["де́ти","children","أطفال","pl","P","","","","",""],
 ["лю́ди","people","ناس","pl","P","","","","",""],
 ["роди́тели","parents","الوالدان","pl","P","","","","",""],
@@ -871,7 +883,7 @@ words: [
 ["пожа́луйста","please / you're welcome","من فضلك / عفوًا","hello","stress"],
 ["да","yes","نعم","hello",""],
 ["нет","no","لا","hello",""],
-["извини́те","excuse me / sorry","عفوًا / آسف","hello",""],
+["извини́те","excuse me / sorry","عفوًا / ⟦آسفة|آسف⟧","hello",""],
 ["хорошо́","good / fine","جيد / حسنًا","hello","stress"],
 ["как","how","كيف","hello",""],
 ["что","what","ماذا","hello",""],
@@ -879,7 +891,7 @@ words: [
 ["кто","who","من","hello",""],
 ["э́то","this / it is","هذا","hello","no-is"],
 ["я","I","أنا","hello",""],
-["ты","you (a friend)","أنتَ / أنتِ (لصديق)","hello",""],
+["ты","you (a friend)","أنتِ / أنتَ (لصديقة أو صديق)","hello",""],
 ["вы","you (polite, or many)","حضرتك / أنتم","hello",""],
 ["он","he","هو","hello",""],
 ["она́","she","هي","hello",""],
@@ -907,8 +919,8 @@ words: [
 ["дочь","daughter","ابنة","people","moy-tvoy acc-fem"],
 ["муж","husband","زوج","people","acc-masc"],
 ["жена́","wife","زوجة","people","acc-fem"],
-["друг","friend (man)","صديق","people","acc-masc"],
 ["подру́га","friend (woman)","صديقة","people","acc-fem"],
+["друг","friend (man)","صديق","people","acc-masc"],
 ["семья́","family","عائلة","people","moy-tvoy"],
 ["ребёнок","child","طفل","people",""],
 ["де́ти","children","أطفال","people",""],
@@ -918,7 +930,8 @@ words: [
 ["лю́ди","people","ناس","people",""],
 ["мужчи́на","man","رجل","people","moy-tvoy"],
 ["же́нщина","woman","امرأة","people",""],
-["сосе́д","neighbour","جار","people","acc-masc"],
+["сосе́дка","neighbour (woman)","جارة","people","acc-fem"],
+["сосе́д","neighbour (man)","جار","people","acc-masc"],
 ["любо́вь","love","حبّ","people","roots"],
 
 /* food */
@@ -1158,12 +1171,15 @@ words: [
 ["о́фис","office","مكتب","work",""],
 ["университе́т","university","جامعة","work","v-prep"],
 ["шко́ла","school","مدرسة","work",""],
-["учи́тель","teacher","معلّم","work","doer acc-masc roots"],
-["учени́к","pupil","تلميذ","work","doer roots"],
+["учи́тельница","teacher (woman)","معلّمة","work","doer roots"],
+["учи́тель","teacher (man; formally a woman too)","معلّم","work","doer acc-masc roots"],
+["учени́ца","pupil (girl)","تلميذة","work","roots"],
+["учени́к","pupil (boy)","تلميذ","work","doer roots"],
+["студе́нтка","student (woman)","طالبة","work","acc-fem no-is"],
 ["студе́нт","student (man)","طالب","work","acc-masc no-is"],
-["студе́нтка","student (woman)","طالبة","work",""],
 ["врач","doctor","طبيب","work","acc-masc no-is"],
-["писа́тель","writer","كاتب","work","doer roots"],
+["писа́тельница","writer (woman)","كاتبة","work","doer roots"],
+["писа́тель","writer (man)","كاتب","work","doer roots"],
 ["води́тель","driver","سائق","work","doer"],
 ["колле́га","colleague","زميل","work",""],
 ["уро́к","lesson","درس","work",""],
@@ -1182,8 +1198,10 @@ words: [
 ["организа́ция","organisation","منظمة","ideas","tion"],
 ["презента́ция","presentation","عرض تقديمي","ideas","tion"],
 ["диску́ссия","discussion","نقاش","ideas","tion"],
-["тури́ст","tourist","سائح","ideas","ism-ist"],
-["журнали́ст","journalist","صحفي","ideas","ism-ist"],
+["тури́стка","tourist (woman)","سائحة","ideas","ism-ist"],
+["тури́ст","tourist (man)","سائح","ideas","ism-ist"],
+["журнали́стка","journalist (woman)","صحفية","ideas","ism-ist"],
+["журнали́ст","journalist (man)","صحفي","ideas","ism-ist"],
 ["оптими́зм","optimism","تفاؤل","ideas","ism-ist"],
 ["техноло́гия","technology","تكنولوجيا","ideas","logy"],
 ["психоло́гия","psychology","علم النفس","ideas","logy"],
@@ -1199,8 +1217,8 @@ words: [
 ["жить","to live","أن يعيش / يسكن","songs",""],
 ["люби́ть","to love","أن يحبّ","songs",""],
 ["уби́ть","to kill","أن يقتل","songs",""],
-["тебя́","you (as the object)","ـكَ / ـكِ (مفعولًا به)","songs",""],
-["твой","your (to a friend)","ـكَ / ـكِ (لصديق)","songs",""],
+["тебя́","you (as the object)","ـكِ / ـكَ (مفعولًا به)","songs",""],
+["твой","your (to a friend)","ـكِ / ـكَ (لصديقة أو صديق)","songs",""],
 ["отча́янно","desperately","بيأس","songs",""],
 ["неопра́вданно","without good reason","بلا مبرّر","songs",""],
 ["неосо́знанно","without realising","دون وعي","songs",""],
@@ -1209,13 +1227,13 @@ words: [
 ["ого́нь","fire","نار","songs",""],
 ["огни́","lights (of a city)","أضواء","songs",""],
 ["меня́","me (as the object)","ـني (مفعولًا به)","songs",""],
-["отпусти́","let go! (to a friend)","اتركْ (أمر لصديق)","songs",""],
-["обними́","hug! (to a friend)","عانِقْ (أمر لصديق)","songs",""],
+["отпусти́","let go! (to a friend)","اتركي / اتركْ (أمر لصديقة أو صديق)","songs",""],
+["обними́","hug! (to a friend)","عانقي / عانِقْ (أمر لصديقة أو صديق)","songs",""],
 ["всё равно́","all the same, I don't mind","سيّان، لا يهمّ","songs",""],
-["хо́чешь","you want (to a friend)","تريد (لصديق)","songs",""],
+["хо́чешь","you want (to a friend)","تريدين / تريد (لصديقة أو صديق)","songs",""],
 ["вме́сто","instead of","بدلًا من","songs",""],
 ["око́шко","little window","نافذة صغيرة","songs",""],
-["живи́","live! (to a friend)","عِشْ (أمر لصديق)","songs",""],
+["живи́","live! (to a friend)","عيشي / عِشْ (أمر لصديقة أو صديق)","songs",""],
 ["звук","sound","صوت","songs",""],
 ["вы́ше","higher","أعلى","songs",""],
 ["кры́ша","roof","سطح","songs",""],
@@ -1229,10 +1247,10 @@ words: [
 ["му́ха","fly","ذبابة","songs",""],
 ["нелегко́","it's not easy","ليس سهلًا","songs",""],
 ["немно́жко","a little bit","قليلًا","songs",""],
-["тебе́","to you (to a friend)","لكَ / لكِ","songs",""],
+["тебе́","to you (to a friend)","لكِ / لكَ","songs",""],
 ["помогу́","I'll help","سأساعد","songs",""],
-["пожале́й","have pity! (to a friend)","ارحَمْ (أمر لصديق)","songs",""],
-["переле́й","pour it over! (to a friend)","اسكُبْ (أمر لصديق)","songs",""]
+["пожале́й","have pity! (to a friend)","ارحمي / ارحَمْ (أمر لصديقة أو صديق)","songs",""],
+["переле́й","pour it over! (to a friend)","اسكبي / اسكُبْ (أمر لصديقة أو صديق)","songs",""]
 ],
 
 /* ============ phrases: same shape ============ */
@@ -1244,7 +1262,7 @@ phrases: [
 ["О́чень прия́тно.","Nice to meet you.","تشرّفنا.","hello","chunks"],
 ["Я не понима́ю.","I don't understand.","لا أفهم.","hello","ya-form"],
 ["Повтори́те, пожа́луйста.","Please say that again.","أعِد من فضلك.","hello","chunks"],
-["Вы говори́те по-англи́йски?","Do you speak English?","هل تتكلّم الإنجليزية؟","hello","chunks ya-form:i"],
+["Вы говори́те по-англи́йски?","Do you speak English?","هل تتكلّمين الإنجليزية؟","hello","chunks ya-form:i"],
 
 ["У меня́ есть брат.","I have a brother.","عندي أخ.","people","u-menya"],
 ["Э́то моя́ сестра́.","This is my sister.","هذه أختي.","people","moy-tvoy no-is"],
@@ -1262,7 +1280,7 @@ phrases: [
 
 ["Кни́га на столе́.","The book is on the table.","الكتاب على الطاولة.","home","v-prep no-is"],
 ["Я до́ма.","I'm at home.","أنا في البيت.","home","no-is"],
-["Ма́ма на ку́хне.","Mum is in the kitchen.","أمي في المطبخ.","home","v-prep"],
+["Па́па на ку́хне.","Dad is in the kitchen.","أبي في المطبخ.","home","v-prep"],
 ["Где мои́ ключи́?","Where are my keys?","أين مفاتيحي؟","home","moy-tvoy"],
 ["Э́то твоя́ ко́мната?","Is this your room?","هل هذه غرفتك؟","home","moy-tvoy"],
 ["У меня́ есть кот.","I have a cat.","عندي قطّ.","home","u-menya"],
@@ -1315,11 +1333,11 @@ phrases: [
 
 ["Я рабо́таю в о́фисе.","I work in an office.","أعمل في مكتب.","work","ya-form v-prep"],
 ["Кем вы рабо́таете?","What do you do for work?","ما عملك؟","work","chunks:more"],
-["Я студе́нт.","I'm a student.","أنا طالب.","work","no-is"],
+["Я ⟦студе́нтка|студе́нт⟧.","I'm a student.","أنا ⟦طالبة|طالب⟧.","work","no-is"],
 ["У меня́ вопро́с.","I have a question.","عندي سؤال.","work","u-menya"],
 
 ["Э́то интере́сная информа́ция.","This is interesting information.","هذه معلومات مثيرة للاهتمام.","ideas","tion moy-tvoy:adj"],
-["Я журнали́ст.","I'm a journalist.","أنا صحفي.","ideas","ism-ist no-is"],
+["Я ⟦журнали́стка|журнали́ст⟧.","I'm a journalist.","أنا ⟦صحفية|صحفي⟧.","ideas","ism-ist no-is"],
 ["Я люблю́ му́зыку.","I love music.","أحب الموسيقى.","ideas","acc-fem ya-form"],
 ["Кака́я ситуа́ция!","What a situation!","يا له من موقف!","ideas","tion chunks:more"],
 
@@ -1342,11 +1360,11 @@ phrases: [
 ["Ве́чером темно́.","It's dark in the evening.","المساء مظلم.","songs","chunks:more"],
 ["Мне всё равно́.","I don't mind. / It's all the same to me.","سيّان عندي.","songs","nravitsya:state"],
 ["Мне не всё равно́.","I do care.","يهمّني الأمر.","songs","nravitsya:state"],
-["Что ты ду́маешь?","What do you think?","ماذا تظنّ؟","songs","ya-form"],
+["Что ты ду́маешь?","What do you think?","ماذا تظنّين؟","songs","ya-form"],
 ["Обними́ меня́.","Hug me.","عانِقني.","songs","acc-masc:pron"],
-["Хо́чешь ко́фе?","Do you want coffee?","هل تريد قهوة؟","songs","ya-form"],
-["Ты хо́чешь спать?","Do you want to sleep?","هل تريد أن تنام؟","songs","ya-form:inf"],
-["Хо́чешь чай вме́сто ко́фе?","Do you want tea instead of coffee?","هل تريد شايًا بدل القهوة؟","songs","ya-form"],
+["Хо́чешь ко́фе?","Do you want coffee?","هل تريدين قهوة؟","songs","ya-form"],
+["Ты хо́чешь спать?","Do you want to sleep?","هل تريدين أن تنامي؟","songs","ya-form:inf"],
+["Хо́чешь чай вме́сто ко́фе?","Do you want tea instead of coffee?","هل تريدين شايًا بدل القهوة؟","songs","ya-form"],
 ["Я ви́жу со́лнце.","I see the sun.","أرى الشمس.","songs","ya-form"],
 ["Где ла́мпа?","Where's the lamp?","أين المصباح؟","songs",""],
 ["Сосе́ди спят.","The neighbours are asleep.","الجيران نائمون.","songs","ya-form"],
@@ -1358,7 +1376,7 @@ phrases: [
 ["Бра́тья и ба́бушки в самолёте.","Brothers and grandmothers are on the plane.","الإخوة والجدّات في الطائرة.","songs","no-is v-prep"],
 ["Ты мой ми́лый друг.","You're my dear friend.","أنت صديقي العزيز.","songs","no-is moy-tvoy:adj"],
 ["Му́ха в молоке́.","There's a fly in the milk.","ذبابة في الحليب.","songs","no-is v-prep"],
-["Куда́ ты идёшь?","Where are you going?","إلى أين أنت ذاهب؟","songs","ya-form"],
+["Куда́ ты идёшь?","Where are you going?","إلى أين أنتِ ذاهبة؟","songs","ya-form"],
 ["Тебе́ хорошо́?","Are you all right?","هل أنت بخير؟","songs","nravitsya:state"],
 ["Мне нелегко́.","It's not easy for me.","ليس الأمر سهلًا عليّ.","songs","nravitsya:state"],
 ["Я не могу́.","I can't.","لا أستطيع.","songs","ya-form"],
@@ -1383,7 +1401,7 @@ readings: [
  ["По-ру́сски я говорю́ ма́ло,","I speak a little Russian,","أتكلّم الروسية قليلًا،"],
  ["но я понима́ю мно́го!","but I understand a lot!","لكنني أفهم كثيرًا!"]]},
 {id:"cafe", en:"In the café", ar:"في المقهى", topic:"food", lines:[
- ["— Здра́вствуйте! Что вы хоти́те?","— Hello! What would you like?","— مرحبًا! ماذا تريد؟"],
+ ["— Здра́вствуйте! Что вы хоти́те?","— Hello! What would you like?","— مرحبًا! ماذا تريدين؟"],
  ["— Ко́фе с молоко́м, пожа́луйста.","— Coffee with milk, please.","— قهوة بالحليب من فضلك."],
  ["— И всё?","— Anything else?","— هل هذا كل شيء؟"],
  ["— И пи́ццу.","— And a pizza.","— وبيتزا."],
@@ -1397,11 +1415,11 @@ readings: [
  ["Вы́ход нале́во, вход напра́во.","The exit is on the left, the entrance on the right.","المخرج على اليسار، والمدخل على اليمين."],
  ["Я иду́ на у́лицу.","I go out onto the street.","أخرج إلى الشارع."],
  ["На у́лице хо́лодно!","It's cold outside!","الجو بارد في الخارج!"]]},
-{id:"brat", en:"My brother the journalist", ar:"أخي الصحفي", topic:"ideas", lines:[
- ["Мой брат — журнали́ст.","My brother is a journalist.","أخي صحفي."],
- ["Ему́ нра́вится поли́тика.","He likes politics.","تعجبه السياسة."],
+{id:"brat", en:"My sister the journalist", ar:"أختي الصحفية", topic:"ideas", lines:[
+ ["Моя́ сестра́ — журнали́стка.","My sister is a journalist.","أختي صحفية."],
+ ["Ей нра́вится поли́тика.","She likes politics.","تعجبها السياسة."],
  ["Сего́дня в Москве́ презента́ция.","Today there's a presentation in Moscow.","اليوم يوجد عرض تقديمي في موسكو."],
- ["Брат на презента́ции.","My brother is at the presentation.","أخي في العرض التقديمي."],
+ ["Сестра́ на презента́ции.","My sister is at the presentation.","أختي في العرض التقديمي."],
  ["Ситуа́ция интере́сная!","The situation is interesting!","الموقف مثير للاهتمام!"]]},
 {id:"year", en:"My year", ar:"سنتي", topic:"months", lines:[
  ["Мой день рожде́ния в ма́е.","My birthday is in May.","عيد ميلادي في مايو."],
@@ -1411,11 +1429,11 @@ readings: [
  ["А тебе́?","And you?","وأنت؟"]]},
 {id:"family", en:"My family", ar:"عائلتي", topic:"people", lines:[
  ["Э́то моя́ семья́.","This is my family.","هذه عائلتي."],
- ["Э́то мой па́па. Он врач.","This is my dad. He's a doctor.","هذا أبي. هو طبيب."],
- ["Э́то моя́ ма́ма. Она́ учи́тель.","This is my mum. She's a teacher.","هذه أمي. هي معلّمة."],
- ["У меня́ есть брат и сестра́.","I have a brother and a sister.","عندي أخ وأخت."],
- ["Брат живёт в Москве́, а сестра́ в Бо́стоне.","My brother lives in Moscow, and my sister in Boston.","أخي يسكن في موسكو، وأختي في بوسطن."],
- ["Я люблю́ бра́та и сестру́.","I love my brother and my sister.","أحب أخي وأختي."],
+ ["Э́то моя́ ма́ма. Она́ врач.","This is my mum. She's a doctor.","هذه أمي. هي طبيبة."],
+ ["Э́то мой па́па. Он учи́тель.","This is my dad. He's a teacher.","هذا أبي. هو معلّم."],
+ ["У меня́ есть сестра́ и брат.","I have a sister and a brother.","عندي أخت وأخ."],
+ ["Сестра́ живёт в Москве́, а брат в Бо́стоне.","My sister lives in Moscow, and my brother in Boston.","أختي تسكن في موسكو، وأخي في بوسطن."],
+ ["Я люблю́ сестру́ и бра́та.","I love my sister and my brother.","أحب أختي وأخي."],
  ["Мы мно́го говори́м.","We talk a lot.","نتكلّم كثيرًا."]]},
 {id:"grandma", en:"Grandma's cat", ar:"قطّ جدّتي", topic:"people", lines:[
  ["У ба́бушки есть кот.","Grandma has a cat.","عند جدّتي قطّ."],
@@ -1425,12 +1443,12 @@ readings: [
  ["А кот пьёт молоко́.","And the cat drinks milk.","أمّا القطّ فيشرب الحليب."],
  ["Ему́ нра́вится молоко́.","He likes milk.","يعجبه الحليب."]]},
 {id:"kitchen", en:"In the kitchen", ar:"في المطبخ", topic:"home", lines:[
- ["Ма́ма на ку́хне.","Mum is in the kitchen.","أمي في المطبخ."],
+ ["Па́па на ку́хне.","Dad is in the kitchen.","أبي في المطبخ."],
  ["На столе́ хлеб, сыр и я́блоко.","On the table there's bread, cheese and an apple.","على الطاولة خبز وجبن وتفاحة."],
  ["В холоди́льнике молоко́ и ры́ба.","In the fridge there's milk and fish.","في الثلاجة حليب وسمك."],
- ["— Ма́ма, где сок?","— Mum, where's the juice?","— أمي، أين العصير؟"],
+ ["— Па́па, где сок?","— Dad, where's the juice?","— أبي، أين العصير؟"],
  ["— Сок в холоди́льнике.","— The juice is in the fridge.","— العصير في الثلاجة."],
- ["Я хочу́ суп. Ма́ма то́же хо́чет суп.","I want soup. Mum wants soup too.","أريد حساءً. وأمي تريد حساءً أيضًا."],
+ ["Я хочу́ суп. Па́па то́же хо́чет суп.","I want soup. Dad wants soup too.","أريد حساءً. وأبي يريد حساءً أيضًا."],
  ["Суп горя́чий. Э́то о́чень вку́сно!","The soup is hot. It's very tasty!","الحساء ساخن. إنه لذيذ جدًّا!"]]},
 {id:"flat", en:"My new flat", ar:"شقّتي الجديدة", topic:"home", lines:[
  ["Э́то моя́ но́вая кварти́ра.","This is my new flat.","هذه شقّتي الجديدة."],
@@ -1466,9 +1484,9 @@ readings: [
  ["— У меня́ боли́т голова́.","— I have a headache.","— رأسي يؤلمني."],
  ["— А го́рло?","— And your throat?","— وحلقك؟"],
  ["— Го́рло то́же. И спина́.","— My throat too. And my back.","— حلقي أيضًا. وظهري."],
- ["— Вам хо́лодно?","— Are you cold?","— هل تشعر بالبرد؟"],
+ ["— Вам хо́лодно?","— Are you cold?","— هل تشعر⟦ين|⟧ بالبرد؟"],
  ["— Да, мне о́чень хо́лодно.","— Yes, I'm very cold.","— نعم، أشعر ببرد شديد."],
- ["— Вам на́до пить чай и спать.","— You need to drink tea and sleep.","— يجب أن تشرب الشاي وتنام."]]},
+ ["— Вам на́до пить чай и спать.","— You need to drink tea and sleep.","— يجب أن تشرب⟦ي|⟧ الشاي وتنام⟦ي|⟧."]]},
 {id:"bodyread", en:"Head and hands", ar:"الرأس واليدان", topic:"body", lines:[
  ["Вот голова́, вот лицо́.","Here's the head, here's the face.","هذا الرأس، وهذا الوجه."],
  ["На лице́ глаза́, нос и рот.","On the face are the eyes, the nose and the mouth.","على الوجه العينان والأنف والفم."],
@@ -1523,7 +1541,7 @@ readings: [
  ["Мне два́дцать де́вять лет.","I'm twenty-nine.","عمري تسعة وعشرون عامًا."],
  ["У бра́та день рожде́ния в ию́ле.","My brother's birthday is in July.","عيد ميلاد أخي في يوليو."],
  ["Ему́ три́дцать два го́да.","He's thirty-two.","عمره اثنان وثلاثون عامًا."],
- ["Ма́ма говори́т, что ей два́дцать пять лет!","Mum says she's twenty-five!","أمي تقول إن عمرها خمسة وعشرون عامًا!"]]},
+ ["Па́па говори́т, что ему́ два́дцать пять лет!","Dad says he's twenty-five!","أبي يقول إن عمره خمسة وعشرون عامًا!"]]},
 {id:"market", en:"At the market", ar:"في السوق", topic:"shop", lines:[
  ["Я на ры́нке.","I'm at the market.","أنا في السوق."],
  ["Я хочу́ купи́ть ры́бу, хлеб и сыр.","I want to buy fish, bread and cheese.","أريد أن أشتري سمكًا وخبزًا وجبنًا."],
@@ -1534,29 +1552,29 @@ readings: [
  ["Но у меня́ нет де́нег! Мо́жно ка́ртой?","But I have no cash! Can I pay by card?","لكن ليس معي نقود! هل يمكن الدفع بالبطاقة؟"]]},
 {id:"office", en:"At the office", ar:"في المكتب", topic:"work", lines:[
  ["Я рабо́таю в о́фисе.","I work in an office.","أعمل في مكتب."],
- ["Мой колле́га Андре́й — хоро́ший рабо́тник.","My colleague Andrey is a good worker.","زميلي أندريه عامل جيد."],
- ["Он мно́го рабо́тает и мно́го зна́ет.","He works a lot and knows a lot.","هو يعمل كثيرًا ويعرف كثيرًا."],
+ ["Моя́ колле́га О́льга — хоро́шая рабо́тница.","My colleague Olga is a good worker.","زميلتي أولغا عاملة جيدة."],
+ ["Она́ мно́го рабо́тает и мно́го зна́ет.","She works a lot and knows a lot.","هي تعمل كثيرًا وتعرف كثيرًا."],
  ["Днём мы обе́даем в кафе́.","During the day we have lunch in a café.","في النهار نتغدّى في مقهى."],
  ["Мне нра́вится моя́ рабо́та.","I like my job.","يعجبني عملي."],
  ["Ве́чером я иду́ домо́й.","In the evening I go home.","في المساء أعود إلى البيت."]]},
 {id:"teacher", en:"My sister the teacher", ar:"أختي المعلّمة", topic:"work", lines:[
- ["Моя́ сестра́ — учи́тель.","My sister is a teacher.","أختي معلّمة."],
+ ["Моя́ сестра́ — учи́тельница.","My sister is a teacher.","أختي معلّمة."],
  ["Она́ рабо́тает в шко́ле.","She works at a school.","تعمل في مدرسة."],
  ["У неё де́сять учени́ков.","She has ten pupils.","عندها عشرة تلاميذ."],
  ["Её уро́ки интере́сные.","Her lessons are interesting.","دروسها مثيرة للاهتمام."],
  ["Ученики́ её лю́бят.","Her pupils love her.","تلاميذها يحبّونها."],
  ["Учи́тель — э́то хоро́шая профе́ссия.","Teacher is a good profession.","التعليم مهنة جيدة."]]},
-{id:"writer", en:"My friend the writer", ar:"صديقي الكاتب", topic:"work", lines:[
- ["Мой друг — писа́тель.","My friend is a writer.","صديقي كاتب."],
- ["Он пи́шет кни́ги.","He writes books.","هو يكتب كتبًا."],
- ["Я чита́ю его́ кни́ги. Я его́ чита́тель!","I read his books. I'm his reader!","أقرأ كتبه. أنا قارئه!"],
- ["Его́ но́вая кни́га — «Жизнь и любо́вь».","His new book is “Life and Love”.","كتابه الجديد هو «الحياة والحب»."],
+{id:"writer", en:"My friend the writer", ar:"صديقتي الكاتبة", topic:"work", lines:[
+ ["Моя́ подру́га — писа́тельница.","My friend is a writer.","صديقتي كاتبة."],
+ ["Она́ пи́шет кни́ги.","She writes books.","هي تكتب كتبًا."],
+ ["Я чита́ю её кни́ги. Я её ⟦чита́тельница|чита́тель⟧!","I read her books. I'm her reader!","أقرأ كتبها. أنا ⟦قارئتها|قارئها⟧!"],
+ ["Её но́вая кни́га — «Жизнь и любо́вь».","Her new book is “Life and Love”.","كتابها الجديد هو «الحياة والحب»."],
  ["Мне нра́вится э́та кни́га.","I like this book.","يعجبني هذا الكتاب."],
- ["Я пишу́ ему́ письмо́.","I'm writing him a letter.","أكتب له رسالة."]]},
+ ["Я пишу́ ей письмо́.","I'm writing her a letter.","أكتب لها رسالة."]]},
 {id:"razgovor", en:"A conversation", ar:"محادثة", topic:"hello", lines:[
  ["— Приве́т! Как дела́?","— Hi! How are you?","— أهلًا! كيف حالك؟"],
  ["— Хорошо́, спаси́бо. А у тебя́?","— Fine, thanks. And you?","— بخير، شكرًا. وأنت؟"],
- ["— То́же хорошо́. Ты говори́шь по-ара́бски?","— Fine too. Do you speak Arabic?","— بخير أيضًا. هل تتكلّم العربية؟"],
+ ["— То́же хорошо́. Ты говори́шь по-ара́бски?","— Fine too. Do you speak Arabic?","— بخير أيضًا. هل تتكلّم⟦ين|⟧ العربية؟"],
  ["— Да, и по-англи́йски то́же. А ты?","— Yes, and English too. And you?","— نعم، والإنجليزية أيضًا. وأنت؟"],
  ["— Я говорю́ по-ру́сски. По-ара́бски я понима́ю ма́ло.","— I speak Russian. I understand a little Arabic.","— أتكلّم الروسية. وأفهم العربية قليلًا."],
  ["— Хорошо́! Мы мо́жем говори́ть и по-ру́сски, и по-ара́бски!","— Great! We can speak both Russian and Arabic!","— رائع! نستطيع أن نتكلّم بالروسية والعربية معًا!"]]},
@@ -1568,26 +1586,26 @@ readings: [
  ["Я ви́жу его́ у́тром на остано́вке.","I see him in the morning at the bus stop.","أراه في الصباح في الموقف."],
  ["Мы е́дем в центр на авто́бусе.","We go to the centre by bus.","نذهب إلى المركز بالحافلة."],
  ["Мне нра́вится мой но́вый сосе́д!","I like my new neighbour!","يعجبني جاري الجديد!"]]},
-{id:"tourist", en:"A tourist in Moscow", ar:"سائح في موسكو", topic:"ideas", lines:[
- ["Я тури́ст. Я в Москве́.","I'm a tourist. I'm in Moscow.","أنا سائح. أنا في موسكو."],
+{id:"tourist", en:"A tourist in Moscow", ar:"⟦سائحة|سائح⟧ في موسكو", topic:"ideas", lines:[
+ ["Я ⟦тури́стка|тури́ст⟧. Я в Москве́.","I'm a tourist. I'm in Moscow.","أنا ⟦سائحة|سائح⟧. أنا في موسكو."],
  ["Здесь мно́го тури́стов.","There are a lot of tourists here.","هنا سيّاح كثيرون."],
  ["Я ви́жу ста́нцию метро́.","I see a metro station.","أرى محطة مترو."],
  ["Информа́ция на ста́нции по-ру́сски и по-англи́йски.","The information at the station is in Russian and English.","المعلومات في المحطة بالروسية والإنجليزية."],
  ["Мне нра́вится э́та ста́нция. Она́ как музе́й!","I like this station. It's like a museum!","تعجبني هذه المحطة. إنها كالمتحف!"],
- ["Ситуа́ция интере́сная: я тури́ст, но я понима́ю по-ру́сски!","Interesting situation: I'm a tourist, but I understand Russian!","موقف مثير للاهتمام: أنا سائح لكنني أفهم الروسية!"]]},
+ ["Ситуа́ция интере́сная: я ⟦тури́стка|тури́ст⟧, но я понима́ю по-ру́сски!","Interesting situation: I'm a tourist, but I understand Russian!","موقف مثير للاهتمام: أنا ⟦سائحة|سائح⟧ لكنني أفهم الروسية!"]]},
 {id:"discussion", en:"A family discussion", ar:"نقاش عائلي", topic:"ideas", lines:[
- ["Па́па лю́бит поли́тику и эконо́мику.","Dad loves politics and economics.","أبي يحبّ السياسة والاقتصاد."],
- ["Ма́ма лю́бит биоло́гию и психоло́гию.","Mum loves biology and psychology.","أمي تحبّ علم الأحياء وعلم النفس."],
+ ["Ма́ма лю́бит поли́тику и эконо́мику.","Mum loves politics and economics.","أمي تحبّ السياسة والاقتصاد."],
+ ["Па́па лю́бит биоло́гию и психоло́гию.","Dad loves biology and psychology.","أبي يحبّ علم الأحياء وعلم النفس."],
  ["А я люблю́ му́зыку и фотогра́фию.","And I love music and photography.","وأنا أحبّ الموسيقى والتصوير."],
  ["Ве́чером у нас диску́ссия.","In the evening we have a discussion.","في المساء عندنا نقاش."],
- ["Па́па говори́т: «Эконо́мика — э́то жизнь!»","Dad says: “Economics is life!”","أبي يقول: «الاقتصاد هو الحياة!»"],
- ["Ма́ма говори́т: «Нет, жизнь — э́то биоло́гия!»","Mum says: “No, life is biology!”","أمي تقول: «لا، الحياة هي علم الأحياء!»"],
+ ["Ма́ма говори́т: «Эконо́мика — э́то жизнь!»","Mum says: “Economics is life!”","أمي تقول: «الاقتصاد هو الحياة!»"],
+ ["Па́па говори́т: «Нет, жизнь — э́то биоло́гия!»","Dad says: “No, life is biology!”","أبي يقول: «لا، الحياة هي علم الأحياء!»"],
  ["А я говорю́: «Жизнь — э́то му́зыка!»","And I say: “Life is music!”","وأنا أقول: «الحياة هي الموسيقى!»"]]},
 {id:"optimist", en:"Optimist and pessimist", ar:"متفائل ومتشائم", topic:"ideas", lines:[
  ["Мой брат — оптими́ст.","My brother is an optimist.","أخي متفائل."],
  ["У него́ нет рабо́ты, но он говори́т: «Всё хорошо́!»","He has no job, but he says: “Everything's fine!”","ليس عنده عمل، لكنه يقول: «كل شيء بخير!»"],
- ["А я пессими́ст. Я говорю́: «Всё пло́хо!»","And I'm a pessimist. I say: “Everything's bad!”","وأنا متشائم. أقول: «كل شيء سيئ!»"],
- ["Брат — журнали́ст, а я — студе́нт.","My brother is a journalist, and I'm a student.","أخي صحفي، وأنا طالب."],
+ ["А я ⟦пессими́стка|пессими́ст⟧. Я говорю́: «Всё пло́хо!»","And I'm a pessimist. I say: “Everything's bad!”","وأنا ⟦متشائمة|متشائم⟧. أقول: «كل شيء سيئ!»"],
+ ["Брат — журнали́ст, а я — ⟦студе́нтка|студе́нт⟧.","My brother is a journalist, and I'm a student.","أخي صحفي، وأنا ⟦طالبة|طالب⟧."],
  ["Ма́ма говори́т: «А я реали́стка!»","Mum says: “And I'm a realist!”","أمي تقول: «وأنا واقعية!»"]]}
 ],
 
@@ -1636,7 +1654,7 @@ facts: [
   ar:"الكلمات المذكّرة المنتهية بـ -а تأخذ صفات مذكّرة: мой ста́рый де́душка، хоро́ший па́па."},
  {p:"v-prep", t:"", w:"аэропо́рт мост",
   en:"в аэропорту́ and на мосту́ use a stressed -у́ instead of -е: a leftover of an old case. A handful of short words do it, so learn them as chunks.",
-  ar:"в аэропорту́ وна мосту́ تستخدم -у́ المنبورة بدل -е: بقية من حالة إعرابية قديمة. عدد قليل من الكلمات القصيرة يفعل ذلك، فاحفظها كما هي."},
+  ar:"в аэропорту́ وна мосту́ تستخدم -у́ المنبورة بدل -е: بقية من حالة إعرابية قديمة. عدد قليل من الكلمات القصيرة يفعل ذلك، فاحفظ⟦ي|⟧ها كما هي."},
  {p:"v-prep", t:"", w:"ры́нок по́чта вокза́л ста́нция рабо́та у́лица",
   en:"на goes with places that were once open spaces or events: на ры́нке, на вокза́ле, на по́чте, на рабо́те. That's why it isn't в.",
   ar:"تأتي на مع أماكن كانت أصلًا مفتوحة أو مع الأحداث: на ры́нке، на вокза́ле، на по́чте، на рабо́те. لهذا لا نقول в."},
@@ -1701,7 +1719,7 @@ songs: [
    body:{en:`<p>From the same 2013 album as «Жить в твое́й голове́». The chorus is almost only two words, {ко́фе} and {вино́}, over and over, so this is the easiest song to start with.</p>
 <p>It's about not being able to choose and wanting to be let go, while still caring what one person thinks. On the first listen, just count how many times you hear {ко́фе} and {вино́}.</p>`,
          ar:`<p>من ألبوم 2013 نفسه الذي فيه «Жить в твое́й голове́». اللازمة تكاد تكون كلمتين فقط، {ко́фе} و{вино́}، تتكرّران مرة بعد مرة، لذلك هذه أسهل أغنية للبداية.</p>
-<p>الأغنية عن العجز عن الاختيار والرغبة في التحرّر، مع الاهتمام برأي شخص واحد. في الاستماع الأول عُدّ فقط كم مرة تسمع {ко́фе} و{вино́}.</p>`}},
+<p>الأغنية عن العجز عن الاختيار والرغبة في التحرّر، مع الاهتمام برأي شخص واحد. في الاستماع الأول ⟦عُدّي|عُدّ⟧ فقط كم مرة تسمع⟦ين|⟧ {ко́фе} و{вино́}.</p>`}},
   {id:"who", en:"Who is Zemfira", ar:"من هي زيمفيرا",
    body:{en:`<p>Zemfira Ramazanova comes from Ufa and broke through in the late 1990s. She writes, arranges and produces her own music, and she is one of the most influential voices in Russian-language rock.</p>`,
          ar:`<p>زيمفيرا رامازانوفا من مدينة أوفا، واشتهرت في أواخر التسعينيات. تكتب موسيقاها وتوزّعها وتنتجها بنفسها، وهي من أكثر الأصوات تأثيرًا في موسيقى الروك باللغة الروسية.</p>`}},
@@ -1716,22 +1734,22 @@ songs: [
 <li>{вино́}, {кино́}, {окно́}: words ending in {-о} are “it” words.</li>
 <li>{и́ли} = or: {Ко́фе и́ли вино́?} A question needs only a rising voice.</li>
 <li>{темно́} = it's dark, like {хо́лодно}, it's cold. {Ве́чером темно́.}</li></ul>`,
-         ar:`<p>معظم الكلمات هنا تكاد تخمّنها:</p>
+         ar:`<p>معظم الكلمات هنا تكاد⟦ين|⟧ تخمّن⟦ين|⟧ها:</p>
 <ul><li>{ко́фе} دخلت الروسية عبر الهولندية والتركية من العربية <ar>قهوة</ar>. وهي مذكّرة: {мой ко́фе}.</li>
 <li>{вино́}، {кино́}، {окно́}: الكلمات المنتهية بـ {-о} محايدة.</li>
 <li>{и́ли} = أو / أم: {Ко́фе и́ли вино́?} قهوة أم نبيذ؟ السؤال يحتاج فقط إلى رفع الصوت.</li>
 <li>{темно́} = الجو مظلم، مثل {хо́лодно} الجو بارد. {Ве́чером темно́.} المساء مظلم.</li></ul>`},
    words:["ко́фе","вино́","кино́","и́ли","окно́","темно́","о́чень"],
    phrases:["Ко́фе и́ли вино́?","Я хочу́ ко́фе.","Я люблю́ кино́.","Ве́чером темно́."]},
-  {en:"Let me go, hug me", ar:"اتركني، عانقني",
+  {en:"Let me go, hug me", ar:"اتركيني، عانقيني",
    body:{en:`<ul><li>{отпусти́ меня́} = let me go, {обними́ меня́} = hug me. Asking a friend to do something often ends in {-и}. Learn these two whole.</li>
 <li>{меня́} is “me” as the object, the twin of {тебя́}.</li>
 <li>{мне всё равно́} = it's all the same to me, I don't mind. It's built like {мне хо́лодно}: “to me” + a state. The chorus turns it around: {мне не всё равно́}, I do care.</li>
 <li>{ду́маешь} = you think: the ты-ending {-ешь}, as in {живёшь}. {Что ты ду́маешь?}</li></ul>`,
-         ar:`<ul><li>{отпусти́ меня́} = اتركني، {обними́ меня́} = عانقني. الطلب من صديق ينتهي غالبًا بـ {-и}. احفظ هاتين كاملتين.</li>
+         ar:`<ul><li>{отпусти́ меня́} = اتركيني، {обними́ меня́} = عانقيني. الطلب من صديق ينتهي غالبًا بـ {-и}. احفظ⟦ي|⟧ هاتين كاملتين.</li>
 <li>{меня́} هي «ـني» مفعولًا به، توأم {тебя́}.</li>
 <li>{мне всё равно́} = سيّان عندي، لا يهمّني. مبنية مثل {мне хо́лодно}: «لي» + حالة. واللازمة تقلبها: {мне не всё равно́} يهمّني.</li>
-<li>{ду́маешь} = تفكّر / تظنّ: نهاية «أنت» {-ешь} كما في {живёшь}. {Что ты ду́маешь?} ماذا تظنّ؟</li></ul>`},
+<li>{ду́маешь} = تفكّرين / تظنّين: نهاية «أنت» {-ешь} كما في {живёшь}. {Что ты ду́маешь?} ماذا تظنّين؟</li></ul>`},
    bridge:{en:`{Мне не всё равно́} is <ar>يهمّني</ar>: “it matters to me”, with “me” in the to-whom form, exactly like Arabic.`,
            ar:`{Мне не всё равно́} هي <ar>يهمّني</ar>: الأمر يعنيني، و«أنا» في صيغة «لِمَن»، تمامًا كما في العربية.`},
    words:["меня́","отпусти́","обними́","всё равно́","ду́маю","что","пожа́луйста"],
@@ -1745,7 +1763,7 @@ songs: [
    body:{en:`<p>A tiny poem for children by one of the greatest Russian poets. Twelve short lines: someone asks a fly that has fallen into the milk how it's doing, and the fly answers and asks for help.</p>
 <p>It's a dialogue, so read it aloud in two voices. Listen for {молоко́}, {ты} and {тебе́}.</p>`,
          ar:`<p>قصيدة صغيرة للأطفال كتبها أحد أعظم الشعراء الروس. اثنا عشر سطرًا قصيرًا: شخص يسأل ذبابة وقعت في الحليب عن حالها، فتجيب الذبابة وتطلب المساعدة.</p>
-<p>إنها حوار، فاقرأها بصوت عالٍ بصوتين. انتبه لـ {молоко́} و{ты} و{тебе́}.</p>`}},
+<p>إنها حوار، ⟦فاقرئيها|فاقرأها⟧ بصوت عالٍ بصوتين. انتبه⟦ي|⟧ لـ {молоко́} و{ты} و{тебе́}.</p>`}},
   {id:"who", en:"Who is Mandelstam", ar:"من هو ماندلشتام",
    body:{en:`<p>Osip Mandelstam (1891–1938) is one of the great Russian poets of the 20th century. In the 1920s, when he could hardly publish his own poems, he wrote small, playful books for children. He was arrested twice for his poetry and died in a Soviet transit camp near Vladivostok.</p>`,
          ar:`<p>أوسيب ماندلشتام (1891–1938) من كبار الشعراء الروس في القرن العشرين. في العشرينيات، حين كان نشر قصائده شبه مستحيل، كتب كتبًا صغيرة مرحة للأطفال. اعتُقل مرتين بسبب شعره، ومات في معسكر عبور سوفيتي قرب فلاديفوستوك.</p>`}}
@@ -1769,12 +1787,12 @@ songs: [
 <li>Requests to a friend: after a vowel they end in {-й}: {пожале́й} (have pity), {переле́й} (pour it over). Otherwise in {-и}, like {обними́}.</li>
 <li>{ча́шка} = cup, {ло́жка} = spoon. {лу́чше} = better.</li></ul>`,
          ar:`<ul><li>{не могу́} = لا أستطيع. {помогу́} = سأساعد: فعل واحد مكتمل، لذلك هو للمستقبل.</li>
-<li>الطلب من صديق: بعد حرف علّة ينتهي بـ {-й}: {пожале́й} (ارحمْ)، {переле́й} (اسكبْ). وإلا فبـ {-и} مثل {обними́}.</li>
+<li>الطلب من صديق: بعد حرف علّة ينتهي بـ {-й}: {пожале́й} (ارحمي)، {переле́й} (اسكبي). وإلا فبـ {-и} مثل {обними́}.</li>
 <li>{ча́шка} = فنجان، {ло́жка} = ملعقة. {лу́чше} = أفضل.</li></ul>`},
    words:["могу́","помогу́","пожале́й","переле́й","ча́шка","ло́жка","лу́чше","меня́"],
    phrases:["Я не могу́.","Я тебе́ помогу́.","Где ча́шка и ло́жка?"]}
  ]},
-{id:"khochesh", ru:"Хо́чешь?", by:"Земфи́ра", en:"Do you want…?", ar:"هل تريد…؟", year:2000,
+{id:"khochesh", ru:"Хо́чешь?", by:"Земфи́ра", en:"Do you want…?", ar:"هل تريدين…؟", year:2000,
  video:"xpJ_fYyAeYk",
  lyrics:"https://lyricstranslate.com/en/%D1%85%D0%BE%D1%87%D0%B5%D1%88%D1%8C-khochesh-do-you-want.html-0",
  ps:["ya-form","ya-form:inf","no-is"],
@@ -1782,24 +1800,24 @@ songs: [
   {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
    body:{en:`<p>One of Zemfira's best-known songs, from 2000. Almost every line is an offer that starts with the same word, {хо́чешь}: do you want…? Some offers are tender, some are wild.</p>
 <p>On the first listen, catch {хо́чешь} each time, and two things: {со́лнце} (the sun) and {ла́мпа} (a lamp).</p>`,
-         ar:`<p>من أشهر أغاني زيمفيرا، من عام 2000. كل سطر تقريبًا عرض يبدأ بالكلمة نفسها، {хо́чешь}: هل تريد…؟ بعض العروض رقيق وبعضها جامح.</p>
-<p>في الاستماع الأول التقط {хо́чешь} كل مرة، وشيئين: {со́лнце} (الشمس) و{ла́мпа} (المصباح).</p>`}},
+         ar:`<p>من أشهر أغاني زيمفيرا، من عام 2000. كل سطر تقريبًا عرض يبدأ بالكلمة نفسها، {хо́чешь}: هل تريدين…؟ بعض العروض رقيق وبعضها جامح.</p>
+<p>في الاستماع الأول التقط⟦ي|⟧ {хо́чешь} كل مرة، وشيئين: {со́лнце} (الشمس) و{ла́мпа} (المصباح).</p>`}},
   {id:"who", en:"Who is Zemfira", ar:"من هي زيمفيرا",
    body:{en:`<p>Zemfira Ramazanova comes from Ufa and broke through in the late 1990s. She writes, arranges and produces her own music, and she is one of the most influential voices in Russian-language rock.</p>`,
          ar:`<p>زيمفيرا رامازانوفا من مدينة أوفا، واشتهرت في أواخر التسعينيات. تكتب موسيقاها وتوزّعها وتنتجها بنفسها، وهي من أكثر الأصوات تأثيرًا في موسيقى الروك باللغة الروسية.</p>`}}
  ],
  lessons:[
-  {en:"Do you want…?", ar:"هل تريد…؟",
+  {en:"Do you want…?", ar:"هل تريدين…؟",
    body:{en:`<ul><li>{хочу́ → хо́чешь}: “want” is irregular, worth knowing by heart: {хочу́, хо́чешь, хо́чет, хоти́м, хоти́те, хотя́т}.</li>
 <li>A question needs no extra word, only a rising voice on the key word: {Хо́чешь ко́фе?}</li>
 <li>{вме́сто} = instead of: {чай вме́сто ко́фе}.</li>
 <li>{око́шко} is a small, dear {окно́}: {-шко} makes things small and warm.</li>
 <li>{живи́} = live! Asking a friend ends in {-и}, like {обними́} in «Кофеви́но».</li></ul>`,
          ar:`<ul><li>{хочу́ ← хо́чешь}: فعل «يريد» شاذّ، يستحق الحفظ: {хочу́, хо́чешь, хо́чет, хоти́м, хоти́те, хотя́т}.</li>
-<li>السؤال لا يحتاج إلى كلمة إضافية، فقط رفع الصوت على الكلمة المهمّة: {Хо́чешь ко́фе?} هل تريد قهوة؟</li>
+<li>السؤال لا يحتاج إلى كلمة إضافية، فقط رفع الصوت على الكلمة المهمّة: {Хо́чешь ко́фе?} هل تريدين قهوة؟</li>
 <li>{вме́сто} = بدلًا من: {чай вме́сто ко́фе} شاي بدل القهوة.</li>
 <li>{око́шко} نافذة صغيرة عزيزة من {окно́}: {-шко} تصغّر الشيء وتحبّبه.</li>
-<li>{живи́} = عِشْ! الطلب من صديق ينتهي بـ {-и}، مثل {обними́} في «Кофеви́но».</li></ul>`},
+<li>{живи́} = عيشي! الطلب من صديق ينتهي بـ {-и}، مثل {обними́} في «Кофеви́но».</li></ul>`},
    bridge:{en:`{око́шко} works like the Arabic diminutive: <ar>كتاب ← كُتيّب</ar>, <ar>بيت ← بُيَيت</ar>. Arabic changes the inside of the word; Russian adds an ending.`,
            ar:`{око́шко} مثل التصغير في العربية: <ar>كتاب ← كُتيّب</ar>، <ar>بيت ← بُيَيت</ar>. العربية تغيّر داخل الكلمة، والروسية تضيف نهاية.`},
    words:["хо́чешь","хочу́","со́лнце","ла́мпа","вме́сто","око́шко","живи́","сосе́д"],
@@ -1814,11 +1832,11 @@ songs: [
    body:{en:`<p>This is the title song of Zemfira's sixth album, released in February 2013, and the first song on it. The black-and-white video was directed by her long-time collaborator, the film-maker Renata Litvinova.</p>
 <p>The song is about living inside another person's thoughts. It sounds calm, but the feelings in it are strong, and not all of them are gentle. On the first listen, don't try to follow every word. Catch three: {жить}, {голове́}, {тебя́}.</p>`,
          ar:`<p>هذه هي الأغنية التي يحمل اسمَها الألبومُ السادس لزيمفيرا، الصادر في فبراير 2013، وهي أولى أغانيه. أخرجت الفيديو بالأبيض والأسود شريكتها الفنية منذ سنوات، المخرجة ريناتا ليتفينوفا.</p>
-<p>الأغنية عن العيش داخل أفكار شخص آخر. تبدو هادئة، لكن مشاعرها قوية، وليست كلها لطيفة. في الاستماع الأول لا تحاول أن تتابع كل كلمة. التقط ثلاثًا فقط: {жить}، {голове́}، {тебя́}.</p>`}},
+<p>الأغنية عن العيش داخل أفكار شخص آخر. تبدو هادئة، لكن مشاعرها قوية، وليست كلها لطيفة. في الاستماع الأول لا تحاول⟦ي|⟧ أن تتابع⟦ي|⟧ كل كلمة. التقط⟦ي|⟧ ثلاثًا فقط: {жить}، {голове́}، {тебя́}.</p>`}},
   {id:"who", en:"Who is Zemfira", ar:"من هي زيمفيرا",
    body:{en:`<p>Zemfira Ramazanova comes from Ufa and broke through in the late 1990s. She writes, arranges and produces her own music, and she is one of the most influential voices in Russian-language rock.</p>`,
          ar:`<p>زيمفيرا رامازانوفا من مدينة أوفا، واشتهرت في أواخر التسعينيات. تكتب موسيقاها وتوزّعها وتنتجها بنفسها، وهي من أكثر الأصوات تأثيرًا في موسيقى الروك باللغة الروسية.</p>`}},
-  {id:"sounds", en:"Sounds to listen for", ar:"أصوات انتبه لها",
+  {id:"sounds", en:"Sounds to listen for", ar:"أصوات انتبه⟦ي|⟧ لها",
    body:{en:`<ul><li>The {ж} of {жить} is the <ar>ج</ar> of Levantine and Maghrebi Arabic, as in <ar>جميل</ar>.</li>
 <li>Only a stressed {о} sounds like о. In {голова́} the first two sound like а.</li>
 <li>{ь} has no sound of its own. It makes the т at the end of {жить} soft and light.</li>
@@ -1826,7 +1844,7 @@ songs: [
          ar:`<ul><li>حرف {ж} في {жить} هو <ar>ج</ar> كما تُنطق في الشام والمغرب، مثل <ar>جميل</ar>.</li>
 <li>الـ {о} المنبورة وحدها تُنطق о. في {голова́} تُنطق الأوليان مثل а.</li>
 <li>{ь} لا صوت لها. هي تجعل الـ т في آخر {жить} رقيقة وخفيفة.</li>
-<li>الـ {л} الصلبة هي اللام المفخّمة في <ar>الله</ar>، والـ {ль} الليّنة هي اللام المرقّقة في <ar>ليل</ar>. تسمعهما في {люби́ть} و{голова́}.</li></ul>`}}
+<li>الـ {л} الصلبة هي اللام المفخّمة في <ar>الله</ar>، والـ {ль} الليّنة هي اللام المرقّقة في <ar>ليل</ar>. تسمع⟦ين|⟧هما في {люби́ть} و{голова́}.</li></ul>`}}
  ],
  lessons:[
   {en:"From the title", ar:"من العنوان",
@@ -1838,8 +1856,8 @@ songs: [
          ar:`<p>{Жить в твое́й голове́} تعني «أن أعيش في رأسك». في العنوان ثلاث قطع بناء:</p>
 <ul><li>{жить} صيغة المصدر، تنتهي بـ {-ть}: «أن يعيش». وبعد {хочу́} تبقى كما هي: {Я хочу́ жить в Бо́стоне.} أريد أن أسكن في بوسطن.</li>
 <li>{голова́ → в голове́}: بعد {в} تأخذ كلمة المكان نهاية المكان {-е}.</li>
-<li>{твоя́ → твое́й}: كلمة «ـكَ» تأخذ نهاية المكان أيضًا إذا كانت الكلمة بعد {в} مؤنثة. احفظ {в твое́й} و{в мое́й} كاملتين الآن.</li></ul>
-<p>{тебя́} هي «ـكَ» مفعولًا به: {Я люблю́ тебя́.} أحبّك. والترتيب حرّ: {Я тебя́ люблю́} بالمعنى نفسه.</p>`},
+<li>{твоя́ → твое́й}: كلمة «ـكِ / ـكَ» تأخذ نهاية المكان أيضًا إذا كانت الكلمة بعد {в} مؤنثة. احفظ⟦ي|⟧ {в твое́й} و{в мое́й} كاملتين الآن.</li></ul>
+<p>{тебя́} هي «ـكِ / ـكَ» مفعولًا به: {Я люблю́ тебя́.} أحبّك. والترتيب حرّ: {Я тебя́ люблю́} بالمعنى نفسه.</p>`},
    bridge:{en:`After <ar>في</ar> Arabic changes the ending too: <ar>في الرأسِ</ar>. And <ar>أحبّك</ar> glues “you” to the verb, where Russian keeps it as its own word, {тебя́}.`,
            ar:`بعد <ar>في</ar> تتغيّر النهاية في العربية أيضًا: <ar>في الرأسِ</ar>. و<ar>أحبّك</ar> تلصق الضمير بالفعل، أمّا الروسية فتجعله كلمة مستقلّة: {тебя́}.`},
    words:["жить","голова́","ты","тебя́","твой","люби́ть","и"],
@@ -1866,7 +1884,7 @@ songs: [
          ar:`<p>كلمات يومية للأغاني القادمة، في جمل عن مدينة وغرفة ومسافة بعيدة:</p>
 <ul><li>{го́род → города́}: في الجمع يقفز النبر إلى الآخر.</li>
 <li>{ого́нь} نار، و{огни́} أضواء، مثل أضواء المدينة في الليل.</li>
-<li>{Ме́жду на́ми} = بيننا. احفظها كاملة.</li>
+<li>{Ме́жду на́ми} = بيننا. احفظ⟦ي|⟧ها كاملة.</li>
 <li>{не́бо} كلمة محايدة، لذلك «واحدة» هي {одно́}: {Не́бо одно́.} السماء واحدة.</li></ul>`},
    words:["океа́н","го́род","города́","любо́вь","ко́мната","не́бо","ого́нь","огни́","вино́"],
    phrases:["Ме́жду на́ми океа́н.","Я живу́ в го́роде Бо́стон, а ты в Эр-Рия́де.","Моя́ любо́вь живёт в Эр-Рия́де.","В мое́й ко́мнате ко́фе и вино́.","Не́бо в Бо́стоне и в Эр-Рия́де одно́.","Огни́ в го́роде, а я в ко́мнате."]}
@@ -1881,7 +1899,7 @@ songs: [
    body:{en:`<p>The last song on Monetochka's 2024 album «Моли́твы. Анекдо́ты. То́сты.» Somewhere above the roofs, a full plane flies between four cities. Reviewers heard it as a hopeful picture of a time when people travel freely again.</p>
 <p>The verses are fast and full of words; don't chase them. The chorus comes back three times: listen for the four cities, {Москва́}, {Пари́ж}, {Ки́ев}, {Петербу́рг}, and for who is on board.</p>`,
          ar:`<p>آخر أغنية في ألبوم مونيتوتشكا لعام 2024 «Моли́твы. Анекдо́ты. То́сты.». في مكانٍ ما فوق السطوح تطير طائرة ممتلئة بين أربع مدن. رأى النقّاد فيها صورة متفائلة لزمن يسافر فيه الناس بحرية من جديد.</p>
-<p>المقاطع سريعة ومليئة بالكلمات، فلا تلاحقها. اللازمة تعود ثلاث مرات: استمع للمدن الأربع، {Москва́} و{Пари́ж} و{Ки́ев} و{Петербу́рг}، ولمن في الطائرة.</p>`}},
+<p>المقاطع سريعة ومليئة بالكلمات، فلا تلاحق⟦ي|⟧ها. اللازمة تعود ثلاث مرات: استمع⟦ي|⟧ للمدن الأربع، {Москва́} و{Пари́ж} و{Ки́ев} و{Петербу́рг}، ولمن في الطائرة.</p>`}},
   {id:"who", en:"Who is Monetochka", ar:"من هي مونيتوتشكا",
    body:{en:`<p>Liza Monetochka, from Yekaterinburg, became famous in 2017–2018 with witty, ironic songs about growing up. After speaking out against the war in Ukraine she left Russia; she now lives in Lithuania.</p>`,
          ar:`<p>ليزا مونيتوتشكا من مدينة يكاترينبورغ، اشتهرت في 2017–2018 بأغانٍ ذكية وساخرة عن الكبر. بعد أن عارضت الحرب في أوكرانيا غادرت روسيا، وتعيش الآن في ليتوانيا.</p>`}}
@@ -1892,7 +1910,7 @@ songs: [
 <li>{где́-то} = somewhere. {-то} turns a question word into “some-”.</li>
 <li>{рейс} = a flight, {самолёт} = a plane, {звук} = sound.</li>
 <li>{Рейс Москва́ — Пари́ж.}: on tickets and boards the dash means “to”.</li></ul>`,
-         ar:`<ul><li>{вы́ше крыш} = أعلى من السطوح. بعد {вы́ше} (أعلى) يأخذ ما نقارن به صيغة «مِن»: {кры́ша → крыш}. احفظها كاملة.</li>
+         ar:`<ul><li>{вы́ше крыш} = أعلى من السطوح. بعد {вы́ше} (أعلى) يأخذ ما نقارن به صيغة «مِن»: {кры́ша → крыш}. احفظ⟦ي|⟧ها كاملة.</li>
 <li>{где́-то} = في مكانٍ ما. {-то} تجعل كلمة السؤال «ما»: أين ← في مكانٍ ما.</li>
 <li>{рейс} = رحلة جوية، {самолёт} = طائرة، {звук} = صوت.</li>
 <li>{Рейс Москва́ — Пари́ж.}: على التذاكر واللوحات تعني الشَّرطة «إلى».</li></ul>`},

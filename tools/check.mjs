@@ -5,9 +5,27 @@ import vm from "node:vm";
 
 const ctx = { window: {} };
 vm.runInNewContext(readFileSync(new URL("../course.js", import.meta.url), "utf8"), ctx);
-const C = ctx.window.COURSE;
+const RAW = ctx.window.COURSE;
 const errors = [];
-const err = (where, msg) => errors.push(`${where}: ${msg}`);
+const err = (where, msg) => { const e = `${where}: ${msg}`; if (!errors.includes(e)) errors.push(e); };
+
+// Gendered text: ⟦feminine|masculine⟧. Every check runs on both versions.
+const GM = /⟦([^|⟧]*)\|([^⟧]*)⟧/g;
+const resolve = (v, g) => typeof v === "string" ? v.replace(GM, g === "m" ? "$2" : "$1")
+  : Array.isArray(v) ? v.map(x => resolve(x, g)) : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, resolve(x, g)])) : v;
+const rawText = JSON.stringify(RAW);
+if ((rawText.match(/⟦/g) || []).length !== (rawText.match(GM) || []).length || (rawText.match(/⟧/g) || []).length !== (rawText.match(GM) || []).length)
+  err("gender markers", "every ⟦ needs the form ⟦feminine|masculine⟧");
+// Arabic that talks to the learner must use the feminine-default markers (masculine-only commands creep back in new lessons)
+const MASC = /(^|[\s«(،:.])((?:و|ف)?(?:اضغط|انسخ|الصق|افتح|اكتب|استمع|احفظ|تدرّب|انتبه|استخدم|تذكّر|انظر|التقط|اسأل|اقرأ|أضف|خذ|احذف))(?=[\s»).،:!؟]|$)/;
+const scanAr = (v, where) => { if (typeof v === "string") { const m = v.match(MASC); if (m) err(where, `Arabic “${m[2]}” addresses the learner as a man only: write it with a marker, e.g. ${m[2]}⟦ي|⟧`); }
+  else if (Array.isArray(v)) v.forEach((x, i) => scanAr(x, where)); else if (v && typeof v === "object") for (const k in v) scanAr(v[k], where); };
+RAW.principles.forEach(p => scanAr([p.ar, p.can?.ar, p.body?.ar, p.bridge?.ar, ...(p.parts || []).map(x => [x.ar, x.body?.ar])], `principle ${p.id}`));
+(RAW.songs || []).forEach(sg => scanAr([sg.ar, ...(sg.notes || []).map(n => [n.ar, n.body?.ar]), ...(sg.lessons || []).map(l => [l.ar, l.body?.ar, l.bridge?.ar])], `song ${sg.id}`));
+(RAW.facts || []).forEach((f, i) => scanAr(f.ar, `fact ${i + 1}`));
+const unknown = new Map();
+
+for (const C of [resolve(RAW, "f"), resolve(RAW, "m")]) {
 
 const VOW = /[аеиоуыэюяё]/gi;
 const plain = s => s.replace(/́/g, "");
@@ -141,11 +159,12 @@ C.words.forEach(w => plain(w[0]).split(/\s+/).forEach(addT));
 (C.verbs || []).forEach(v => [v[0], ...v.slice(3, 9)].forEach(addT));
 C.principles.forEach(p => (p.items || []).forEach(x => (p.drill === "form" ? [x[0], x[2]] : [x[0]]).forEach(t => plain(t).split(/[\s.,!?…]+/).forEach(addT))));
 ["мой","моя","моё","мои","твой","твоя","твоё","твои","этот","эта","это","эти","его","её","их","меня","тебя","нас","вас","мне","тебе","ему","ей","нам","вам","им","у","в","во","на","не","с","к","по","до","что","нет"].forEach(addT);
-const unknown = new Map();
 const scan = (t, where) => plain(t).split(/[\s.,!?«»"“”:;…—–]+/).filter(Boolean).forEach(tok => { const k = tok.toLowerCase(); if (!taught.has(k) && !/^[А-ЯЁA-Z]/.test(tok)) unknown.set(k, where); });
 (C.readings || []).forEach(r => r.lines.forEach(l => scan(l[0], `reading ${r.id}`)));
 C.phrases.forEach(p => scan(p[0], "phrase"));
+}
 if (unknown.size && process.argv.includes("--words")) console.log("Not yet taught as a word or form:\n" + [...unknown].map(([k, w]) => `  ${k}  (${w})`).join("\n"));
 
 if (errors.length) { console.error(errors.join("\n")); console.error(`\n${errors.length} problem(s).`); process.exit(1); }
+const C = RAW;
 console.log(`OK · ${C.topics.length} topics · ${C.principles.length} principles · ${C.words.length} words · ${C.phrases.length} phrases · ${C.readings.length} readings · ${(C.songs || []).length} songs`);
