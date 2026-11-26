@@ -47,7 +47,7 @@ header.top{position:sticky;top:0;z-index:10;background:var(--bg);padding:calc(10
 .lang button{border:0;background:none;padding:6px 12px;font-size:14px;min-width:44px;min-height:36px}
 .lang button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px))}
-nav.tabs button{flex:1;max-width:136px;border:0;background:none;padding:8px 2px;font-size:13px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:52px}
+nav.tabs button{flex:1;min-width:0;max-width:120px;border:0;background:none;padding:8px 1px;font-size:12px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:52px}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current=page]{color:var(--accent);font-weight:600}
 h1{font:700 22px/1.25 var(--f-display);margin:18px 0 4px}
@@ -158,6 +158,9 @@ textarea{width:100%;min-height:120px;border-radius:12px;border:1px solid var(--l
 .fbrow small{color:var(--mute)}
 .fbrow .x{width:36px;height:36px}
 .fb-list>summary{cursor:pointer;color:var(--accent);font-weight:500;padding:4px 0}
+.vid{position:relative;aspect-ratio:16/9;width:100%;max-width:100%;border-radius:12px;overflow:hidden;background:#000}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.kn{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:4px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 </style>
@@ -176,6 +179,7 @@ textarea{width:100%;min-height:120px;border-radius:12px;border:1px solid var(--l
 <script>
 /* Koren · Copyright © 2026 natmartem · SPDX-License-Identifier: AGPL-3.0-or-later
    localStorage "koren-state": progress and settings. "koren-packs": lessons added in the app.
+   "koren-lyrics": song lyrics the learner pasted (never in the repo: copyright).
    IndexedDB "koren" → "audio", "audio2": recordings imported on this phone. */
 "use strict";
 const $=s=>document.querySelector(s);
@@ -193,6 +197,10 @@ try{const raw=localStorage.getItem("koren-state");if(raw){const o=JSON.parse(raw
 try{localStorage.setItem("koren-probe","1");localStorage.removeItem("koren-probe")}catch(e){storageOK=false}
 const save=()=>{try{localStorage.setItem("koren-state",JSON.stringify(S))}catch(e){storageOK=false}};
 const T=(en,ar)=>S.lang==="ar"?ar:en;
+/* song lyrics: pasted by the learner, kept on this phone only */
+let LYR={};
+try{const o=JSON.parse(localStorage.getItem("koren-lyrics")||"{}");if(o&&typeof o==="object"&&!Array.isArray(o))LYR=o}catch(e){}
+const saveLyr=()=>{try{localStorage.setItem("koren-lyrics",JSON.stringify(LYR));return true}catch(e){return false}};
 
 /* ================= course, with lesson packs merged in ================= */
 const BASE=window.COURSE||{topics:[],principles:[],words:[],phrases:[],readings:[],facts:[]};
@@ -202,6 +210,7 @@ const savePacks=()=>{try{localStorage.setItem("koren-packs",JSON.stringify(PACKS
 let TOP=[],PR=[],WORDS=[],PHRASES=[],READS=[],FACTS=[],ITEMS={},PITEMS={},TOPm={},PRm={};
 /* combination tables (from course.js) and lookups built from them */
 let N=[],ADJ=[],VERBS=[],FORMIDX=new Map(),BASEIDX={},STEPS=[],STEPm={};
+let SONGS=[],SONGm={},LEX=new Map();
 const POSS={m:"мой",f:"моя́",n:"моё",pl:"мои́"},TPOSS={m:"твой",f:"твоя́",n:"твоё",pl:"твои́"},DEM={m:"э́тот",f:"э́та",n:"э́то",pl:"э́ти"};
 const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
 const prepOf=w=>w.split(" ")[0],nounOf=w=>w.split(" ").slice(1).join(" ");
@@ -209,13 +218,15 @@ const clean=t=>t.replace(/[.,!?«»"“”:;…()]/g,"");
 const wkey=ru=>"W:"+plain(ru).toLowerCase();
 const pkey=ru=>"P:"+plain(ru);
 function build(){
-  const c={topics:[...BASE.topics],principles:[...BASE.principles],words:[...BASE.words],phrases:[...BASE.phrases],readings:[...(BASE.readings||[])],facts:[...(BASE.facts||[])],nouns:[...(BASE.nouns||[])],adjs:[...(BASE.adjs||[])],verbs:[...(BASE.verbs||[])]};
+  const c={topics:[...BASE.topics],principles:[...BASE.principles],words:[...BASE.words],phrases:[...BASE.phrases],readings:[...(BASE.readings||[])],facts:[...(BASE.facts||[])],songs:[...(BASE.songs||[])],nouns:[...(BASE.nouns||[])],adjs:[...(BASE.adjs||[])],verbs:[...(BASE.verbs||[])]};
   PACKS.forEach(p=>{
     (p.topics||[]).forEach(t=>{const i=c.topics.findIndex(x=>x.id===t.id);if(i<0)c.topics.push(t);else c.topics[i]=Object.assign({},c.topics[i],t)});
     (p.principles||[]).forEach(t=>{const i=c.principles.findIndex(x=>x.id===t.id);if(i<0)c.principles.push(t);else c.principles[i]=Object.assign({},c.principles[i],t)});
     ["words","phrases","readings","facts","nouns","adjs","verbs"].forEach(k=>{(p[k]||[]).forEach(x=>c[k].push(x))});
+    (p.songs||[]).forEach(x=>{const i=c.songs.findIndex(y=>y.id===x.id);if(i<0)c.songs.push(x);else c.songs[i]=x});
   });
   TOP=c.topics;PR=c.principles;READS=c.readings;FACTS=c.facts;TOPm={};PRm={};ITEMS={};PITEMS={};
+  SONGS=c.songs.filter(x=>x&&x.id&&Array.isArray(x.lessons));SONGm={};SONGS.forEach(x=>SONGm[x.id]=x);
   TOP.forEach(t=>TOPm[t.id]=t);PR.forEach(p=>PRm[p.id]=p);
   const mk=(a,kind)=>{const key=kind==="w"?wkey(a[0]):pkey(a[0]);
     if(ITEMS[key]){const o=ITEMS[key];(a[4]||"").split(/\s+/).filter(x=>x&&PRm[x.split(":")[0]]).forEach(x=>{if(!o.ps.includes(x))o.ps.push(x)});return null}
@@ -234,14 +245,23 @@ function build(){
   /* reading lines are items too, so they come back for review */
   READS.forEach(r=>(r.lines||[]).forEach(l=>{const key="L:"+plain(l[0]);if(!ITEMS[key])ITEMS[key]={key,akey:"S:"+plain(l[0]),kind:"l",ru:l[0],en:l[1],ar:l[2],topic:r.topic,ps:[],read:r.id}}));
   generate(c);
+  buildLex();
   buildPath();
+}
+/* words from songs: their topic is off the path; they count once learned in a song */
+const isSongWord=it=>!!(it&&TOPm[it.topic]&&TOPm[it.topic].song);
+/* every form the course knows → the word keys it belongs to, to mark known words in pasted lyrics */
+function buildLex(){
+  LEX=new Map();const add=(f,k)=>{const n=norm(f);if(!n||n.includes(" "))return;const a=LEX.get(n);if(!a)LEX.set(n,[k]);else if(!a.includes(k))a.push(k)};
+  WORDS.forEach(w=>add(w.ru,w.key));
+  new Set(FORMIDX.values()).forEach(set=>{const ks=set.map(wkey).filter(k=>ITEMS[k]);if(ks.length)set.forEach(f=>ks.forEach(k=>add(f,k)))});
 }
 /* ================= combinations: vocabulary × principles =================
    Every noun, adjective and verb in the tables is put through every principle it fits,
    so each card gets many sentences built from the learner's own topics. Wrong options are
    always the same word in other forms. */
 function generate(c){
-  N=(c.nouns||[]).map(a=>({nom:a[0],en:a[1],ar:a[2],g:a[3],cat:a[4],where:a[5]||"",acc:a[6]||"",gen:a[7]||"",dat:a[8]||"",gpl:a[9]||""}));
+  N=(c.nouns||[]).map(a=>({nom:a[0],en:a[1],ar:a[2],g:a[3],cat:a[4],where:a[5]||"",acc:a[6]||"",gen:a[7]||"",dat:a[8]||"",gpl:a[9]||"",song:isSongWord(ITEMS[wkey(a[0])])}));
   ADJ=(c.adjs||[]).map(a=>({f:{m:a[0],f:a[1],n:a[2],pl:a[3]},en:a[4],ar:a[5],cats:a[6]||""}));
   VERBS=(c.verbs||[]).map(a=>({inf:a[0],en:a[1],ar:a[2],forms:a.slice(3,9),compl:String(a[9]||"").split("|").filter(Boolean)}));
   FORMIDX=new Map();BASEIDX={};
@@ -262,7 +282,7 @@ function generate(c){
       en:meaning?meaning.en:base?base.nom+" — "+base.en:"",ar:meaning?meaning.ar:base?base.nom+" — "+base.ar:""};
     PITEMS[key]=o;PRm[pid].list.push(o);if(o.base){const k=wkey(o.base);(BASEIDX[k]=BASEIDX[k]||[]).push(o)}
   };
-  const things=N.filter(n=>(n.cat==="F"||n.cat==="C")&&n.g!=="pl").map(n=>n.nom);
+  const things=N.filter(n=>(n.cat==="F"||n.cat==="C")&&n.g!=="pl"&&!n.song).map(n=>n.nom); /* never put a song word into someone else's sentence */
   const WF={L:["Я сейча́с …","Мы …","Ма́ма …","Брат …"],C:["Я живу́ …","Сестра́ живёт …","Мы сейча́с …"],V:["Я сейча́с …","Мы …"],T:["Ключ …","Кот …","Телефо́н …","Кни́га …"],M:["Мой день рожде́ния …","Мы отдыха́ем …","… хо́лодно."]};
   const AF={P:["Я ви́жу …","Я люблю́ …","Я жду …","Я зна́ю …"],T:["Я ви́жу …","Я хочу́ …"],F:["Я люблю́ …"],L:["Я ви́жу …","Я люблю́ …"],C:["Я люблю́ …","Я зна́ю …"],V:["Я ви́жу …","Я жду …"]};
   const DF=["Я рабо́таю …","Мы отдыха́ем …","У меня́ уро́к …"];
@@ -325,7 +345,7 @@ function generate(c){
       const o={pid:"stress",part:"",tag:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
 }
 build();
-const APP_VERSION="1.2";
+const APP_VERSION="1.3";
 
 /* ================= feedback notes (localStorage "koren-feedback") =================
    A note box under each drill question, drill result, topic, principle and reading.
@@ -446,17 +466,18 @@ function dueKeys(){const d=today();return Object.keys(S.srs).filter(k=>S.srs[k].
    A step is done when its lesson is finished. Practice only ever reviews what the path has taught. */
 function buildPath(){
   STEPS=[];STEPm={};const order=[...(BASE.path||[])];
-  TOP.forEach(t=>{if(!order.includes("t:"+t.id))order.push("t:"+t.id)});
+  TOP.forEach(t=>{if(!t.song&&!order.includes("t:"+t.id))order.push("t:"+t.id)});
   PR.forEach(x=>{if(!order.includes("p:"+x.id))order.push("p:"+x.id);(x.parts||[]).forEach(pt=>{if(!order.includes(`p:${x.id}:${pt.id}`))order.push(`p:${x.id}:${pt.id}`)})});
   READS.forEach(r=>{if(!order.includes("r:"+r.id))order.push("r:"+r.id)});
   order.forEach(st=>{const [k,id,part]=st.split(":");
-    if(k==="t"&&TOPm[id]){const ws=WORDS.filter(w=>w.topic===id);if(!ws.length)return;const n=Math.ceil(ws.length/7),size=Math.ceil(ws.length/n);
+    if(k==="t"&&TOPm[id]&&!TOPm[id].song){const ws=WORDS.filter(w=>w.topic===id);if(!ws.length)return;const n=Math.ceil(ws.length/7),size=Math.ceil(ws.length/n);
       for(let i=0;i<n;i++)STEPS.push({id:`t:${id}:${i+1}`,k:"t",topic:id,words:ws.slice(i*size,(i+1)*size),part:i+1,parts:n,phrases:[]})}
     else if(k==="p"&&PRm[id]&&(!part||(PRm[id].parts||[]).some(pt=>pt.id===part)))STEPS.push({id:"p:"+id+(part?":"+part:""),k:"p",pid:id,part:part||"",phrases:[]});
     else if(k==="r"&&READS.some(r=>r.id===id))STEPS.push({id:"r:"+id,k:"r",rid:id,phrases:[]});
   });
   STEPS.forEach((x,i)=>{x.i=i;STEPm[x.id]=x});
-  PHRASES.forEach(ph=>{let idx=STEPS.findIndex(x=>x.topic===ph.topic);
+  PHRASES.forEach(ph=>{if(TOPm[ph.topic]&&TOPm[ph.topic].song)return; /* song sentences live on their song page */
+    let idx=STEPS.findIndex(x=>x.topic===ph.topic);
     ph.ps.forEach(tag=>{let j=STEPS.findIndex(x=>x.id==="p:"+tag);if(j<0)j=STEPS.findIndex(x=>x.id==="p:"+tag.split(":")[0]);if(j>idx)idx=j});
     if(idx>=0)STEPS[idx].phrases.push(ph)});
 }
@@ -487,7 +508,7 @@ function lessonQs(x){
   if(x.k==="p"){q.push({t:"card",pid:x.pid,part:x.part});q.push(...principleQs(x.pid,8,x.part))}
   else if(x.k==="r"){q.push({t:"text",rid:x.rid});q.push(...readingQs(x.rid))}
   else{
-    const set=x.words;set.forEach(w=>q.push({t:"intro",it:w}));
+    const set=x.words;set.filter(w=>!seenOrDrilled(w)).forEach(w=>q.push({t:"intro",it:w})); /* already learned (in a song, say): no new-word card, just practice */
     shuffle(set).forEach(w=>q.push(wordQ(w,"pm")));
     shuffle(set).slice(0,4).forEach(w=>q.push(wordQ(w,canPlay(w.key)&&Math.random()<.5?"lp":"pr")));
     shuffle(set).slice(0,2).forEach(w=>q.push(wordQ(w,"ty")));
@@ -513,6 +534,7 @@ function poolOf(f){
   let lines=Object.values(ITEMS).filter(x=>x.kind==="l"&&(S.read[x.read]||S.done["r:"+x.read]));
   let pr=PR.filter(x=>unlocked(x.id)).flatMap(x=>x.list.filter(y=>met(y)&&unlocked(y.tag||x.id)));
   if(f.pid){items=items.filter(x=>x.ps.includes(f.pid));lines=[];pr=pr.filter(x=>x.pid===f.pid)}
+  if(f.song){const ks=new Set(SONGm[f.song]?songItems(SONGm[f.song]).map(x=>x.key):[]);items=items.filter(x=>ks.has(x.key));lines=[];pr=pr.filter(x=>x.base&&ks.has(wkey(x.base)))}
   if(f.topic){items=items.filter(x=>x.topic===f.topic);lines=lines.filter(x=>x.topic===f.topic);pr=pr.filter(x=>x.base&&ITEMS[wkey(x.base)]&&ITEMS[wkey(x.base)].topic===f.topic)}
   return {items,lines,pr,size:items.length+lines.length+pr.length};
 }
@@ -526,6 +548,8 @@ function practiceQs(f,n){
   if(q.length<n){[...P.items,...P.pr,...P.lines].filter(x=>!used.has(x.key)).sort(()=>Math.random()-.5).slice(0,n-q.length).forEach(x=>{const z=x.pid?principleQ(x,null):itemQ(x);if(z)q.push(z)})}
   return shuffle(q).slice(0,n);
 }
+/* a sentence built on a song word waits until that word is learned in its song */
+function songLocked(x){const k=x.base?wkey(x.base):x.akey&&x.akey.startsWith("W:")?x.akey:null;if(!k)return false;const it=ITEMS[k];return !!(it&&isSongWord(it)&&!seenOrDrilled(it))}
 const nextPrinciple=()=>{const x=STEPS.find(y=>y.k==="p"&&!stepDone(y));return x?PRm[x.pid]:null};
 
 /* ================= text helpers ================= */
@@ -549,9 +573,10 @@ const ICON={
  read:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5c3-1 6-1 9 1 3-2 6-2 9-1v14c-3-1-6-1-9 1-3-2-6-2-9-1z"/><path d="M12 6v14"/></svg>',
  path:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg>',
  practice:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.7-5.7L20 8.6M20 4v4.6h-4.6M20 12a8 8 0 0 1-13.7 5.7L4 15.4M4 20v-4.6h4.6"/></svg>',
+ songs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
  more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>'};
 function renderTabs(cur){
-  const tabs=[["path",T("Path","المسار")],["practice",T("Practice","التدريب")],["topics",T("Topics","المواضيع")],["principles",T("Principles","المبادئ")],["more",T("More","المزيد")]];
+  const tabs=[["path",T("Path","المسار")],["practice",T("Practice","التدريب")],["songs",T("Songs","الأغاني")],["topics",T("Topics","المواضيع")],["principles",T("Principles","المبادئ")],["more",T("More","المزيد")]];
   $("#tabs").innerHTML=tabs.map(([id,n])=>`<button type="button" data-go="#${id}" ${cur===id?'aria-current="page"':""}>${ICON[id]}<span>${n}</span></button>`).join("");
 }
 
@@ -560,12 +585,12 @@ let Q=null; /* the running practice: {list,i,answered,title,back,done:[]} */
 function render(){
   document.documentElement.lang=S.lang==="ar"?"ar":"en";document.documentElement.dir=S.lang==="ar"?"rtl":"ltr";
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===S.lang)));
-  const h=(location.hash||"#path").slice(1),[v,arg]=h.split("/");
+  const h=(location.hash||"#path").slice(1),[v,arg,sub]=h.split("/");
   $("#tabs").hidden=(v==="drill"&&!!Q);
   if(v==="drill"&&Q){
     if(Q.answered&&!Q.finished){Q.answered=false;Q.i++;if(Q.i>=Q.list.length)Q.finished=true} /* back from a card: carry on with the next one */
     return renderQ()}
-  const tab={topic:"topics",p:"principles",r:"topics",read:"topics",today:"path"}[v]||v;renderTabs(tab);
+  const tab={topic:"topics",p:"principles",r:"topics",read:"topics",today:"path",song:"songs"}[v]||v;renderTabs(tab);
   const view=$("#view");
   const back=Q&&!Q.finished?`<button type="button" class="back" data-go="#drill">← ${T("Back to practice","العودة إلى التدريب")}</button>`:"";
   let html="";
@@ -577,8 +602,11 @@ function render(){
   else if(v==="practice")html=vPractice();
   else if(v==="r")html=vReading(arg);
   else if(v==="more")html=vMore();
+  else if(v==="songs")html=vSongs();
+  else if(v==="song"&&SONGm[arg])html=vSong(arg);
   else html=vPath();
   view.innerHTML=back+html;
+  if(sub==="lyrics")setTimeout(()=>{const el=$("#lyrics");if(el)el.scrollIntoView({block:"start"})},60);
 }
 function stepRow(x,cur){
   const d=stepDone(x),isCur=cur&&cur.id===x.id;
@@ -620,7 +648,7 @@ function vTopic(id){
   const fresh=ws.filter(w=>!seenOrDrilled(w)).length;
   return `<a class="back" href="#topics">← ${T("Topics","المواضيع")}</a><h1>${esc(L(t))}</h1>
   <div class="card"><div class="row">
-   ${poolOf({topic:id}).size?`<button type="button" class="btn primary" data-act="practice" data-topic="${esc(id)}">${T("Practise what you've learned here","تدرّب على ما تعلّمته هنا")}</button>`:`<span class="lead">${T("Words here are taught on the path.","تُعلَّم كلمات هذا الموضوع في المسار.")}</span>`}</div>
+   ${poolOf({topic:id}).size?`<button type="button" class="btn primary" data-act="practice" data-topic="${esc(id)}">${T("Practise what you've learned here","تدرّب على ما تعلّمته هنا")}</button>`:t.song?`<span class="lead">${T("These words are taught in Songs.","تُعلَّم هذه الكلمات في الأغاني.")}</span><a class="btn small" href="#songs">${T("Open Songs","افتح الأغاني")}</a>`:`<span class="lead">${T("Words here are taught on the path.","تُعلَّم كلمات هذا الموضوع في المسار.")}</span>`}</div>
    ${ps.length?`<span class="label">${T("Principles you'll meet here","مبادئ ستجدها هنا")}</span>${pchips(ps)}`:""}</div>
   <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning.","اضغط على الكلمة لتسمعها وترى معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
   ${ph.length?`<div class="card"><span class="label">${T("Phrases","العبارات")}</span><div>${ph.map(x=>{const need=x.ps.filter(p=>!unlocked(p));
@@ -662,6 +690,85 @@ function vReading(id){
    <button type="button" class="btn wide" data-act="markread" data-id="${esc(id)}">${S.read[id]?T("Read ✓","مقروء ✓"):T("I've read it","قرأته")}</button></div>
   ${fbBox("r:"+id,()=>({kind:"reading",src:`Reading “${r.en}” (id ${id})`}))}`;
 }
+/* ================= songs =================
+   A song page: video, notes, small lessons from the song's words, and lyrics the learner pastes on this phone. */
+const songWords=s=>[...new Set(s.lessons.flatMap(l=>l.words||[]))].map(r=>ITEMS[wkey(r)]).filter(Boolean);
+const songPhrases=s=>[...new Set(s.lessons.flatMap(l=>l.phrases||[]))].map(r=>ITEMS[pkey(r)]).filter(Boolean);
+const songItems=s=>[...songWords(s),...songPhrases(s)];
+const sdKey=(id,i)=>`s:${id}:${i+1}`;
+const songNext=s=>s.lessons.findIndex((_,i)=>!S.done[sdKey(s.id,i)]);
+function vSongs(){
+  return `<h1>${T("Songs","الأغاني")}</h1>
+  <p class="lead">${T("Watch, learn the song's words in small lessons, then listen again. Words you learn here count as known on your path and come back in Practice.","شاهد، وتعلّم كلمات الأغنية في دروس صغيرة، ثم استمع مرة أخرى. الكلمات التي تتعلّمها هنا تُحسب معروفة في مسارك وتعود في التدريب.")}</p>
+  <div class="card">${SONGS.length?`<div class="list">${SONGS.map(s=>{const ws=songWords(s),n=recognised(ws),d=s.lessons.filter((_,i)=>S.done[sdKey(s.id,i)]).length;
+    return `<a class="li" href="#song/${esc(s.id)}"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s"><span class="ru">${esc(s.by)}</span> · ${T(`${d} of ${s.lessons.length} lessons`,`${d} من ${s.lessons.length} دروس`)}${n?` · ${T(`you recognise ${n} of ${ws.length} words`,`تعرف ${n} من ${ws.length} كلمة`)}`:""}</div>${d?`<div class="meter"><i style="width:${Math.round(d/s.lessons.length*100)}%"></i></div>`:""}</div>${d===s.lessons.length?`<span class="pill good">✓</span>`:""}${CHEV}</a>`}).join("")}</div>`
+   :`<p class="lead">${T("No songs yet.","لا توجد أغانٍ بعد.")}</p>`}</div>`;
+}
+function lyrLines(text){
+  const out=[];
+  String(text||"").split(/\r?\n/).forEach(raw=>{const l=raw.trim();
+    if(/\]\(https?:/i.test(l)||/^you might also like$/i.test(l)||/^\d+\s+contributors?\b/i.test(l))return; /* bits a lyrics site adds */
+    if(!l){if(out.length&&!out[out.length-1].gap)out.push({gap:1});return}
+    if(/^\[[^\]]*\]$/.test(l)){out.push({head:l.slice(1,-1)});return}
+    const m=l.split(/\s*\|\s*|\t+/);out.push({ru:m[0].trim(),tr:m.slice(1).join(" ").trim()})});
+  while(out.length&&out[out.length-1].gap)out.pop();
+  return out;
+}
+const knownTok=tok=>{const a=LEX.get(norm(tok));return !!a&&a.some(k=>S.seen[k]||S.srs[k])};
+const lyrMark=ru=>String(ru).split(/(\s+)/).map(tok=>!tok.trim()?tok:knownTok(tok)?`<span class="kn">${esc(tok)}</span>`:esc(tok)).join("");
+function lyricsCard(s){
+  const id=s.id,txt=LYR[id]||"",lines=lyrLines(txt),hasTr=lines.some(l=>l.tr);
+  const why=`<p class="lead">${T("Lyrics are copyrighted, so Koren doesn't include them. Paste them here for your own study, for example from a site that licenses them. They stay on this phone only: they're never uploaded to GitHub or added to feedback.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها «كورين». الصقها هنا لدراستك الشخصية، مثلًا من موقع مرخّص لها. تبقى على هذا الهاتف فقط: لا تُرفع إلى GitHub ولا تُضاف إلى الملاحظات.")}</p>${s.lyrics?`<a href="${esc(s.lyrics)}" target="_blank" rel="noopener">${T("Lyrics and a translation on LyricsTranslate","الكلمات وترجمتها على LyricsTranslate")}</a>`:""}`;
+  const editor=`<textarea class="fbk-ta" id="lyr-${esc(id)}" rows="8" spellcheck="false" aria-label="${T("Lyrics","كلمات الأغنية")}" placeholder="${esc(T("One line per row. Add your translation after | if you like:\nЖить в твоей голове | To live in your head","سطر في كل صف. أضف ترجمتك بعد | إن أردت:\nЖить в твоей голове | أن أعيش في رأسك"))}">${esc(txt)}</textarea>
+   <div class="row"><button type="button" class="btn small primary" data-act="lyrsave" data-id="${esc(id)}">${T("Save on this phone","احفظ على هذا الهاتف")}</button>${txt?`<button type="button" class="btn small" data-act="lyrrm" data-id="${esc(id)}">${T("Remove lyrics","احذف الكلمات")}</button>`:""}</div><p class="msg" id="lyrmsg" aria-live="polite"></p>`;
+  if(!lines.some(l=>l.ru))return `<div class="card" id="lyrics"><span class="label">${T("Lyrics","كلمات الأغنية")}</span>${why}${editor}</div>`;
+  return `<div class="card reading" id="lyrics"><span class="label">${T("Lyrics","كلمات الأغنية")}</span>
+   <span class="tap-hint">${T("Underlined: words you already know.","تحت الخط: كلمات تعرفها.")} ${hasTr?T("Tap a line to see your translation.","اضغط على السطر لترى ترجمتك."):T("Tap the speaker to hear a line.","اضغط على السمّاعة لتسمع السطر.")}</span>
+   <div>${lines.map(l=>l.head?`<p class="label" style="margin-top:12px">${esc(l.head)}</p>`:l.gap?`<div style="height:10px"></div>`:`<div class="line">${spk("S:"+plain(l.ru),l.ru)}<button type="button" class="reveal" data-reveal><span class="rl ru">${lyrMark(l.ru)}</span>${l.tr?`<span class="m" hidden>${esc(l.tr)}</span>`:""}</button></div>`).join("")}</div>
+   <details class="fbk"><summary>✎ ${T("Edit lyrics","عدّل الكلمات")}</summary><div class="fbk-in">${why}${editor}</div></details></div>`;
+}
+function vSong(id){
+  const s=SONGm[id],ws=songWords(s),ph=songPhrases(s),nx=songNext(s),started=s.lessons.some((_,i)=>S.done[sdKey(id,i)]);
+  const lessonRow=(l,i)=>{const d=!!S.done[sdKey(id,i)],cur=i===nx;
+    return `<button type="button" class="li" data-act="song" data-id="${esc(id)}" data-li="${i}"><span class="pill${d?" good":""}" style="min-width:34px;justify-content:center;${cur?"background:var(--accent);color:var(--accent-ink)":""}">${d?"✓":i+1}</span><div class="grow"><div class="t">${esc(L(l))}</div><div class="s ru">${esc((l.words||[]).slice(0,4).map(plain).join(", "))}${(l.words||[]).length>4?"…":""}</div></div>${CHEV}</button>`};
+  return `<a class="back" href="#songs">← ${T("Songs","الأغاني")}</a>
+  <h1 class="ru">${esc(s.ru)}</h1>
+  <button type="button" class="reveal" data-reveal style="background:none;border:0;padding:0;text-align:start;display:flex;flex-direction:column;gap:2px"><span class="lead"><span class="ru">${esc(s.by)}</span>${s.year?" · "+esc(s.year):""} · <span class="tap-hint">${T("tap for the title's meaning","اضغط لمعنى العنوان")}</span></span><span class="m" hidden style="font-size:17px">${esc(L(s))}</span></button>
+  ${s.video?`<div class="card"><div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(s.video)}" title="${esc(plain(s.ru))}, ${esc(plain(s.by))}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+   <a href="https://www.youtube.com/watch?v=${encodeURIComponent(s.video)}" target="_blank" rel="noopener">${T("If the video doesn't load, open it on YouTube","إذا لم يعمل الفيديو، افتحه على يوتيوب")}</a></div>`:""}
+  ${(s.notes||[]).map(n=>`<div class="card body"><span class="label">${esc(L(n))}</span>${md(L(n.body))}</div>`).join("")}
+  <div class="card"><span class="label">${T("Learn the song's words","تعلّم كلمات الأغنية")}</span>
+   ${nx<0?`<p class="lead">${T("All lessons done. Listen again: you'll recognise much more now.","أنهيت كل الدروس. استمع مرة أخرى: ستعرف أكثر بكثير الآن.")}</p><button type="button" class="btn primary wide" data-act="songpractice" data-id="${esc(id)}">${T("Practise this song","تدرّب على هذه الأغنية")}</button>`
+     :`<button type="button" class="btn primary wide" data-act="song" data-id="${esc(id)}" data-li="${nx}">${started?T("Continue","تابع"):T("Start","ابدأ")}: ${esc(L(s.lessons[nx]))}</button>`}
+   <div class="list">${s.lessons.map(lessonRow).join("")}</div>
+   <p class="count">${T(`You recognise ${recognised(ws)} of ${ws.length} words.`,`تعرف ${recognised(ws)} من ${ws.length} كلمة.`)}</p></div>
+  ${lyricsCard(s)}
+  <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning.","اضغط على الكلمة لتسمعها وترى معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
+  ${ph.length?`<div class="card"><span class="label">${T("Sentences","الجمل")}</span><div>${ph.map(x=>{const need=x.ps.filter(p=>!unlocked(p));
+    return wordRow(x)+(need.length?`<div class="chips" style="margin:-4px 0 6px">${need.map(p=>`<a class="pill root" href="#p/${esc(p.split(":")[0])}">${T("Practised after:","يُتدرَّب عليها بعد:")} ${esc(pname(p))}</a>`).join("")}</div>`:"")}).join("")}</div></div>`:""}
+  ${(s.ps||[]).length?`<div class="card"><span class="label">${T("Grammar in this song","القواعد في هذه الأغنية")}</span><p class="lead">${T("Each card explains one building block the song uses.","كل بطاقة تشرح قطعة بناء واحدة تستخدمها الأغنية.")}</p>${pchips(s.ps)}</div>`:""}
+  ${fbBox("s:"+id,()=>({kind:"song",src:`Song “${plain(s.ru)}” by ${plain(s.by)} (id ${id})`}))}`;
+}
+function songQs(s,li){
+  const l=s.lessons[li],q=[{t:"snote",sid:s.id,li}];
+  const ws=(l.words||[]).map(r=>ITEMS[wkey(r)]).filter(Boolean),ph=(l.phrases||[]).map(r=>ITEMS[pkey(r)]).filter(Boolean);
+  ws.filter(w=>!seenOrDrilled(w)).forEach(w=>q.push({t:"intro",it:w}));
+  shuffle(ws).forEach(w=>q.push(wordQ(w,"pm")));
+  shuffle(ws).slice(0,4).forEach(w=>q.push(wordQ(w,canPlay(w.key)&&Math.random()<.5?"lp":"pr")));
+  shuffle(ws.filter(w=>plain(w.ru).length<=7)).slice(0,2).forEach(w=>q.push(wordQ(w,"ty")));
+  /* sentences only once their grammar cards are done on the path */
+  const ok=ph.filter(ready);
+  ok.filter(x=>!seenOrDrilled(x)).forEach(x=>q.push({t:"intro",it:x}));
+  shuffle(ok).forEach(x=>{const z=gapQ(x)||buildQ(x)||wordQ(x,"pm");if(z)q.push(z)});
+  shuffle(ws.flatMap(w=>BASEIDX[w.key]||[]).filter(y=>unlocked(y.tag))).slice(0,3).forEach(y=>{const z=principleQ(y,null);if(z)q.push(z)});
+  q.push(...reviewQs(2));
+  return q.filter(Boolean);
+}
+function startSong(id,li){
+  const s=SONGm[id];if(!s||!s.lessons[li])return;
+  startQ(songQs(s,li),"song",`Song “${plain(s.ru)}” lesson ${li+1}: ${s.lessons[li].en} (${id}:${li+1})`);
+  if(Q)Q.song={id,li};
+}
 function vMore(){
   const nA=Object.keys(AUD).length;
   return `<h1>${T("More","المزيد")}</h1>
@@ -672,6 +779,9 @@ function vMore(){
    <div class="switch"><span>${T("Play sound automatically","تشغيل الصوت تلقائيًا")}</span><div class="seg"><button type="button" data-act="auto" data-v="1" aria-pressed="${autoOn()}">${T("On","تشغيل")}</button><button type="button" data-act="auto" data-v="0" aria-pressed="${!autoOn()}">${T("Off","إيقاف")}</button></div></div>
    <div class="switch"><span>${T("Phone voice when there's no recording","صوت الهاتف عند غياب التسجيل")}</span><div class="seg"><button type="button" data-act="tts" data-v="1" aria-pressed="${S.tts}">${T("On","تشغيل")}</button><button type="button" data-act="tts" data-v="0" aria-pressed="${!S.tts}">${T("Off","إيقاف")}</button></div></div>
   </div>
+  ${SONGS.length?`<div class="card"><span class="label">${T("Song lyrics","كلمات الأغاني")}</span>
+   <p class="lead">${T("Lyrics are copyrighted, so the app doesn't include them. Add them on each song's page: they stay on this phone only, for your own study.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها التطبيق. أضفها في صفحة كل أغنية: تبقى على هذا الهاتف فقط، لدراستك الشخصية.")}</p>
+   <div class="list">${SONGS.map(s=>`<a class="li" href="#song/${esc(s.id)}/lyrics"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s">${LYR[s.id]?T("Added on this phone","مضافة على هذا الهاتف"):T("Not added yet: tap to add","لم تُضف بعد: اضغط للإضافة")}</div></div>${CHEV}</a>`).join("")}</div></div>`:""}
   <div class="card"><span class="label">${T("Recordings","التسجيلات")}</span>
    <p>${T(`${nA} items have a real voice.`,`${nA} عنصرًا بصوت حقيقي.`)} ${T("A speaker records them on the recorder page, then the file goes into the app's GitHub folder (or import it here to hear it on this phone now).","يسجّلها متحدّث في صفحة التسجيل، ثم يوضع الملف في مجلد التطبيق على GitHub (أو استورده هنا لتسمعه على هذا الهاتف الآن).")}</p>
    <div class="row"><a class="btn small" href="record.html">${T("Recorder, voice 1","صفحة التسجيل، الصوت 1")}</a><a class="btn small" href="record.html?speaker=2">${T("Voice 2","الصوت 2")}</a></div>
@@ -739,7 +849,7 @@ function principleQsFrom(p,list,n){
   const d=today();
   /* prefer sentences built from words the learner has already met */
   const met=x=>{const k=x.base?wkey(x.base):x.gen&&x.akey&&x.akey.startsWith("W:")?x.akey:null;if(!k)return true;const it=ITEMS[k];return !it||!!seenOrDrilled(it)};
-  let pool=list;if(p.drill==="stress"){const known=pool.filter(met);if(known.length>=n)pool=known}
+  let pool=list.filter(x=>!songLocked(x));if(p.drill==="stress"){const known=pool.filter(met);if(known.length>=n)pool=known}
   const ranked=shuffle(pool).sort((a,b)=>{const ra=S.srs[a.key],rb=S.srs[b.key];const sa=(ra?(ra.d<=d?0:2)+ra.b/10:1)+(met(a)?0:1.5),sb=(rb?(rb.d<=d?0:2)+rb.b/10:1)+(met(b)?0:1.5);return sa-sb});
   const pick=ranked.slice(0,n);
   return pick.map((x,i)=>principleQ(x,p.drill==="pattern"?(i<n/2?"pick":i<n*.75?"mean":"type"):p.drill==="form"&&i>=n-2?"type":null)).filter(Boolean);
@@ -813,7 +923,7 @@ function startQ(list,title,src){
 }
 
 /* what a question looked like, in words, for feedback notes */
-const TASK={fty:"Type the missing words",gap:"Fill the gap in a sentence",build:"Build the sentence from tiles",intro:"New word card",pm:"What does it mean?",pr:"Which one is it? (meaning → Russian)",lp:"Listen and pick",ty:"Type it in Russian",lt:"Listen and type",form:"Fill the gap",pat:"Which is the Russian word? (English → Russian)",pmean:"What does it mean? (rule word)",pty:"Use the rule: type it",stress:"Where is the stress?",read:"Read the sign"};
+const TASK={snote:"Song lesson card",fty:"Type the missing words",gap:"Fill the gap in a sentence",build:"Build the sentence from tiles",intro:"New word card",pm:"What does it mean?",pr:"Which one is it? (meaning → Russian)",lp:"Listen and pick",ty:"Type it in Russian",lt:"Listen and type",form:"Fill the gap",pat:"Which is the Russian word? (English → Russian)",pmean:"What does it mean? (rule word)",pty:"Use the rule: type it",stress:"Where is the stress?",read:"Read the sign"};
 function qCtx(i){
   const Qr=Q,q=Q.list[i];
   return ()=>{
@@ -870,6 +980,10 @@ function renderQ(){
   }else if(q.t==="card"){const p=PRm[q.pid];
     body=`<p class="prompt">${T("New principle","مبدأ جديد")} · ${kindName(p.kind)}</p><h1 style="margin:0">${esc(L(p))}</h1><p class="lead">${esc(L(p.can))}</p>
      <div class="card body" style="margin:0">${md(L(p.body))}</div>${p.bridge?`<div class="card bridge body" style="margin:0"><span class="label">${T("From what you already know","ممّا تعرفه أصلًا")}</span><p>${md(L(p.bridge))}</p></div>`:""}
+     <button type="button" class="btn primary wide" data-act="next">${T("Got it, let's practise","فهمت، لنتدرّب")}</button>`;
+  }else if(q.t==="snote"){const s=SONGm[q.sid],l=s.lessons[q.li];
+    body=`<p class="prompt">${T("Song","أغنية")} · <span class="ru">${esc(s.ru)}</span> · ${T(`lesson ${q.li+1} of ${s.lessons.length}`,`الدرس ${q.li+1} من ${s.lessons.length}`)}</p><h1 style="margin:0">${esc(L(l))}</h1>
+     <div class="card body" style="margin:0">${md(L(l.body))}</div>${l.bridge?`<div class="card bridge body" style="margin:0"><span class="label">${T("From what you already know","ممّا تعرفه أصلًا")}</span><p>${md(L(l.bridge))}</p></div>`:""}
      <button type="button" class="btn primary wide" data-act="next">${T("Got it, let's practise","فهمت، لنتدرّب")}</button>`;
   }else if(q.t==="intro"){const it=q.it;S.seen[it.key]=1;save();
     body=`<p class="prompt">${T("New word","كلمة جديدة")} · ${esc(tname(it.topic))}</p><div class="big ru">${esc(it.ru)}</div><div class="center">${spk(it.akey||it.key,it.ru,true)}</div>
@@ -952,13 +1066,17 @@ function nextQ(){
 function renderEnd(){
   if(Q.title==="reading"){const m=/id ([^)]+)\)/.exec(Q.src);if(m&&!S.read[m[1]]){S.read[m[1]]=1;save()}}
   if(Q.stepId&&!Q.marked){Q.marked=1;S.done[Q.stepId]=1;const x=STEPm[Q.stepId];if(x&&x.k==="r")S.read[x.rid]=1;save()}
-  const nx=curStep(),fromPath=Q.title==="step";
-  return `<div class="drill"><h1>${fromPath?T("Step done","أنجزت الخطوة"):T("Done for now","انتهينا الآن")}</h1>
+  if(Q.song&&!Q.smarked){Q.smarked=1;S.done[sdKey(Q.song.id,Q.song.li)]=1;save()}
+  const nx=curStep(),fromPath=Q.title==="step",sg=Q.song?SONGm[Q.song.id]:null,snx=sg?songNext(sg):-1;
+  return `<div class="drill"><h1>${fromPath?T("Step done","أنجزت الخطوة"):sg?T("Lesson done","أنجزت الدرس"):T("Done for now","انتهينا الآن")}</h1>
    <p class="lead">${T(`You worked with ${Q.touched.size} words and patterns. They'll come back in Practice at the right time.`,`تدرّبت على ${Q.touched.size} من الكلمات والأنماط. ستعود في التدريب في الوقت المناسب.`)}</p>
    ${fromPath&&nx?`<div class="card"><span class="label">${T(`Next: step ${nx.i+1} of ${STEPS.length}`,`التالي: الخطوة ${nx.i+1} من ${STEPS.length}`)} · ${esc(stepKind(nx))}</span><h2>${esc(stepName(nx))}</h2><p class="lead">${esc(stepSub(nx))}</p>
      <button type="button" class="btn primary wide" data-act="step" data-id="${esc(nx.id)}">${T("Next","التالي")}</button></div>`:""}
+   ${sg&&snx>=0?`<div class="card"><span class="label">${T(`Next: lesson ${snx+1} of ${sg.lessons.length}`,`التالي: الدرس ${snx+1} من ${sg.lessons.length}`)}</span><h2>${esc(L(sg.lessons[snx]))}</h2>
+     <button type="button" class="btn primary wide" data-act="song" data-id="${esc(sg.id)}" data-li="${snx}">${T("Next","التالي")}</button></div>`:""}
+   ${sg&&snx<0?`<div class="card"><h2>${T("You've learned the song's words","تعلّمت كلمات الأغنية")}</h2><p class="lead">${T("Play the song again: you'll recognise much more now.","شغّل الأغنية مرة أخرى: ستعرف أكثر بكثير الآن.")}</p></div>`:""}
    ${Q.title==="practice"?`<button type="button" class="btn primary wide" data-act="again">${T("Another round","جولة أخرى")}</button>`:""}
-   <button type="button" class="btn wide" data-act="quit">${fromPath?T("Back to the path","العودة إلى المسار"):Q.title==="practice"?T("Back to Practice","العودة إلى التدريب"):T("Back","رجوع")}</button>
+   <button type="button" class="btn wide" data-act="quit">${fromPath?T("Back to the path","العودة إلى المسار"):sg?T("Back to the song","العودة إلى الأغنية"):Q.title==="practice"?T("Back to Practice","العودة إلى التدريب"):T("Back","رجوع")}</button>
    ${fbBox("d:"+Q.qid,()=>{const qs=Q.list.filter(q=>q.t!=="intro"&&q.t!=="card"&&q.t!=="text"),wr=Q.list.map((q,i)=>Q.res[i]===false?(q.t==="form"||q.t==="fty"?q.x.full:(q.x||q.it).ru):null).filter(Boolean);return {kind:"drill",src:Q.src,score:`${Q.right}/${qs.length} right`,wrong:wr.join(", ")}})}</div>`;
 }
 
@@ -979,6 +1097,12 @@ document.addEventListener("click",e=>{
   if(t.dataset.unbuild!==undefined&&Q&&!Q.answered){Q.list[Q.i].built.splice(+t.dataset.unbuild,1);renderQ();return}
   const a=t.dataset.act;if(!a)return;
   if(a==="step"){startStep(t.dataset.id);return}
+  if(a==="song"){startSong(t.dataset.id,+t.dataset.li);return}
+  if(a==="songpractice"){const f={song:t.dataset.id},l=practiceQs(f,15);if(!l.length)return;startQ(l,"practice",`Practice: song ${t.dataset.id}`);if(Q)Q.filter=f;return}
+  if(a==="lyrsave"){const id=t.dataset.id,ta=document.getElementById("lyr-"+id),v=ta?ta.value:"";if(v.trim())LYR[id]=v;else delete LYR[id];
+    const ok=saveLyr();render();const m=$("#lyrmsg");if(m)m.textContent=ok?T("Saved on this phone.","حُفظت على هذا الهاتف."):T("Couldn't save: storage is full or blocked.","تعذّر الحفظ: التخزين ممتلئ أو محظور.");
+    const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"});return}
+  if(a==="lyrrm"){if(t.dataset.sure){delete LYR[t.dataset.id];saveLyr();render();const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"})}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط مرة أخرى للحذف")}return}
   if(a==="practice"){const f=t.dataset.pid?{pid:t.dataset.pid}:t.dataset.topic?{topic:t.dataset.topic}:null;
     const l=practiceQs(f,15);if(!l.length)return;startQ(l,"practice",f?f.pid?`Practice: principle ${f.pid}`:`Practice: topic ${f.topic}`:"Mixed practice");if(Q)Q.filter=f;return}
   if(a==="ppractice")return startQ(principleQs(t.dataset.id,8),"principle",`Principle practice “${(PRm[t.dataset.id]||{}).en}” (id ${t.dataset.id})`);
@@ -986,7 +1110,7 @@ document.addEventListener("click",e=>{
   if(a==="rpractice"){const r=READS.find(x=>x.id===t.dataset.id);return startQ(readingQs(t.dataset.id),"reading",`Reading practice “${r?r.en:""}” (id ${t.dataset.id})`)}
   if(a==="check"){const v=($("#typein")||{}).value||"";if(!v.trim())return;answer(v);return}
   if(a==="next"){nextQ();return}
-  if(a==="quit"){stopAudio();const back=Q&&Q.title==="practice"?"#practice":Q&&Q.title==="step"?"#path":null;Q=null;location.hash=back||"#path";return}
+  if(a==="quit"){stopAudio();const back=Q&&Q.song?"#song/"+Q.song.id:Q&&Q.filter&&Q.filter.song?"#song/"+Q.filter.song:Q&&Q.title==="practice"?"#practice":Q&&Q.title==="step"?"#path":null;Q=null;location.hash=back||"#path";return}
   if(a==="again"){const f=Q&&Q.filter;const l=practiceQs(f,15);if(l.length){startQ(l,"practice",Q.src);Q.filter=f}return}
   if(a==="markread"){S.read[t.dataset.id]=S.read[t.dataset.id]?0:1;save();render();return}
   if(a==="stress"){S.stressAll=t.dataset.v==="1";save();render();return}
@@ -1014,7 +1138,7 @@ document.addEventListener("change",async e=>{
   }
   if(t.dataset.act==="restore"){
     const m=$("#bkmsg");if(!o||o.app!=="koren-backup"||!o.state){m.textContent=T("That isn't a Koren backup file.","هذا ليس ملف نسخة احتياطية لكورين.");return}
-    S=Object.assign(S,o.state);if(Array.isArray(o.packs))PACKS=o.packs;if(Array.isArray(o.feedback)){FB=o.feedback.filter(x=>x&&typeof x.id==="string"&&typeof x.text==="string");saveFB()}save();savePacks();build();render();
+    S=Object.assign(S,o.state);if(Array.isArray(o.packs))PACKS=o.packs;if(o.lyrics&&typeof o.lyrics==="object"&&!Array.isArray(o.lyrics)){LYR=o.lyrics;saveLyr()}if(Array.isArray(o.feedback)){FB=o.feedback.filter(x=>x&&typeof x.id==="string"&&typeof x.text==="string");saveFB()}save();savePacks();build();render();
     const m2=$("#bkmsg");if(m2)m2.textContent=T("Progress restored.","تمت استعادة التقدم.");
   }
 });
@@ -1027,7 +1151,7 @@ function addPack(){
   build();render();const m2=$("#packmsg");if(m2)m2.textContent=T("Pack added.","أُضيفت الحزمة.");
 }
 /* ================= feedback for Claude ================= */
-const FBORDER={general:0,topic:1,principle:2,question:3,drill:4,reading:5};
+const FBORDER={general:0,topic:1,principle:2,question:3,drill:4,reading:5,song:6};
 const fbSorted=()=>FB.slice().sort((a,b)=>((FBORDER[(a.ctx||{}).kind]??9)-(FBORDER[(b.ctx||{}).kind]??9))||(a.at-b.at));
 function fbWhere(x){const c=x.ctx||{};if(c.kind==="question")return `${c.src} · ${c.n} · ${c.task}`;return c.src||"Note"}
 function fbCard(){
@@ -1045,7 +1169,7 @@ function fbPrompt(){
 
 Keep progress, added lesson packs and recordings working, and don't change the app radically. Say briefly what you changed for each note (refer to them by number). If a note is unclear or you'd push back on it, say so instead of guessing.`);
   if(!notes.length){out.push("\n(No notes yet: write the feedback here.)");return out.join("\n")}
-  const head={general:"General",topic:"Topics",principle:"Principles",question:"Drill questions",drill:"Whole drills",reading:"Readings"};
+  const head={general:"General",topic:"Topics",principle:"Principles",question:"Drill questions",drill:"Whole drills",reading:"Readings",song:"Songs"};
   let lastK=null;
   notes.forEach((x,i)=>{
     const c=x.ctx||{},k=c.kind||"general";
@@ -1070,7 +1194,7 @@ async function copyPrompt(){
   catch(e){const ta=$("#fb-out");if(ta){ta.hidden=false;ta.value=text;ta.focus();ta.select()}if(m)m.textContent=T("Couldn't copy automatically. The text is in the box: select all and copy.","تعذّر النسخ التلقائي. النص في المربع: حدّده كله وانسخه.")}
 }
 function backup(){
-  const data=JSON.stringify({app:"koren-backup",v:1,made:new Date().toISOString(),state:S,packs:PACKS,feedback:FB});
+  const data=JSON.stringify({app:"koren-backup",v:1,made:new Date().toISOString(),state:S,packs:PACKS,feedback:FB,lyrics:LYR});
   const file=new File([data],"koren-backup-"+new Date().toISOString().slice(0,10)+".json",{type:"application/json"});
   if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Koren backup"}).catch(()=>{});return}
   const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();a.remove();

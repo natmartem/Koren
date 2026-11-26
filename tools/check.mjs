@@ -80,8 +80,36 @@ for (const p of C.principles) {
 const stepIds = new Set([...C.topics.map(t => "t:" + t.id), ...C.readings.map(r => "r:" + r.id),
   ...C.principles.flatMap(p => ["p:" + p.id, ...(p.parts || []).map(x => `p:${p.id}:${x.id}`)])]);
 (C.path || []).forEach(st => { if (!stepIds.has(st)) err("path", `unknown step “${st}”`); });
-[...stepIds].forEach(st => { if (C.path && !C.path.includes(st)) err("path", `“${st}” is not on the path`); });
+const songTopics = new Set(C.topics.filter(t => t.song).map(t => "t:" + t.id)); // song words are taught in the Songs tab, not on the path
+[...stepIds].forEach(st => { if (C.path && !C.path.includes(st) && !songTopics.has(st)) err("path", `“${st}” is not on the path`); });
+songTopics.forEach(st => { if ((C.path || []).includes(st)) err("path", `${st} is a song topic: keep it off the path`); });
 C.principles.forEach(p => (p.parts || []).forEach(pt => { if (C.path && C.path.indexOf(`p:${p.id}:${pt.id}`) < C.path.indexOf("p:" + p.id)) err("path", `part ${p.id}:${pt.id} comes before its card`); }));
+
+// songs
+const wordKeys = new Map(C.words.map(w => [plain(w[0]).toLowerCase(), w])), phraseKeys = new Set(C.phrases.map(p => plain(p[0])));
+const songIds = new Set();
+(C.songs || []).forEach((sg, i) => {
+  const where = `song ${sg.id || i + 1}`;
+  if (!sg.id || songIds.has(sg.id)) err(where, "needs a unique id"); songIds.add(sg.id);
+  for (const f of ["ru", "by", "en", "ar"]) if (!sg[f]) err(where, `missing ${f}`);
+  checkStress(sg.ru, where);
+  if (sg.video && !/^[\w-]{11}$/.test(sg.video)) err(where, "video must be a YouTube id (11 characters)");
+  if (sg.lyrics && !/^https:\/\//.test(sg.lyrics)) err(where, "lyrics must be an https link to a licensed lyrics page");
+  (sg.ps || []).forEach(t => { if (!validTag(t)) err(where, `unknown principle or part “${t}”`); });
+  const checkBody = (o, w2) => { for (const f of ["en", "ar"]) { const b = o?.[f] || "";
+    for (const m of b.matchAll(/\{([^}]+)\}/g)) checkStress(m[1], `${w2} ${f}`);
+    if ((b.match(/<ar>/g) || []).length !== (b.match(/<\/ar>/g) || []).length) err(w2, `unbalanced <ar> in ${f}`); } };
+  (sg.notes || []).forEach(n => { if (!n.en || !n.ar || !n.body?.en || !n.body?.ar) err(`${where} note ${n.id}`, "needs en, ar and body"); checkBody(n.body, `${where} note ${n.id}`); });
+  if (!(sg.lessons || []).length) err(where, "needs at least one lesson");
+  (sg.lessons || []).forEach((l, j) => {
+    const w2 = `${where} lesson ${j + 1}`;
+    if (!l.en || !l.ar || !l.body?.en || !l.body?.ar) err(w2, "needs en, ar and body");
+    checkBody(l.body, w2); if (l.bridge) checkBody(l.bridge, `${w2} bridge`);
+    if (!(l.words || []).length) err(w2, "needs words");
+    (l.words || []).forEach(w => { if (!wordKeys.has(plain(w).toLowerCase())) err(w2, `“${w}” is not in words`); });
+    (l.phrases || []).forEach(ph => { if (!phraseKeys.has(plain(ph))) err(w2, `“${ph}” is not in phrases`); });
+  });
+});
 
 // combination tables
 (C.nouns || []).forEach((n, i) => {
@@ -120,4 +148,4 @@ C.phrases.forEach(p => scan(p[0], "phrase"));
 if (unknown.size && process.argv.includes("--words")) console.log("Not yet taught as a word or form:\n" + [...unknown].map(([k, w]) => `  ${k}  (${w})`).join("\n"));
 
 if (errors.length) { console.error(errors.join("\n")); console.error(`\n${errors.length} problem(s).`); process.exit(1); }
-console.log(`OK · ${C.topics.length} topics · ${C.principles.length} principles · ${C.words.length} words · ${C.phrases.length} phrases · ${C.readings.length} readings`);
+console.log(`OK · ${C.topics.length} topics · ${C.principles.length} principles · ${C.words.length} words · ${C.phrases.length} phrases · ${C.readings.length} readings · ${(C.songs || []).length} songs`);

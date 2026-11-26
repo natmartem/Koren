@@ -19,7 +19,7 @@
    In explanation text, {…} marks Russian (tappable, with sound) and <ar>…</ar> marks Arabic.
    Audio keys: "W:" + word without stress marks, "P:" + phrase without stress marks. Do not change an item's Russian once recorded. */
 window.COURSE = {
-version: 1,
+version: 2,
 
 /* ============ suggested path ============
    The order Today suggests: a principle card, then the topics and readings that use it.
@@ -57,7 +57,8 @@ topics: [
  {id:"describe",en:"Describing things",    ar:"الوصف"},
  {id:"shop",    en:"Shopping and money",   ar:"التسوّق والمال"},
  {id:"work",    en:"Work and study",       ar:"العمل والدراسة"},
- {id:"ideas",   en:"International words",  ar:"كلمات عالمية"}
+ {id:"ideas",   en:"International words",  ar:"كلمات عالمية"},
+ {id:"songs",   en:"Words from songs",     ar:"كلمات من الأغاني", song:true}
 ],
 
 /* kind: grammar | words | sound */
@@ -809,7 +810,11 @@ nouns: [
 ["Москва́","Moscow","موسكو","f","C","в Москве́","Москву́","Москвы́","Москве́",""],
 ["Бо́стон","Boston","بوسطن","m","C","в Бо́стоне","Бо́стон","Бо́стона","Бо́стону",""],
 ["Эр-Рия́д","Riyadh","الرياض","m","C","в Эр-Рия́де","Эр-Рия́д","Эр-Рия́да","Эр-Рия́ду",""],
-["Росси́я","Russia","روسيا","f","C","в Росси́и","Росси́ю","Росси́и","Росси́и",""]
+["Росси́я","Russia","روسيا","f","C","в Росси́и","Росси́ю","Росси́и","Росси́и",""],
+/* words from songs: they only show up in drills once learned in the song */
+["океа́н","ocean","محيط","m","L","","океа́н","океа́на","океа́ну",""],
+["не́бо","sky","سماء","n","L","","не́бо","не́ба","не́бу",""],
+["вино́","wine","نبيذ","n","F","","вино́","вина́","вину́",""]
 ],
 adjs: [
 ["хоро́ший","хоро́шая","хоро́шее","хоро́шие","good","جيد","PLTFVWB"],
@@ -1164,7 +1169,23 @@ words: [
 ["му́зыка","music","موسيقى","ideas","logy acc-fem"],
 ["интерне́т","internet","إنترنت","ideas",""],
 ["жизнь","life","حياة","ideas","roots"],
-["разгово́р","conversation","محادثة","ideas","roots"]
+["разгово́р","conversation","محادثة","ideas","roots"],
+
+/* songs: taught in the Songs tab, not on the path. Learned there, they count as known everywhere. */
+["жить","to live","أن يعيش / يسكن","songs",""],
+["люби́ть","to love","أن يحبّ","songs",""],
+["уби́ть","to kill","أن يقتل","songs",""],
+["тебя́","you (as the object)","ـكَ / ـكِ (مفعولًا به)","songs",""],
+["твой","your (to a friend)","ـكَ / ـكِ (لصديق)","songs",""],
+["отча́янно","desperately","بيأس","songs",""],
+["неопра́вданно","without good reason","بلا مبرّر","songs",""],
+["неосо́знанно","without realising","دون وعي","songs",""],
+["океа́н","ocean","محيط","songs",""],
+["города́","cities","مدن","songs",""],
+["не́бо","sky","سماء","songs",""],
+["ого́нь","fire","نار","songs",""],
+["огни́","lights (of a city)","أضواء","songs",""],
+["вино́","wine","نبيذ","songs",""]
 ],
 
 /* ============ phrases: same shape ============ */
@@ -1253,7 +1274,22 @@ phrases: [
 ["Э́то интере́сная информа́ция.","This is interesting information.","هذه معلومات مثيرة للاهتمام.","ideas","tion moy-tvoy:adj"],
 ["Я журнали́ст.","I'm a journalist.","أنا صحفي.","ideas","ism-ist no-is"],
 ["Я люблю́ му́зыку.","I love music.","أحب الموسيقى.","ideas","acc-fem ya-form"],
-["Кака́я ситуа́ция!","What a situation!","يا له من موقف!","ideas","tion chunks:more"]
+["Кака́я ситуа́ция!","What a situation!","يا له من موقف!","ideas","tion chunks:more"],
+
+/* songs */
+["Жить в твое́й голове́.","To live in your head.","أن أعيش في رأسك.","songs","v-prep chunks"],
+["Я люблю́ тебя́.","I love you.","أحبّك.","songs","ya-form acc-masc:pron"],
+["Я хочу́ жить в Бо́стоне.","I want to live in Boston.","أريد أن أسكن في بوسطن.","songs","ya-form:inf v-prep"],
+["Где ты?","Where are you?","أين أنت؟","songs",""],
+["Э́то твой телефо́н?","Is this your phone?","هل هذا هاتفك؟","songs","moy-tvoy no-is"],
+["Я отча́янно хочу́ спать.","I desperately want to sleep.","أريد أن أنام بشدّة.","songs","ya-form:inf"],
+["Э́то неопра́вданно до́рого.","That's expensive for no good reason.","هذا غالٍ بلا مبرّر.","songs","no-is"],
+["Ме́жду на́ми океа́н.","There's an ocean between us.","بيننا محيط.","songs","no-is chunks"],
+["Я живу́ в го́роде Бо́стон, а ты в Эр-Рия́де.","I live in the city of Boston, and you in Riyadh.","أسكن في مدينة بوسطن، وأنت في الرياض.","songs","ya-form v-prep"],
+["Моя́ любо́вь живёт в Эр-Рия́де.","My love lives in Riyadh.","حبّي يعيش في الرياض.","songs","moy-tvoy ya-form v-prep"],
+["В мое́й ко́мнате ко́фе и вино́.","In my room there's coffee and wine.","في غرفتي قهوة ونبيذ.","songs","no-is v-prep"],
+["Не́бо в Бо́стоне и в Эр-Рия́де одно́.","The sky over Boston and over Riyadh is one.","السماء فوق بوسطن وفوق الرياض واحدة.","songs","no-is v-prep numbers"],
+["Огни́ в го́роде, а я в ко́мнате.","Lights in the city, and I'm in my room.","أضواء في المدينة، وأنا في غرفتي.","songs","no-is v-prep"]
 ],
 
 /* ============ easy readings ============ */
@@ -1570,5 +1606,81 @@ facts: [
   en:"Cyrillic grew out of the Greek alphabet in the 9th–10th centuries, named after Saint Cyril. Greek is also where Latin letters come from, which is why so many letters look familiar.",
   ar:"نشأت الأبجدية الكيريلية من الأبجدية اليونانية في القرنين التاسع والعاشر، وسُمّيت باسم القديس كيريل. ومن اليونانية جاءت الحروف اللاتينية أيضًا، لذلك تبدو حروف كثيرة مألوفة."}
 
+],
+
+/* ============ songs ============
+   A song page: the official video, short notes, and small lessons built from the song's words.
+   Lyrics are NOT in the app (copyright): the learner pastes them on the song page and they stay on that phone.
+   lessons[].words / phrases: Russian exactly as in words / phrases above. Song-only words use the topic "songs",
+   which is not on the path; once learned in a song, a word counts as known everywhere (path, practice, readings).
+   Phrases are drilled only after their principle cards are done on the path, like everywhere else.
+   notes and lesson bodies: {…} marks Russian, <ar>…</ar> marks Arabic, as in principles. */
+songs: [
+{id:"golova", ru:"Жить в твое́й голове́", by:"Земфи́ра", en:"To live in your head", ar:"أن أعيش في رأسك", year:2013,
+ video:"lfLBb-Q4hlc",
+ lyrics:"https://lyricstranslate.com/en/zhit-v-tvoey-golove-%D0%B6%D0%B8%D1%82%D1%8C-%D0%B2-%D1%82%D0%B2%D0%BE%D0%B5%D0%B9-%D0%B3%D0%BE%D0%BB%D0%BE%D0%B2%D0%B5-live-your-head.html",
+ ps:["no-is","v-prep","moy-tvoy","acc-masc:pron","ya-form","ya-form:inf","chunks"],
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>This is the title song of Zemfira's sixth album, released in February 2013, and the first song on it. The black-and-white video was directed by her long-time collaborator, the film-maker Renata Litvinova.</p>
+<p>The song is about living inside another person's thoughts. It sounds calm, but the feelings in it are strong, and not all of them are gentle. On the first listen, don't try to follow every word. Catch three: {жить}, {голове́}, {тебя́}.</p>`,
+         ar:`<p>هذه هي الأغنية التي يحمل اسمَها الألبومُ السادس لزيمفيرا، الصادر في فبراير 2013، وهي أولى أغانيه. أخرجت الفيديو بالأبيض والأسود شريكتها الفنية منذ سنوات، المخرجة ريناتا ليتفينوفا.</p>
+<p>الأغنية عن العيش داخل أفكار شخص آخر. تبدو هادئة، لكن مشاعرها قوية، وليست كلها لطيفة. في الاستماع الأول لا تحاول أن تتابع كل كلمة. التقط ثلاثًا فقط: {жить}، {голове́}، {тебя́}.</p>`}},
+  {id:"who", en:"Who is Zemfira", ar:"من هي زيمفيرا",
+   body:{en:`<p>Zemfira Ramazanova comes from Ufa and broke through in the late 1990s. She writes, arranges and produces her own music, and she is one of the most influential voices in Russian-language rock.</p>`,
+         ar:`<p>زيمفيرا رامازانوفا من مدينة أوفا، واشتهرت في أواخر التسعينيات. تكتب موسيقاها وتوزّعها وتنتجها بنفسها، وهي من أكثر الأصوات تأثيرًا في موسيقى الروك باللغة الروسية.</p>`}},
+  {id:"sounds", en:"Sounds to listen for", ar:"أصوات انتبه لها",
+   body:{en:`<ul><li>The {ж} of {жить} is the <ar>ج</ar> of Levantine and Maghrebi Arabic, as in <ar>جميل</ar>.</li>
+<li>Only a stressed {о} sounds like о. In {голова́} the first two sound like а.</li>
+<li>{ь} has no sound of its own. It makes the т at the end of {жить} soft and light.</li>
+<li>Hard {л} is the heavy <ar>ل</ar> of <ar>الله</ar>; soft {ль} is the light <ar>ل</ar> of <ar>ليل</ar>. You hear both in {люби́ть}, {голова́}.</li></ul>`,
+         ar:`<ul><li>حرف {ж} في {жить} هو <ar>ج</ar> كما تُنطق في الشام والمغرب، مثل <ar>جميل</ar>.</li>
+<li>الـ {о} المنبورة وحدها تُنطق о. في {голова́} تُنطق الأوليان مثل а.</li>
+<li>{ь} لا صوت لها. هي تجعل الـ т في آخر {жить} رقيقة وخفيفة.</li>
+<li>الـ {л} الصلبة هي اللام المفخّمة في <ar>الله</ar>، والـ {ль} الليّنة هي اللام المرقّقة في <ar>ليل</ar>. تسمعهما في {люби́ть} و{голова́}.</li></ul>`}}
+ ],
+ lessons:[
+  {en:"From the title", ar:"من العنوان",
+   body:{en:`<p>{Жить в твое́й голове́} means “to live in your head”. Three building blocks are inside:</p>
+<ul><li>{жить} is the dictionary form, ending in {-ть}: “to live”. After {хочу́} it stays like this: {Я хочу́ жить в Бо́стоне.}</li>
+<li>{голова́ → в голове́}: after {в}, a place word takes the where-ending {-е}.</li>
+<li>{твоя́ → твое́й}: “your” takes a where-ending too when the word after {в} is feminine. Learn {в твое́й} and {в мое́й} whole for now.</li></ul>
+<p>{тебя́} is “you” as the object: {Я люблю́ тебя́.} The order is free: {Я тебя́ люблю́} means the same.</p>`,
+         ar:`<p>{Жить в твое́й голове́} تعني «أن أعيش في رأسك». في العنوان ثلاث قطع بناء:</p>
+<ul><li>{жить} صيغة المصدر، تنتهي بـ {-ть}: «أن يعيش». وبعد {хочу́} تبقى كما هي: {Я хочу́ жить в Бо́стоне.} أريد أن أسكن في بوسطن.</li>
+<li>{голова́ → в голове́}: بعد {в} تأخذ كلمة المكان نهاية المكان {-е}.</li>
+<li>{твоя́ → твое́й}: كلمة «ـكَ» تأخذ نهاية المكان أيضًا إذا كانت الكلمة بعد {в} مؤنثة. احفظ {в твое́й} و{в мое́й} كاملتين الآن.</li></ul>
+<p>{тебя́} هي «ـكَ» مفعولًا به: {Я люблю́ тебя́.} أحبّك. والترتيب حرّ: {Я тебя́ люблю́} بالمعنى نفسه.</p>`},
+   bridge:{en:`After <ar>في</ar> Arabic changes the ending too: <ar>في الرأسِ</ar>. And <ar>أحبّك</ar> glues “you” to the verb, where Russian keeps it as its own word, {тебя́}.`,
+           ar:`بعد <ar>في</ar> تتغيّر النهاية في العربية أيضًا: <ar>في الرأسِ</ar>. و<ar>أحبّك</ar> تلصق الضمير بالفعل، أمّا الروسية فتجعله كلمة مستقلّة: {тебя́}.`},
+   words:["жить","голова́","ты","тебя́","твой","люби́ть","и"],
+   phrases:["Жить в твое́й голове́.","Я люблю́ тебя́.","Я хочу́ жить в Бо́стоне.","Где ты?","Э́то твой телефо́н?","У меня́ боли́т голова́."]},
+  {en:"The strong words", ar:"الكلمات القوية",
+   body:{en:`<p>The song's strongest words are long, but they are built from pieces:</p>
+<ul><li>{-о} at the end turns a describing word into “how”: {отча́янно} desperately, {неосо́знанно} without realising.</li>
+<li>{не-} at the front flips the meaning, like un- or in-: {неопра́вданно} = without good reason.</li>
+<li>The song puts {люби́ть} and {уби́ть} side by side: to love and to kill, one sound apart.</li></ul>`,
+         ar:`<p>أقوى كلمات الأغنية طويلة، لكنها مبنية من قطع:</p>
+<ul><li>{-о} في آخر الصفة تجعلها حالًا تجيب عن «كيف»: {отча́янно} بيأس، {неосо́знанно} دون وعي.</li>
+<li>{не-} في أولها تقلب المعنى، مثل <ar>غير</ar> و<ar>لا</ar>: {неопра́вданно} = بلا مبرّر.</li>
+<li>الأغنية تضع {люби́ть} و{уби́ть} جنبًا إلى جنب: أن يحبّ وأن يقتل، بينهما صوت واحد.</li></ul>`},
+   bridge:{en:`Arabic marks “how” with an ending as well: <ar>سريعًا</ar>, <ar>فجأةً</ar>. Russian {-о} does the same job.`,
+           ar:`العربية تضع علامة الحال في الآخر أيضًا: <ar>سريعًا</ar>، <ar>فجأةً</ar>. والـ {-о} الروسية تقوم بالعمل نفسه.`},
+   words:["уби́ть","отча́янно","неопра́вданно","неосо́знанно"],
+   phrases:["Я отча́янно хочу́ спать.","Э́то неопра́вданно до́рого."]},
+  {en:"Around us: city, sky, ocean", ar:"حولنا: المدينة والسماء والمحيط",
+   body:{en:`<p>Everyday words for the next songs, in sentences about a city, a room and a long distance:</p>
+<ul><li>{го́род → города́}: in the plural the stress jumps to the end.</li>
+<li>{ого́нь} is fire; {огни́} are lights, like the lights of a city at night.</li>
+<li>{Ме́жду на́ми} = between us. Learn it whole.</li>
+<li>{не́бо} is an “it” word, so “one” is {одно́}: {Не́бо одно́.}</li></ul>`,
+         ar:`<p>كلمات يومية للأغاني القادمة، في جمل عن مدينة وغرفة ومسافة بعيدة:</p>
+<ul><li>{го́род → города́}: في الجمع يقفز النبر إلى الآخر.</li>
+<li>{ого́нь} نار، و{огни́} أضواء، مثل أضواء المدينة في الليل.</li>
+<li>{Ме́жду на́ми} = بيننا. احفظها كاملة.</li>
+<li>{не́бо} كلمة محايدة، لذلك «واحدة» هي {одно́}: {Не́бо одно́.} السماء واحدة.</li></ul>`},
+   words:["океа́н","го́род","города́","любо́вь","ко́мната","не́бо","ого́нь","огни́","вино́"],
+   phrases:["Ме́жду на́ми океа́н.","Я живу́ в го́роде Бо́стон, а ты в Эр-Рия́де.","Моя́ любо́вь живёт в Эр-Рия́де.","В мое́й ко́мнате ко́фе и вино́.","Не́бо в Бо́стоне и в Эр-Рия́де одно́.","Огни́ в го́роде, а я в ко́мнате."]}
+ ]}
 ]
 };
