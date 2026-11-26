@@ -24,6 +24,8 @@ function checkStress(text, where) {
 
 const topics = new Set(C.topics.map(t => t.id));
 const prins = new Set(C.principles.map(p => p.id));
+const partsOf = new Map(C.principles.map(p => [p.id, new Set((p.parts || []).map(x => x.id))]));
+const validTag = t => { const [pid, part] = t.split(":"); return prins.has(pid) && (!part || partsOf.get(pid).has(part)); };
 const keys = new Map();
 
 for (const [kind, list] of [["word", C.words], ["phrase", C.phrases]]) {
@@ -31,7 +33,7 @@ for (const [kind, list] of [["word", C.words], ["phrase", C.phrases]]) {
     const where = `${kind} ${i + 1} (${w[0]})`;
     if (w.length !== 5) err(where, "should have 5 fields");
     if (!topics.has(w[3])) err(where, `unknown topic “${w[3]}”`);
-    for (const p of (w[4] || "").split(/\s+/).filter(Boolean)) if (!prins.has(p)) err(where, `unknown principle “${p}”`);
+    for (const p of (w[4] || "").split(/\s+/).filter(Boolean)) if (!validTag(p)) err(where, `unknown principle or part “${p}”`);
     if (!w[1] || !w[2]) err(where, "missing English or Arabic");
     checkStress(w[0], where);
     const key = (kind === "word" ? "W:" + plain(w[0]).toLowerCase() : "P:" + plain(w[0]));
@@ -50,11 +52,14 @@ for (const p of C.principles) {
     if ((br.match(/<ar>/g) || []).length !== (br.match(/<\/ar>/g) || []).length) err(where, `unbalanced <ar> in ${f} bridge`);
   }
   (p.ex || []).forEach(x => checkStress(x[0], `${where} example`));
+  (p.parts || []).forEach(pt => { for (const f of ["en", "ar"]) { if (!pt[f] || !pt.body?.[f]) err(`${where} part ${pt.id}`, `missing ${f}`);
+    for (const m of (pt.body?.[f] || "").matchAll(/\{([^}]+)\}/g)) checkStress(m[1], `${where} part ${pt.id} ${f}`); } });
   const seen = new Set();
   (p.items || []).forEach((x, i) => {
     const w = `${where} item ${i + 1}`;
     if (p.drill === "form") {
-      if (x.length !== 8) err(w, "form items need 8 fields");
+      if (x.length !== 8 && x.length !== 9) err(w, "form items need 8 fields (9 with a part)");
+      if (x.length === 9 && !partsOf.get(p.id).has(x[8])) err(w, `unknown part “${x[8]}”`);
       if (!x[0].includes("…")) err(w, "frame needs …");
       checkStress(x[0], w); checkStress(x[2], w); if (x[1]) checkStress(x[1], w);
       const opts = [x[2], x[3], x[4], x[5]];
@@ -63,12 +68,20 @@ for (const p of C.principles) {
       checkStress(x[0], w);
       if ((plain(x[0]).match(VOW) || []).length < 2 || /ё/.test(x[0])) err(w, "stress items need 2+ vowels and no ё");
     } else {
-      if (x.length !== 3 && !(p.id === "roots" && x.length === 4)) err(w, "items need 3 fields (4 with a root)");
+      if (x.length < 3 || x.length > 5) err(w, "items need 3 fields (4 with a root, 5 with a part)");
+      if (x.length === 5 && !partsOf.get(p.id).has(x[4])) err(w, `unknown part “${x[4]}”`);
       if (p.drill !== "read") checkStress(x[0], w);
       if (seen.has(x[0])) err(w, "duplicate"); seen.add(x[0]);
     }
   });
 }
+
+// path
+const stepIds = new Set([...C.topics.map(t => "t:" + t.id), ...C.readings.map(r => "r:" + r.id),
+  ...C.principles.flatMap(p => ["p:" + p.id, ...(p.parts || []).map(x => `p:${p.id}:${x.id}`)])]);
+(C.path || []).forEach(st => { if (!stepIds.has(st)) err("path", `unknown step “${st}”`); });
+[...stepIds].forEach(st => { if (C.path && !C.path.includes(st)) err("path", `“${st}” is not on the path`); });
+C.principles.forEach(p => (p.parts || []).forEach(pt => { if (C.path && C.path.indexOf(`p:${p.id}:${pt.id}`) < C.path.indexOf("p:" + p.id)) err("path", `part ${p.id}:${pt.id} comes before its card`); }));
 
 // combination tables
 (C.nouns || []).forEach((n, i) => {

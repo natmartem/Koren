@@ -110,7 +110,7 @@ C.principles.forEach(p=>{const it=(p.items||[]).map(x=>p.drill==="form"
   (p.ex||[]).forEach(x=>{if(x[0].includes(" "))it.push({key:"S:"+plain(x[0]),ru:x[0],en:x[1],ph:1})});
   add("Principle · "+p.en,it)});
 /* examples inside the explanation cards ({…} in the text), so a tap there plays a real voice */
-C.principles.forEach(p=>{const it=[];String((p.body||{}).en||"").replace(/\{([^}]+)\}/g,(m,x)=>{const t=plain(x).trim();if(/^-|-$/.test(t)||!/[а-яё]/i.test(t))return m;
+C.principles.forEach(p=>{const it=[];[(p.body||{}).en||"",...(p.parts||[]).map(x=>(x.body||{}).en||"")].join(" ").replace(/\{([^}]+)\}/g,(m,x)=>{const t=plain(x).trim();if(/^-|-$/.test(t)||!/[а-яё]/i.test(t))return m;
   const txt=x.replace(/\s*→\s*/g,", ").trim(),k=/\s/.test(plain(txt))?"S:"+plain(txt):"W:"+plain(txt).toLowerCase();it.push({key:k,ru:txt,en:"example in the card",ph:/\s/.test(txt)?1:0});return m});
   add("Card examples · "+p.en,it,"Examples from the explanation card. Say each one naturally; for single letters say just the sound.")});
 (C.readings||[]).forEach(r=>add("Reading · "+r.en,r.lines.map(l=>({key:"S:"+plain(l[0]),ru:l[0],en:l[1],ph:1})),"A short text: read each line naturally, as if telling it to a friend."));

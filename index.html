@@ -218,15 +218,16 @@ function build(){
   TOP=c.topics;PR=c.principles;READS=c.readings;FACTS=c.facts;TOPm={};PRm={};ITEMS={};PITEMS={};
   TOP.forEach(t=>TOPm[t.id]=t);PR.forEach(p=>PRm[p.id]=p);
   const mk=(a,kind)=>{const key=kind==="w"?wkey(a[0]):pkey(a[0]);
-    if(ITEMS[key]){const o=ITEMS[key];(a[4]||"").split(/\s+/).filter(Boolean).forEach(x=>{if(!o.ps.includes(x))o.ps.push(x)});return null}
-    const o={key,akey:key,kind,ru:a[0],en:a[1],ar:a[2],topic:a[3],ps:(a[4]||"").split(/\s+/).filter(x=>x&&PRm[x])};ITEMS[key]=o;return o};
+    if(ITEMS[key]){const o=ITEMS[key];(a[4]||"").split(/\s+/).filter(x=>x&&PRm[x.split(":")[0]]).forEach(x=>{if(!o.ps.includes(x))o.ps.push(x)});return null}
+    const o={key,akey:key,kind,ru:a[0],en:a[1],ar:a[2],topic:a[3],ps:(a[4]||"").split(/\s+/).filter(x=>x&&PRm[x.split(":")[0]])};ITEMS[key]=o;return o};
   WORDS=c.words.map(a=>mk(a,"w")).filter(Boolean);
   PHRASES=c.phrases.map(a=>mk(a,"p")).filter(Boolean);
   PR.forEach(p=>{p.list=(p.items||[]).map((x,i)=>{
     let o;
-    if(p.drill==="form")o={pid:p.id,frame:x[0],hint:x[1],ans:x[2],wrong:[x[3],x[4],x[5]],en:x[6],ar:x[7],full:x[0].replace("…",x[2]).replace(/\s+([.?!,])/g,"$1")};
+    if(p.drill==="form")o={pid:p.id,part:x[8]||"",frame:x[0],hint:x[1],ans:x[2],wrong:[x[3],x[4],x[5]],en:x[6],ar:x[7],full:x[0].replace("…",x[2]).replace(/\s+([.?!,])/g,"$1")};
     else if(p.drill==="stress")o={pid:p.id,ru:x[0],en:(ITEMS[wkey(x[0])]||{}).en||"",ar:(ITEMS[wkey(x[0])]||{}).ar||""};
-    else o={pid:p.id,ru:x[0],en:x[1],ar:x[2],root:x[3]||""};
+    else o={pid:p.id,ru:x[0],en:x[1],ar:x[2],root:x[3]||"",part:x[4]||""};
+    o.part=o.part||"";o.tag=p.id+(o.part?":"+o.part:"");
     o.key="I:"+p.id+":"+plain(o.ans||o.ru)+"|"+plain(o.hint||"")+"|"+plain(o.frame||"");
     o.akey=p.drill==="form"?"S:"+plain(o.full):wkey(o.ru);
     PITEMS[o.key]=o;return o})});
@@ -250,14 +251,14 @@ function generate(c){
   addSet(Object.values(POSS));addSet(Object.values(TPOSS));ADJ.forEach(a=>addSet(Object.values(a.f)));
   const ok=id=>PRm[id]&&PRm[id].drill==="form";
   const FULLS=new Set();PR.forEach(p=>(p.list||[]).forEach(x=>{if(x.full)FULLS.add(plain(x.full))}));
-  const gi=(pid,frame,hint,ans,cands,base,meaning)=>{
+  const gi=(pid,frame,hint,ans,cands,base,meaning,part)=>{
     if(!ok(pid)||!ans)return;
     if(frame.startsWith("…")){ans=cap(ans);cands=cands.map(cap)}
     const wrong=[],seen=new Set([plain(ans).toLowerCase()]);
     for(const x of cands){if(!x)continue;const k=plain(x).toLowerCase();if(seen.has(k))continue;seen.add(k);wrong.push(x);if(wrong.length===3)break}
     if(wrong.length<2)return;
     const full=frame.replace("…",ans).replace(/\s+([.?!,])/g,"$1"),key="G:"+pid+":"+plain(full);if(PITEMS[key]||FULLS.has(plain(full)))return;FULLS.add(plain(full));
-    const o={pid,frame,hint,ans,wrong,full,key,akey:"S:"+plain(full),gen:1,base:base?base.nom:"",
+    part=part||"";const o={pid,part,tag:pid+(part?":"+part:""),frame,hint,ans,wrong,full,key,akey:"S:"+plain(full),gen:1,base:base?base.nom:"",
       en:meaning?meaning.en:base?base.nom+" — "+base.en:"",ar:meaning?meaning.ar:base?base.nom+" — "+base.ar:""};
     PITEMS[key]=o;PRm[pid].list.push(o);if(o.base){const k=wkey(o.base);(BASEIDX[k]=BASEIDX[k]||[]).push(o)}
   };
@@ -271,33 +272,35 @@ function generate(c){
     const pr=n.where?prepOf(n.where):"",other=pr==="в"?"на":"в",wn=n.where?nounOf(n.where):"";
     /* my, your, this, and describing words: every noun, plural ones too */
     if(n.cat!=="C"&&n.cat!=="M"&&n.cat!=="D"){
-      const P2=i%2?TPOSS:POSS;if(n.cat!=="W")gi("moy-tvoy","Э́то … "+n.nom+".",P2.m,P2[n.g],Object.values(P2),n);
+      const P2=i%2?TPOSS:POSS;const odd=n.g==="pl"||/ь$/.test(n.nom)||(n.g==="m"&&/[ая]$/.test(plain(n.nom)))||(n.g==="n"&&/мя$/.test(plain(n.nom)));
+      if(n.cat!=="W")gi("moy-tvoy","Э́то … "+n.nom+".",P2.m,P2[n.g],Object.values(P2),n,null,odd&&n.g!=="pl"?"tricky":"");
       const fit=ADJ.filter(a=>a.cats.includes(n.cat));
       if(fit.length){const a1=fit[i%fit.length],a2=fit[(i+3)%fit.length];
-        gi("moy-tvoy","Э́то … "+n.nom+".",a1.f.m,a1.f[n.g],Object.values(a1.f),n);
-        if(a2!==a1)gi("moy-tvoy",cap(n.nom)+" … .",a2.f.m,a2.f[n.g],Object.values(a2.f),n)}
-      gi("moy-tvoy","Где … "+n.nom+"?","э́тот",DEM[n.g],Object.values(DEM),n);
+        gi("moy-tvoy","Э́то … "+n.nom+".",a1.f.m,a1.f[n.g],Object.values(a1.f),n,null,"adj");
+        if(a2!==a1)gi("moy-tvoy",cap(n.nom)+" … .",a2.f.m,a2.f[n.g],Object.values(a2.f),n,null,"adj")}
+      gi("moy-tvoy","Где … "+n.nom+"?","э́тот",DEM[n.g],Object.values(DEM),n,null,"this");
     }
     if(n.g==="pl")return;
     /* on which day */
-    if(n.cat==="D"){gi(n.g==="f"?"acc-fem":"acc-masc",end(DF[i%DF.length]),n.nom,n.where,[pr+" "+n.gen,pr+" "+n.dat,pr+" "+n.nom],n);return}
+    if(n.cat==="D"){gi("acc-fem",end(DF[i%DF.length]),n.nom,n.where,[pr+" "+n.gen,pr+" "+n.dat,pr+" "+n.nom],n,null,"days");return}
     /* where */
     if(n.where&&wn!==n.nom&&WF[n.cat]){const fs=WF[n.cat];let f=fs[i%fs.length];if(n.cat==="T"&&f.startsWith(cap(n.nom)))f=fs[(i+1)%fs.length];
-      gi("v-prep",end(f),n.nom,n.where,[pr+" "+n.nom,pr+" "+n.gen,pr+" "+n.dat,other+" "+wn],n)}
+      gi("v-prep",end(f),n.nom,n.where,[pr+" "+n.nom,pr+" "+n.gen,pr+" "+n.dat,other+" "+wn],n,null,/(у́|ии)$/.test(wn)?"tricky":"")}
     if(n.cat==="M")return;
     /* where to */
     if(n.where&&n.acc&&(n.cat==="L"||n.cat==="C")&&n.nom!=="дом"){const ft=n.cat==="C"?["Мы е́дем …","Я е́ду …"]:["Я иду́ …","Мы идём …","Ма́ма идёт …"];
-      gi("v-prep",end(ft[i%ft.length]),n.nom,pr+" "+n.acc,[n.where,pr+" "+n.gen,pr+" "+n.dat,other+" "+n.acc],n)}
+      gi("v-prep",end(ft[i%ft.length]),n.nom,pr+" "+n.acc,[n.where,pr+" "+n.gen,pr+" "+n.dat,other+" "+n.acc],n,null,"to")}
     /* objects */
-    if(n.acc&&AF[n.cat]){const fs=AF[n.cat];gi(n.g==="f"?"acc-fem":"acc-masc",end(fs[i%fs.length]),n.nom,n.acc,[n.nom,n.gen,n.dat,wn],n)}
+    if(n.acc&&AF[n.cat]){const fs=AF[n.cat],fem=n.g==="f"||(n.g==="m"&&/[ая]$/.test(plain(n.nom)));
+      gi(fem?"acc-fem":"acc-masc",end(fs[i%fs.length]),n.nom,n.acc,[n.nom,n.gen,n.dat,wn],n,null,fem&&(n.g!=="f"||/ь$/.test(n.nom)||plain(n.acc).replace(/у$/,"")!==plain(n.nom).replace(/а$/,""))?"tricky":"")}
     /* at someone's: у брата есть… / none: нет… / it hurts */
-    if(n.cat==="P"&&n.gen)gi("u-menya",HAVE[i%HAVE.length],n.nom,n.gen,[n.nom,n.acc,n.dat],n);
-    if(n.gen&&(["T","F","V"].includes(n.cat)||n.nom==="вре́мя"))gi("u-menya","У меня́ нет … .",n.nom,n.gen,[n.nom,n.acc,n.dat],n);
-    if(n.cat==="B")gi("u-menya","У меня́ боли́т … .",n.nom,n.nom,[n.acc,n.gen,n.dat],n);
+    if(n.cat==="P"&&n.gen)gi("u-menya",HAVE[i%HAVE.length],n.nom,n.gen,[n.nom,n.acc,n.dat],n,null,"net");
+    if(n.gen&&(["T","F","V"].includes(n.cat)||n.nom==="вре́мя"))gi("u-menya","У меня́ нет … .",n.nom,n.gen,[n.nom,n.acc,n.dat],n,null,"net");
+    if(n.cat==="B")gi("u-menya","У меня́ боли́т … .",n.nom,n.nom,[n.acc,n.gen,n.dat],n,null,"net");
     /* to whom: нравится, state words */
     if(n.cat==="P"&&n.dat){const C3=[cap(n.nom),cap(n.acc),cap(n.gen)];
       gi("nravitsya","… нра́вится "+things[i%things.length]+".",n.nom,cap(n.dat),C3,n);
-      gi("nravitsya","… "+STATES[i%STATES.length]+".",n.nom,cap(n.dat),C3,n)}
+      gi("nravitsya","… "+STATES[i%STATES.length]+".",n.nom,cap(n.dat),C3,n,null,"state")}
     if(["F","L","C","T"].includes(n.cat)&&n.acc)gi("nravitsya","Мне нра́вится … .",n.nom,n.nom,[n.acc,n.gen,n.dat],n);
     /* numbers */
     if(n.gpl&&n.gen&&n.cat!=="C"){
@@ -312,12 +315,14 @@ function generate(c){
   VERBS.forEach((v,vi)=>PERS.forEach(([pn,k],pi)=>{
     if(!v.forms[k])return;const compl=v.compl.length?" "+v.compl[(vi+pi)%v.compl.length]:"",neg=(vi*7+pi)%6===0;
     const cands=[...v.forms.filter((_,j)=>j!==k),v.inf],rot=(vi+pi)%cands.length;
-    gi("ya-form",`${pn} ${neg?"не ":""}…${compl}${k===1?"?":"."}`,v.inf,v.forms[k],cands.slice(rot).concat(cands.slice(0,rot)),null,{en:v.inf+" — "+v.en,ar:v.inf+" — "+v.ar});
+    const iFam=!["знать","понима́ть","рабо́тать","чита́ть","обе́дать","отдыха́ть"].includes(v.inf); /* the first verb lesson drills regular -ать verbs only */
+    const inf=/^(спать|чита́ть|рабо́тать)$/.test(v.compl[(vi+pi)%Math.max(1,v.compl.length)]||"");
+    gi("ya-form",`${pn} ${neg?"не ":""}…${compl}${k===1?"?":"."}`,v.inf,v.forms[k],cands.slice(rot).concat(cands.slice(0,rot)),null,{en:v.inf+" — "+v.en,ar:v.inf+" — "+v.ar},inf?"inf":iFam?"i":"");
   }));
   /* stress: every word you have */
   if(PRm.stress){const have=new Set(PRm.stress.list.map(x=>plain(x.ru)));
     WORDS.forEach(w=>{const pw=plain(w.ru);if(have.has(pw)||/\s|ё/i.test(w.ru)||(pw.match(/[аеиоуыэюя]/gi)||[]).length<2)return;have.add(pw);
-      const o={pid:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
+      const o={pid:"stress",part:"",tag:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
 }
 build();
 const APP_VERSION="1.2";
@@ -442,50 +447,51 @@ function dueKeys(){const d=today();return Object.keys(S.srs).filter(k=>S.srs[k].
 function buildPath(){
   STEPS=[];STEPm={};const order=[...(BASE.path||[])];
   TOP.forEach(t=>{if(!order.includes("t:"+t.id))order.push("t:"+t.id)});
-  PR.forEach(x=>{if(!order.includes("p:"+x.id))order.push("p:"+x.id)});
+  PR.forEach(x=>{if(!order.includes("p:"+x.id))order.push("p:"+x.id);(x.parts||[]).forEach(pt=>{if(!order.includes(`p:${x.id}:${pt.id}`))order.push(`p:${x.id}:${pt.id}`)})});
   READS.forEach(r=>{if(!order.includes("r:"+r.id))order.push("r:"+r.id)});
-  order.forEach(st=>{const [k,id]=st.split(":");
+  order.forEach(st=>{const [k,id,part]=st.split(":");
     if(k==="t"&&TOPm[id]){const ws=WORDS.filter(w=>w.topic===id);if(!ws.length)return;const n=Math.ceil(ws.length/7),size=Math.ceil(ws.length/n);
       for(let i=0;i<n;i++)STEPS.push({id:`t:${id}:${i+1}`,k:"t",topic:id,words:ws.slice(i*size,(i+1)*size),part:i+1,parts:n,phrases:[]})}
-    else if(k==="p"&&PRm[id])STEPS.push({id:"p:"+id,k:"p",pid:id,phrases:[]});
+    else if(k==="p"&&PRm[id]&&(!part||(PRm[id].parts||[]).some(pt=>pt.id===part)))STEPS.push({id:"p:"+id+(part?":"+part:""),k:"p",pid:id,part:part||"",phrases:[]});
     else if(k==="r"&&READS.some(r=>r.id===id))STEPS.push({id:"r:"+id,k:"r",rid:id,phrases:[]});
   });
   STEPS.forEach((x,i)=>{x.i=i;STEPm[x.id]=x});
   PHRASES.forEach(ph=>{let idx=STEPS.findIndex(x=>x.topic===ph.topic);
-    ph.ps.forEach(pid=>{const j=STEPS.findIndex(x=>x.id==="p:"+pid);if(j>idx)idx=j});
+    ph.ps.forEach(tag=>{let j=STEPS.findIndex(x=>x.id==="p:"+tag);if(j<0)j=STEPS.findIndex(x=>x.id==="p:"+tag.split(":")[0]);if(j>idx)idx=j});
     if(idx>=0)STEPS[idx].phrases.push(ph)});
 }
 const DRILLED=6;
 function stepDone(x){
   if(!x)return false;if(S.done[x.id])return true;
-  if(x.k==="p")return !!(S.ps[x.pid]&&S.ps[x.pid].n>=DRILLED);
+  if(x.k==="p"){const k=x.pid+(x.part?":"+x.part:"");return !!(S.ps[k]&&S.ps[k].n>=DRILLED)}
   if(x.k==="r")return !!S.read[x.rid];
   return x.words.every(w=>S.seen[w.key])&&x.phrases.every(w=>S.seen[w.key]);
 }
-const unlocked=pid=>stepDone(STEPm["p:"+pid]);
+const unlocked=tag=>{const st=STEPm["p:"+tag];return st?stepDone(st):stepDone(STEPm["p:"+tag.split(":")[0]])};
+const partOf=(pid,part)=>part?((PRm[pid].parts||[]).find(x=>x.id===part)||null):null;
 const ready=it=>!it.ps||it.ps.every(unlocked);
 const curStep=()=>STEPS.find(x=>!stepDone(x))||null;
 function stepName(x){
   if(x.k==="t"){const t=TOPm[x.topic];return L(t)+(x.parts>1?` · ${x.part}/${x.parts}`:"")}
-  if(x.k==="p")return L(PRm[x.pid]);
+  if(x.k==="p"){const pt=partOf(x.pid,x.part);return pt?L(pt):L(PRm[x.pid])}
   const r=READS.find(y=>y.id===x.rid);return L(r);
 }
 function stepKind(x){return x.k==="t"?T("New words","كلمات جديدة"):x.k==="p"?T("Principle","مبدأ"):T("Reading","قراءة")}
 function stepSub(x){
   if(x.k==="t")return x.words.slice(0,4).map(w=>plain(w.ru)).join(", ")+(x.words.length>4?"…":"");
-  if(x.k==="p")return L(PRm[x.pid].can);
+  if(x.k==="p"){const pt=partOf(x.pid,x.part);return pt?T(`More on: ${L(PRm[x.pid])}`,`المزيد عن: ${L(PRm[x.pid])}`):L(PRm[x.pid].can)}
   const r=READS.find(y=>y.id===x.rid);return tname(r.topic);
 }
 function lessonQs(x){
   const q=[];
-  if(x.k==="p"){q.push({t:"card",pid:x.pid});q.push(...principleQs(x.pid,8))}
+  if(x.k==="p"){q.push({t:"card",pid:x.pid,part:x.part});q.push(...principleQs(x.pid,8,x.part))}
   else if(x.k==="r"){q.push({t:"text",rid:x.rid});q.push(...readingQs(x.rid))}
   else{
     const set=x.words;set.forEach(w=>q.push({t:"intro",it:w}));
     shuffle(set).forEach(w=>q.push(wordQ(w,"pm")));
     shuffle(set).slice(0,4).forEach(w=>q.push(wordQ(w,canPlay(w.key)&&Math.random()<.5?"lp":"pr")));
     shuffle(set).slice(0,2).forEach(w=>q.push(wordQ(w,"ty")));
-    shuffle(set.flatMap(w=>BASEIDX[w.key]||[]).filter(y=>unlocked(y.pid))).slice(0,3).forEach(y=>{const z=principleQ(y,null);if(z)q.push(z)});
+    shuffle(set.flatMap(w=>BASEIDX[w.key]||[]).filter(y=>unlocked(y.tag))).slice(0,3).forEach(y=>{const z=principleQ(y,null);if(z)q.push(z)});
   }
   /* phrases that become sayable at this step */
   x.phrases.forEach(ph=>q.push({t:"intro",it:ph}));
@@ -496,7 +502,7 @@ function lessonQs(x){
 }
 function startStep(id){
   const x=STEPm[id];if(!x)return;
-  startQ(lessonQs(x),"step",`Path step ${x.i+1}: ${x.k==="t"?TOPm[x.topic].en+(x.parts>1?` ${x.part}/${x.parts}`:""):x.k==="p"?PRm[x.pid].en:READS.find(r=>r.id===x.rid).en} (${x.id})`);
+  startQ(lessonQs(x),"step",`Path step ${x.i+1}: ${x.k==="t"?TOPm[x.topic].en+(x.parts>1?` ${x.part}/${x.parts}`:""):x.k==="p"?PRm[x.pid].en+(x.part?" · "+partOf(x.pid,x.part).en:""):READS.find(r=>r.id===x.rid).en} (${x.id})`);
   if(Q)Q.stepId=id;
 }
 /* ================= practice: only what the path has taught ================= */
@@ -505,7 +511,7 @@ function poolOf(f){
   const met=x=>{const k=x.base?wkey(x.base):x.gen&&x.akey&&x.akey.startsWith("W:")?x.akey:null;if(!k)return true;const it=ITEMS[k];return !it||!!S.seen[it.key]||!!S.srs[it.key]};
   let items=[...WORDS,...PHRASES].filter(x=>(S.seen[x.key]||S.srs[x.key])&&ready(x));
   let lines=Object.values(ITEMS).filter(x=>x.kind==="l"&&(S.read[x.read]||S.done["r:"+x.read]));
-  let pr=PR.filter(x=>unlocked(x.id)).flatMap(x=>x.list.filter(met));
+  let pr=PR.filter(x=>unlocked(x.id)).flatMap(x=>x.list.filter(y=>met(y)&&unlocked(y.tag||x.id)));
   if(f.pid){items=items.filter(x=>x.ps.includes(f.pid));lines=[];pr=pr.filter(x=>x.pid===f.pid)}
   if(f.topic){items=items.filter(x=>x.topic===f.topic);lines=lines.filter(x=>x.topic===f.topic);pr=pr.filter(x=>x.base&&ITEMS[wkey(x.base)]&&ITEMS[wkey(x.base)].topic===f.topic)}
   return {items,lines,pr,size:items.length+lines.length+pr.length};
@@ -527,10 +533,10 @@ const SAYICON=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4
 const md=s=>String(s||"").replace(/\{([^}]+)\}/g,(m,x)=>/^-|-$|^[^а-яё]*$/i.test(plain(x).trim())?`<span class="say">${esc(x)}</span>`:`<button type="button" class="say" data-say="${esc(plain(x))}" aria-label="${T("Play","تشغيل")}">${esc(x)}${SAYICON}</button>`).replace(/<ar>/g,'<span class="ar">').replace(/<\/ar>/g,"</span>");
 const L=o=>o?(S.lang==="ar"?o.ar:o.en):"";
 const tname=id=>TOPm[id]?L(TOPm[id]):id;
-const pname=id=>PRm[id]?L(PRm[id]):id;
+const pname=id=>{const [p,pt]=id.split(":");if(!PRm[p])return id;const x=partOf(p,pt);return x?L(x):L(PRm[p])};
 const kindName=k=>k==="grammar"?T("Grammar","القواعد"):k==="words"?T("Word building","بناء الكلمات"):T("Sound and script","الأصوات والكتابة");
 const CHEV=`<svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const pchips=ps=>ps.length?`<div class="chips">${ps.map(p=>`<a class="pill root" href="#p/${esc(p)}">${esc(pname(p))}</a>`).join("")}</div>`:"";
+const pchips=ps=>ps.length?`<div class="chips">${ps.map(p=>`<a class="pill root" href="#p/${esc(p.split(":")[0])}">${esc(pname(p))}</a>`).join("")}</div>`:"";
 function wordRow(it){
   return `<div class="word">${spk(it.key,it.ru)}<button type="button" class="reveal" data-reveal><span class="w ru">${RUw(it)}</span><span class="m" hidden>${M(it)}</span></button></div>`;
 }
@@ -635,6 +641,7 @@ function vPrinciple(id){
   <p class="kind" style="margin-top:10px">${kindName(p.kind)}</p><h1 style="margin-top:2px">${esc(L(p))}</h1>
   <p class="lead">${esc(L(p.can))}</p>
   <div class="card body">${md(L(p.body))}</div>
+  ${(p.parts||[]).map(pt=>`<div class="card body"><span class="label">${esc(L(pt))}</span>${md(L(pt.body))}</div>`).join("")}
   ${p.bridge?`<div class="card bridge body"><span class="label">${T("From what you already know","ممّا تعرفه أصلًا")}</span><p>${md(L(p.bridge))}</p></div>`:""}
   ${p.ex&&p.ex.length?`<div class="card"><span class="label">${T("Examples","أمثلة")}</span><span class="tap-hint">${T("Tap to see the meaning.","اضغط لترى المعنى.")}</span><div>${p.ex.map(x=>{const it={key:wkey(x[0]),ru:x[0],en:x[1],ar:x[2]};const k=x[0].includes(" ")?"S:"+plain(x[0]):it.key;return `<div class="word">${spk(k,x[0])}<button type="button" class="reveal" data-reveal><span class="w ru">${esc(x[0])}</span><span class="m" hidden>${M(it)}</span></button></div>`}).join("")}</div></div>`:""}
   ${p.list&&p.list.length?`<div class="card"><button type="button" class="btn primary wide" data-act="ppractice" data-id="${esc(id)}">${T("Practise this principle","تدرّب على هذا المبدأ")}</button><p class="count">${p.drill==="form"?T(`${p.list.length} sentences to practise, built from your topics.`,`${p.list.length} جملة للتدريب، مبنية من مواضيعك.`):T(`${p.list.length} words to practise.`,`${p.list.length} كلمة للتدريب.`)}</p>${levelPill(id)?`<div class="row">${levelPill(id)}</div>`:""}</div>`:""}
@@ -723,12 +730,16 @@ function principleQ(x,mode){
   if(mode==="mean")return {t:"pmean",x,opts:shuffle([x,...d])};
   return {t:"pat",x,opts:shuffle([x,...d])};
 }
-function principleQs(pid,n){
+function principleQs(pid,n,part){
   const p=PRm[pid];if(!p||!p.list||!p.list.length)return [];
+  if(part!==undefined){const only=p.list.filter(x=>(x.part||"")===(part||""));if(only.length)return principleQsFrom(p,only,n)}
+  return principleQsFrom(p,p.list,n);
+}
+function principleQsFrom(p,list,n){
   const d=today();
   /* prefer sentences built from words the learner has already met */
   const met=x=>{const k=x.base?wkey(x.base):x.gen&&x.akey&&x.akey.startsWith("W:")?x.akey:null;if(!k)return true;const it=ITEMS[k];return !it||!!seenOrDrilled(it)};
-  let pool=p.list;if(p.drill==="stress"){const known=pool.filter(met);if(known.length>=n)pool=known}
+  let pool=list;if(p.drill==="stress"){const known=pool.filter(met);if(known.length>=n)pool=known}
   const ranked=shuffle(pool).sort((a,b)=>{const ra=S.srs[a.key],rb=S.srs[b.key];const sa=(ra?(ra.d<=d?0:2)+ra.b/10:1)+(met(a)?0:1.5),sb=(rb?(rb.d<=d?0:2)+rb.b/10:1)+(met(b)?0:1.5);return sa-sb});
   const pick=ranked.slice(0,n);
   return pick.map((x,i)=>principleQ(x,p.drill==="pattern"?(i<n/2?"pick":i<n*.75?"mean":"type"):p.drill==="form"&&i>=n-2?"type":null)).filter(Boolean);
@@ -852,6 +863,10 @@ function renderQ(){
      <div class="card reading" style="margin:0"><div class="row" style="justify-content:space-between"><span class="tap-hint">${T("Read it, tap a line to hear it and check the meaning.","اقرأ النص، واضغط على السطر لتسمعه وتتأكد من معناه.")}</span>${canPlay("S:"+plain(r.lines[0][0]))?`<button type="button" class="btn small" data-act="playall" data-id="${esc(r.id)}">▶ ${T("Play all","تشغيل الكل")}</button>`:""}</div>
      <div>${r.lines.map(l=>`<div class="line">${spk("S:"+plain(l[0]),l[0])}<button type="button" class="reveal" data-reveal><span class="rl ru">${RUt(l[0])}</span><span class="m" hidden>${esc(S.lang==="ar"?l[2]:l[1])}</span></button></div>`).join("")}</div></div>
      <button type="button" class="btn primary wide" data-act="next">${T("I've read it, let's practise","قرأته، لنتدرّب")}</button>`;
+  }else if(q.t==="card"&&q.part){const p=PRm[q.pid],pt=partOf(q.pid,q.part);
+    body=`<p class="prompt">${T("More on a principle","المزيد عن مبدأ")} · ${esc(L(p))}</p><h1 style="margin:0">${esc(L(pt))}</h1>
+     <div class="card body" style="margin:0">${md(L(pt.body))}</div>
+     <button type="button" class="btn primary wide" data-act="next">${T("Got it, let's practise","فهمت، لنتدرّب")}</button>`;
   }else if(q.t==="card"){const p=PRm[q.pid];
     body=`<p class="prompt">${T("New principle","مبدأ جديد")} · ${kindName(p.kind)}</p><h1 style="margin:0">${esc(L(p))}</h1><p class="lead">${esc(L(p.can))}</p>
      <div class="card body" style="margin:0">${md(L(p.body))}</div>${p.bridge?`<div class="card bridge body" style="margin:0"><span class="label">${T("From what you already know","ممّا تعرفه أصلًا")}</span><p>${md(L(p.bridge))}</p></div>`:""}
@@ -906,7 +921,7 @@ function answer(given){
   const q=Q.list[Q.i],right=ansOf(q);
   const ok=TYPED.includes(q.t)?norm(given)===norm(right):given===right;
   const item=q.it||q.x,key=item.key;
-  grade(key,ok);if(q.x)pstat(q.x.pid,ok);if(ok)Q.right++;Q.touched.add(key);Q.res[Q.i]=ok;save();fbRefresh("q:"+Q.qid+":"+Q.i);
+  grade(key,ok);if(q.x){pstat(q.x.pid,ok);if(q.x.part)pstat(q.x.pid+":"+q.x.part,ok)}if(ok)Q.right++;Q.touched.add(key);Q.res[Q.i]=ok;save();fbRefresh("q:"+Q.qid+":"+Q.i);
   document.querySelectorAll("[data-ans]").forEach(b=>{b.disabled=true;if(b.dataset.ans===right)b.classList.add("ok");else if(b.dataset.ans===given)b.classList.add("dim")});
   const ti=$("#typein");if(ti)ti.disabled=true;
   document.querySelectorAll("[data-tile],[data-unbuild],[data-act=bcheck]").forEach(b=>b.disabled=true);
