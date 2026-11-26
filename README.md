@@ -14,6 +14,7 @@ Every word names its topic and the principles it shows, so each principle points
 - **Culture** — learn Russian through songs and poems, from easiest to hardest (Кофевино, Мандельштам's «Муха», Хочешь?, Жить в твоей голове, Выше крыш): the official video, short notes in English and Arabic, and small lessons built from the song's words. Song words live in the topic “Words from songs”, which is not on the path. Once learned in a song, a word counts as known everywhere: the path doesn't introduce it again, Practice reviews it, and drill sentences built on it appear. A song's sentences are drilled only after their principle cards are done on the path.
 - **Practice** — review only: a mixed pool of what the path has already taught (words, phrases, read texts, practised principles and their combinations), by principle or by topic. Nothing new.
 - **Topics** and **Principles** — reference: word lists, readings, explanation cards.
+- **Listen** (Practice → Listen, or “Listen and repeat” on the path, a reading or a song) — hands-free listen and repeat for the street or the bus. The app plays recordings in a set order and leaves a pause after each one for the learner to say it aloud. Nothing is checked, scored or counted as progress. Sessions: today's mix (words you know, what's next on the path, sentences, a text, a quick second round, a few song lines), any text or dialogue (whole → line by line with pauses → whole again), any song or poem (the song → line by line → the song again) and any topic. Settings: pause length (short / medium / long; the pause also grows with the length of what you hear), how many times you hear each item (1–3×, voice 1 then voice 2), and whether today's mix includes a song.
 
 The order of the path is `path` in `course.js`.
 
@@ -46,6 +47,12 @@ The speaker opens `record.html`, records, and taps **Send recordings**. Upload t
 ## Adding lessons
 
 Either edit `course.js` (the format is described at the top of the file) and run `node tools/check.mjs`, or ask Claude for a **lesson pack** (JSON with `id`, `title` and any of `topics`, `principles`, `words`, `phrases`, `readings`, `songs`) and paste it in More → Add a lesson pack. Progress is never touched by either route. Do not change the Russian of an item that already has a recording: that is its audio key.
+
+## How Listen plays sound
+
+Recorded items are put together on the phone into one audio track per block of up to four minutes (recording, pause, recording, pause, with a soft two-note chime between parts), trimmed of silence and evened out in volume. Because it is one ordinary audio track, it keeps playing with the screen locked, and the lock screen and headphone buttons can pause and skip. Items without a recording use the phone's Russian voice, which needs the screen on. A song plays from the learner's own audio file if she adds one on the Listen page (it stays on the phone and also plays with the screen locked), otherwise from the video, which needs the screen on and the internet (tap it if it doesn't start by itself).
+
+**Song and poem lines.** The speaker records them line by line on the recorder page, from the lyrics added in the app on that phone or pasted on the recorder page. They are sent as a separate file, `koren-song-lines.json` (or `-2` for the second voice), which the learner imports on her phone (More → Import a recordings file). Do **not** upload that file to GitHub: the lyrics are copyrighted. The main recordings file never contains song lines.
 
 ## Songs, poems and lyrics
 

@@ -38,6 +38,26 @@ a{color:var(--accent)}
 a.li,a.pill,a.btn{color:inherit;text-decoration:none}
 a.pill.root{color:var(--root)}
 nav.tabs[hidden]{display:none}
+/* Listen mode */
+.ap{align-items:stretch;text-align:center;gap:10px}
+.ap-part{font-weight:600;color:var(--mute);min-height:1.5em}
+.ap-stage{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.ap-cue{font-size:14px;font-weight:600;color:var(--mute);min-height:1.4em;padding:2px 12px;border-radius:999px;transition:background .2s,color .2s}
+.ap-cue.say{background:var(--accent);color:var(--accent-ink)}
+.ap-ru{font:600 30px/1.3 var(--f-body);border:0;background:none;padding:4px 8px;max-width:100%;overflow-wrap:anywhere}
+.ap-ru:disabled{color:inherit;cursor:default}
+.ap-mean{font-size:18px;color:var(--mute)}
+#ap-ytbox{width:100%}
+.ap-ctl{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:4px}
+.ap-b{border:0;background:none;color:var(--ink);width:48px;height:48px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ap-b.ap-pp{width:68px;height:68px;background:var(--accent);color:var(--accent-ink)}
+.mini{position:fixed;left:8px;right:8px;bottom:calc(66px + env(safe-area-inset-bottom,0px));z-index:11;max-width:664px;margin:0 auto;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 6px;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.mini[hidden]{display:none}
+.mini-t{border:0;background:none;min-width:0;text-align:start;display:flex;flex-direction:column;padding:4px 2px}
+.mini-t .ru{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.mini-t small{color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.has-mini .wrap{padding-bottom:calc(160px + env(safe-area-inset-bottom,0px))}
+
 .wrap{max-width:680px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom,0px))}
 header.top{position:sticky;top:0;z-index:10;background:var(--bg);padding:calc(10px + env(safe-area-inset-top,0px)) 16px 8px;border-bottom:1px solid var(--line)}
 .top-in{max-width:680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -175,12 +195,15 @@ textarea{width:100%;min-height:120px;border-radius:12px;border:1px solid var(--l
 <main class="wrap" id="view"></main>
 <nav class="tabs" id="tabs" aria-label="Sections"></nav>
 <audio id="player" preload="none"></audio>
+<audio id="aplayer" preload="auto" playsinline></audio>
+<div class="mini" id="mini" hidden></div>
 <script src="course.js"></script>
 <script>
 /* Koren · Copyright © 2026 natmartem · SPDX-License-Identifier: AGPL-3.0-or-later
    localStorage "koren-state": progress and settings. "koren-packs": lessons added in the app.
    "koren-lyrics": song lyrics the learner pasted (never in the repo: copyright).
-   IndexedDB "koren" → "audio", "audio2": recordings imported on this phone. */
+   IndexedDB "koren" → "audio", "audio2": recordings imported on this phone; "lines1", "lines2": song and poem lines
+   (kept off GitHub: lyrics are copyrighted); "songfile:<id>": the learner's own audio file of a song. */
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -354,7 +377,7 @@ function generate(c){
       const o={pid:"stress",part:"",tag:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
 }
 build();
-const APP_VERSION="1.4";
+const APP_VERSION="1.5";
 
 /* ================= feedback notes (localStorage "koren-feedback") =================
    A note box under each drill question, drill result, topic, principle and reading.
@@ -403,7 +426,9 @@ const SPK=`<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><p
 let ruVoice=null;const ttsOK=()=>("speechSynthesis" in window)&&S.tts;
 function loadVoices(){try{const v=speechSynthesis.getVoices().filter(x=>/^ru/i.test(x.lang));ruVoice=v.find(x=>/milena|yuri|katya/i.test(x.name))||v[0]||null}catch(e){}}
 if("speechSynthesis" in window){loadVoices();try{speechSynthesis.onvoiceschanged=loadVoices}catch(e){}}
-const hasA=k=>!!(AUD[k]&&AUD[k].length);
+const AUDN=new Map(); /* the same text with other punctuation or case finds the same recording (song lines) */
+const audOf=k=>{if(!k)return null;if(AUD[k]&&AUD[k].length)return AUD[k];const r=AUDN.get(norm(k.slice(2)));return r&&AUD[r]&&AUD[r].length?AUD[r]:null};
+const hasA=k=>!!audOf(k);
 const canPlay=k=>hasA(k)||ttsOK();
 const hearBtn=(k,text)=>canPlay(k)?`<button type="button" class="hear" data-play="${esc(k)}" data-text="${esc(plain(text))}">${SPK}${T("Hear it","استمع⟦ي|⟧")}</button>`:"";
 const spk=(k,text,big)=>canPlay(k)?`<button type="button" class="spk${big?" big":""}" data-play="${esc(k)}" data-text="${esc(plain(text))}" aria-label="${T("Play","تشغيل")}">${SPK}</button>`:"";
@@ -412,8 +437,8 @@ function speak(text){
   try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(plain(text));u.lang="ru-RU";u.rate=.85;if(ruVoice)u.voice=ruVoice;speechSynthesis.speak(u)}catch(e){}
 }
 function play(k,text,btn){
-  const arr=AUD[k];
-  if(arr&&arr.length){
+  const arr=audOf(k);
+  if(arr){
     const a=arr[Math.floor(Math.random()*arr.length)]; /* several voices: the ear learns the sound, not one person */
     try{if(!a.url){const bin=atob(a.d),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);a.url=URL.createObjectURL(new Blob([u],{type:a.m}))}
       if(playingBtn)playingBtn.classList.remove("playing");playingBtn=btn||null;if(btn)btn.classList.add("playing");
@@ -439,7 +464,7 @@ function addClips(o,src,sp){
   if(!o||o.app!=="koren-audio"||!o.clips||typeof o.clips!=="object")return -1;let n=0;
   Object.keys(o.clips).forEach(k=>{const c=o.clips[k];
     if(/^[WPS]:/.test(k)&&c&&typeof c.m==="string"&&/^audio\//.test(c.m)&&typeof c.d==="string"){
-      AUD[k]=(AUD[k]||[]).filter(x=>!(x.sp===sp&&x.src===src));AUD[k].push({m:c.m,d:c.d,src,sp});n++}});
+      AUD[k]=(AUD[k]||[]).filter(x=>!(x.sp===sp&&x.src===src));AUD[k].push({m:c.m,d:c.d,src,sp});n++;const nk=norm(k.slice(2));if(!AUDN.has(nk))AUDN.set(nk,k)}});
   return n;
 }
 function idb(){return new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error("no idb"));const r=indexedDB.open("koren",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
@@ -451,8 +476,10 @@ async function loadAudio(){
     const f=sp===1?"koren-audio.json":"koren-audio-2.json";
     try{const r=await fetch(f,{cache:"no-cache"});if(r.ok)addClips(await r.json(),"host",sp)}catch(e){}
     try{const loc=await idbGet(sp===1?"audio":"audio2");if(loc)addClips(loc,"local",sp)}catch(e){}
+    try{const ln=await idbGet("lines"+sp);if(ln)addClips(ln,"lines",sp)}catch(e){} /* song lines: on this phone only */
   }
   if(!Q)render();
+  loadSongFiles();
 }
 
 /* ================= progress ================= */
@@ -598,8 +625,8 @@ function render(){
   $("#tabs").hidden=(v==="drill"&&!!Q);
   if(v==="drill"&&Q){
     if(Q.answered&&!Q.finished){Q.answered=false;Q.i++;if(Q.i>=Q.list.length)Q.finished=true} /* back from a card: carry on with the next one */
-    return renderQ()}
-  const tab={topic:"topics",p:"principles",r:"topics",read:"topics",today:"path",song:"songs"}[v]||v;renderTabs(tab);
+    apUI();return renderQ()}
+  const tab={topic:"topics",p:"principles",r:"topics",read:"topics",today:"path",song:"songs",listen:"practice"}[v]||v;renderTabs(tab);
   const view=$("#view");
   const back=Q&&!Q.finished?`<button type="button" class="back" data-go="#drill">← ${T("Back to practice","العودة إلى التدريب")}</button>`:"";
   let html="";
@@ -613,8 +640,11 @@ function render(){
   else if(v==="more")html=vMore();
   else if(v==="songs")html=vSongs();
   else if(v==="song"&&SONGm[arg])html=vSong(arg);
+  else if(v==="listen")html=arg==="play"?vListenPlay():vListen();
   else html=vPath();
+  if(AP.yt){try{AP.yt.destroy()}catch(e){}AP.yt=null;AP.on=false} /* the video lives on the player screen */
   view.innerHTML=back+html;
+  apShown=-1;apUI();if(v==="listen"&&arg==="play"&&AP.mode==="yt")setTimeout(()=>ytMount(),0);
   if(sub==="lyrics")setTimeout(()=>{const el=$("#lyrics");if(el)el.scrollIntoView({block:"start"})},60);
 }
 function stepRow(x,cur){
@@ -631,6 +661,7 @@ function vPath(){
    <button type="button" class="btn primary wide" data-act="step" data-id="${esc(cur.id)}">${done?T("Continue","تابع⟦ي|⟧"):T("Start","⟦ابدئي|ابدأ⟧")}</button>
    <div class="meter"><i style="width:${Math.round(done/STEPS.length*100)}%"></i></div><p class="count">${T(`${done} of ${STEPS.length} steps done`,`أنجزت ${done} من ${STEPS.length} خطوة`)}</p>`
    :`<h2>${T("You've finished the whole path","أنهيت المسار كله")}</h2><p class="lead">${T("Everything is learned. Keep it fresh in Practice.","تعلّمت كل شيء. حافظ⟦ي|⟧ عليه في التدريب.")}</p><button type="button" class="btn primary wide" data-go="#practice">${T("Go to Practice","إلى التدريب")}</button>`}</div>
+  <div class="card"><span class="label">${T("On the go","في الطريق")}</span><p class="lead">${T("Listen and repeat with headphones, no screen needed.","استمع⟦ي|⟧ وردّد⟦ي|⟧ بالسماعات، بلا حاجة إلى الشاشة.")}</p><button type="button" class="btn wide" data-go="#listen">${HEADI} ${T("Listen and repeat","استمع⟦ي|⟧ وردّد⟦ي|⟧")}</button></div>
   <div class="card"><div class="list">${win.map(x=>stepRow(x,cur)).join("")}</div>
    <details class="fb-list"><summary>${T("See the whole path","أظهر⟦ي|⟧ المسار كاملًا")} (${STEPS.length})</summary><div class="list">${STEPS.map(x=>stepRow(x,cur)).join("")}</div></details></div>
   ${storageOK?"":`<div class="card"><p>${T("This browser is not saving progress (private mode?). Open the app normally to keep your progress.","هذا المتصفح لا يحفظ التقدم (وضع خاص؟). افتح⟦ي|⟧ التطبيق بشكل عادي لحفظ تقدمك.")}</p></div>`}`;
@@ -638,7 +669,8 @@ function vPath(){
 function vPractice(){
   const P=poolOf(),pr=PR.filter(x=>unlocked(x.id)),tops=TOP.map(t=>({t,n:poolOf({topic:t.id}).size})).filter(x=>x.n>0);
   const tops2=TOP.map(x=>({t:x,n:recognised(wordsOf(x.id))})).filter(x=>x.n>0);
-  return `<h1>${T("Practice","التدريب")}</h1>
+  return `<div class="seg" style="margin-bottom:12px"><button type="button" aria-pressed="true">${T("Drills","التمارين")}</button><button type="button" data-go="#listen" aria-pressed="false">${T("Listen","الاستماع")}</button></div>
+  <h1>${T("Practice","التدريب")}</h1>
   <p class="lead">${T("Review only: everything here comes from steps you've done on the path. Nothing new.","مراجعة فقط: كل ما هنا من خطوات أنجزتها في المسار. لا شيء جديد.")}</p>
   <div class="card">${P.size?`<p class="count">${T(`${P.size} things to practise`,`${P.size} عنصرًا للتدريب`)}</p><button type="button" class="btn primary wide" data-act="practice">${T("Start practice","⟦ابدئي|ابدأ⟧ التدريب")}</button>`
    :`<p class="lead">${T("This fills up as you go along the path.","يمتلئ هذا كلما تقدّمت في المسار.")}</p><button type="button" class="btn primary wide" data-go="#path">${T("Go to the path","إلى المسار")}</button>`}</div>
@@ -694,7 +726,8 @@ function vReading(id){
   const r=READS.find(x=>x.id===id);if(!r)return vReads();
   return `<a class="back" href="#read">← ${T("Read","القراءة")}</a><h1>${esc(L(r))}</h1>
   <div class="card reading"><div class="row" style="justify-content:space-between"><span class="tap-hint">${T("Tap a line to hear it and check the meaning.","اضغط⟦ي|⟧ على السطر لتسمع⟦ي|⟧ه وتتأكد⟦ي|⟧ من معناه.")}</span>${canPlay("S:"+plain(r.lines[0][0]))?`<button type="button" class="btn small" data-act="playall" data-id="${esc(id)}">▶ ${T("Play all","تشغيل الكل")}</button>`:""}</div><div>${r.lines.map(l=>`<div class="line">${spk("S:"+plain(l[0]),l[0])}<button type="button" class="reveal" data-reveal><span class="rl ru">${RUt(l[0])}</span><span class="m" hidden>${esc(S.lang==="ar"?l[2]:l[1])}</span></button></div>`).join("")}</div></div>
-  <div class="card"><button type="button" class="btn primary wide" data-act="rpractice" data-id="${esc(id)}">${T("Practise this text","تدرّب⟦ي|⟧ على هذا النص")}</button>
+  <div class="card">${listenBtn("r",id,T("Listen and repeat, hands-free","استمع⟦ي|⟧ وردّد⟦ي|⟧ بلا يدين"))}<p class="count">${T("The whole text, then line by line with pauses to say it, then the whole text again.","النص كاملًا، ثم سطرًا سطرًا مع وقفات للترديد، ثم النص كاملًا مرة أخرى.")}</p>
+   <button type="button" class="btn primary wide" data-act="rpractice" data-id="${esc(id)}">${T("Practise this text","تدرّب⟦ي|⟧ على هذا النص")}</button>
    <p class="count">${T("Meaning, gaps, building and typing with these exact lines.","المعنى والفراغات وترتيب الجمل والكتابة، بهذه السطور نفسها.")}</p>
    <button type="button" class="btn wide" data-act="markread" data-id="${esc(id)}">${S.read[id]?T("Read ✓","مقروء ✓"):T("I've read it","قرأته")}</button></div>
   ${fbBox("r:"+id,()=>({kind:"reading",src:`Reading “${r.en}” (id ${id})`}))}`;
@@ -812,6 +845,7 @@ function lyricsCard(s){
    <span class="tap-hint">${T("Underlined: words you already know.","تحت الخط: كلمات تعرف⟦ين|⟧ها.")} ${nt?T("Tap a line to see the translation.","اضغط⟦ي|⟧ على السطر لتر⟦ي|ى⟧ الترجمة."):T("Tap the speaker to hear a line.","اضغط⟦ي|⟧ على السمّاعة لتسمع⟦ي|⟧ السطر.")}</span>
    ${note}
    <div>${L.map(l=>l.head?`<p class="label" style="margin-top:12px">${esc(l.head)}</p>`:l.gap?`<div style="height:10px"></div>`:`<div class="line">${spk("S:"+plain(l.ru),l.ru)}<button type="button" class="reveal" data-reveal><span class="rl ru">${lyrMark(l.ru)}</span>${l.tr?`<span class="m" hidden>${esc(l.tr)}</span>`:""}</button></div>`).join("")}</div>
+   <div style="margin-top:8px">${listenBtn("s",id,T("Listen and repeat line by line","استمع⟦ي|⟧ وردّد⟦ي|⟧ سطرًا سطرًا"))}</div>
    ${nt<lines.length?`<div class="row" style="margin-top:6px">${trLink}${P("tr",T("Paste a translation","الصق⟦ي|⟧ ترجمة"),true)}</div><p class="tap-hint">${T("Copy a translation of the whole song, then tap Paste: it lines up with the Russian lines.","انسخ⟦ي|⟧ ترجمة الأغنية كاملة ثم اضغط⟦ي|⟧ «الصق⟦ي|⟧»: ستتطابق مع السطور الروسية.")}</p>`:""}
    ${editor}</div>`;
 }
@@ -864,7 +898,7 @@ function vMore(){
   <div class="card"><span class="label">${T("Settings","الإعدادات")}</span>
    <div class="switch"><span>${T("Explanations in","لغة الشرح")}</span><div class="seg"><button type="button" data-lang="en" aria-pressed="${S.lang==="en"}">English</button><button type="button" data-lang="ar" aria-pressed="${S.lang==="ar"}" class="ar">العربية</button></div></div>
    <div class="switch"><span>${T("Speak to me as","⟦خاطبيني|خاطبني⟧ بصيغة")}</span><div class="seg"><button type="button" data-gender="f" aria-pressed="${S.gender!=="m"}">${T("A woman","المؤنث")}</button><button type="button" data-gender="m" aria-pressed="${S.gender==="m"}">${T("A man","المذكّر")}</button></div></div>
-   <p style="color:var(--mute);font-size:14px;margin:2px 0 10px">${T("Changes the Arabic instructions and the Russian you say about yourself: <span class="ru" dir="ltr">Я студе́нтка / Я студе́нт</span>. Typed answers accept both.","تغيّر صيغة الإرشادات العربية والجمل الروسية التي تقول⟦ينها|ها⟧ عن نفس⟦كِ|ك⟧: <span class="ru" dir="ltr">Я студе́нтка / Я студе́нт</span>. والإجابات المكتوبة تُقبل بالصيغتين.")}</p>
+   <p style="color:var(--mute);font-size:14px;margin:2px 0 10px">${T("Changes the Arabic instructions and the Russian you say about yourself: <span class='ru' dir='ltr'>Я студе́нтка / Я студе́нт</span>. Typed answers accept both.","تغيّر صيغة الإرشادات العربية والجمل الروسية التي تقول⟦ينها|ها⟧ عن نفس⟦كِ|ك⟧: <span class='ru' dir='ltr'>Я студе́нтка / Я студе́нт</span>. والإجابات المكتوبة تُقبل بالصيغتين.")}</p>
    <div class="switch"><span>${T("Stress marks","علامات النبر")}</span><div class="seg"><button type="button" data-act="stress" data-v="0" aria-pressed="${!S.stressAll}">${T("Fade when known","تختفي عند المعرفة")}</button><button type="button" data-act="stress" data-v="1" aria-pressed="${S.stressAll}">${T("Always","دائمًا")}</button></div></div>
    <div class="switch"><span>${T("Play sound automatically","تشغيل الصوت تلقائيًا")}</span><div class="seg"><button type="button" data-act="auto" data-v="1" aria-pressed="${autoOn()}">${T("On","تشغيل")}</button><button type="button" data-act="auto" data-v="0" aria-pressed="${!autoOn()}">${T("Off","إيقاف")}</button></div></div>
    <div class="switch"><span>${T("Phone voice when there's no recording","صوت الهاتف عند غياب التسجيل")}</span><div class="seg"><button type="button" data-act="tts" data-v="1" aria-pressed="${S.tts}">${T("On","تشغيل")}</button><button type="button" data-act="tts" data-v="0" aria-pressed="${!S.tts}">${T("Off","إيقاف")}</button></div></div>
@@ -888,6 +922,398 @@ function vMore(){
    <p>${T("Koren (Корень, “root”) teaches Russian to Arabic and English speakers through how the language is built. Code: AGPL-3.0. Lessons: CC BY-NC-SA 4.0. Recordings belong to the people who made them.","«كورين» (Корень، أي «جذر») يعلّم الروسية للمتحدثين بالعربية والإنجليزية من خلال طريقة بناء اللغة. الشيفرة: AGPL-3.0. الدروس: CC BY-NC-SA 4.0. التسجيلات ملك أصحابها.")}</p>
    <p class="lead">${T("Course version","نسخة الدروس")} ${esc(BASE.version)}</p></div>`;
 }
+
+/* ================= Listen: hands-free listen and repeat =================
+   For the street, the bus, the kitchen. The app plays recordings in a set order and leaves a pause after
+   each one so the learner can say it aloud. Nothing is checked, scored or counted as progress.
+   - Recorded items are "baked" into one WAV per block (clips + pauses + chimes), so playback goes on with the
+     screen locked and the lock screen shows play/pause/next. The phone voice (no recording) needs the screen on.
+   - Pause after an item = its own length × 1.4 + 0.8 s (min 1.6 s, max 9 s), times the Short/Medium/Long setting.
+   - Words and sentences: heard N times (voice 1, then voice 2 if there is one), each followed by a pause.
+   - Readings and dialogues: the whole text → line by line with pauses → the whole text again.
+   - Songs and poems: the song (the learner's own audio file, or the video) → line by line with pauses → the song again.
+     Song lines are recorded line by line on the recorder page and stay on the phone (lyrics are copyrighted). */
+const AU_DEF={pause:"m",reps:2,song:1};
+const AU=()=>Object.assign({},AU_DEF,S.au||{});
+const PMULT={s:.75,m:1,l:1.45};
+const SR=22050;
+const aplayer=$("#aplayer");
+const AP={sess:null,steps:[],i:0,on:false,mode:"",blk:null,next:null,tok:0,timer:null,yt:null,ytVid:"",say:false,done:false,blocked:false,quiet:false,fileUrl:null,onEnd:null};
+
+/* --- sound building blocks --- */
+function wavBlob(parts,n){
+  const b=new ArrayBuffer(44+n*2),v=new DataView(b),w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,"RIFF");v.setUint32(4,36+n*2,true);w(8,"WAVE");w(12,"fmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,SR,true);v.setUint32(28,SR*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,"data");v.setUint32(40,n*2,true);
+  const out=new Int16Array(b,44,n);let o=0;
+  for(const p of parts)for(let i=0;i<p.length;i++){const s=p[i]>1?1:p[i]<-1?-1:p[i];out[o++]=s<0?s*32768:s*32767}
+  return new Blob([b],{type:"audio/wav"});
+}
+const SILENT=URL.createObjectURL(wavBlob([new Float32Array(SR/10)],SR/10));
+let CH=null;
+function chime(){ /* two soft notes: a new part starts */
+  if(CH)return CH;const n=Math.round(SR*.45),y=new Float32Array(n);
+  [[0,659.25],[.16,987.77]].forEach(([t0,f])=>{const s=Math.round(t0*SR),L=Math.round(SR*.28);
+    for(let i=0;i<L&&s+i<n;i++){const e=Math.exp(-i/(SR*.07))*Math.min(1,i/(SR*.004));y[s+i]+=.2*e*Math.sin(2*Math.PI*f*i/SR)}});
+  return CH=y;
+}
+function resample(x,from){
+  if(!from||from===SR)return x;const r=from/SR,n=Math.floor(x.length/r),y=new Float32Array(n);
+  for(let i=0;i<n;i++){const p=i*r,k=Math.floor(p),f=p-k;y[i]=(x[k]||0)*(1-f)+(x[k+1]||0)*f}return y;
+}
+function tidy(x){ /* cut the silence before and after the voice, even out the volume, soften the edges */
+  let pk=0;for(let i=0;i<x.length;i++){const a=Math.abs(x[i]);if(a>pk)pk=a}
+  if(pk<1e-4)return null;
+  const th=pk*.06;let a=0,b=x.length-1;
+  while(a<b&&Math.abs(x[a])<th)a++;while(b>a&&Math.abs(x[b])<th)b--;
+  a=Math.max(0,a-Math.round(SR*.12));b=Math.min(x.length,b+Math.round(SR*.2));
+  const g=Math.min(4,.9/pk),y=new Float32Array(Math.max(1,b-a));for(let i=0;i<y.length;i++)y[i]=x[a+i]*g;
+  const f=Math.min(Math.round(SR*.01),y.length>>1);for(let i=0;i<f;i++){y[i]*=i/f;y[y.length-1-i]*=i/f}
+  return y;
+}
+function clipBytes(c){const bin=atob(c.d),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u}
+function clipURL(c){if(!c.url)c.url=URL.createObjectURL(new Blob([clipBytes(c)],{type:c.m}));return c.url}
+function decodeClip(c){
+  if(c.pcm)return Promise.resolve(c.pcm);if(c.bad)return Promise.resolve(null);
+  return new Promise(res=>{
+    let ctx;const fail=()=>{c.bad=true;res(null)};
+    try{const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;ctx=new OAC(1,SR,SR)}catch(e){return fail()}
+    const ok=b=>{try{let x=b.getChannelData(0);
+      if(b.numberOfChannels>1){const y=b.getChannelData(1),m=new Float32Array(x.length);for(let i=0;i<x.length;i++)m[i]=(x[i]+y[i])/2;x=m}
+      const t=tidy(resample(x,b.sampleRate));if(!t)return fail();c.pcm=t;res(t)}catch(e){fail()}};
+    try{const p=ctx.decodeAudioData(clipBytes(c).buffer,ok,fail);if(p&&p.catch)p.catch(()=>{})}catch(e){fail()}
+  });
+}
+/* voice 1 for the first hearing, voice 2 for the second when there is one */
+const pickClip=(arr,v)=>arr.find(x=>x.sp===(v%2?2:1))||arr[v%arr.length]||arr[0];
+const estDur=t=>Math.max(.7,plain(t||"").length/12);
+function gapAfter(st,dur){
+  if(st.gap!=null)return st.gap;
+  if(!st.rep)return 450;
+  return Math.round(Math.min(9000,Math.max(1600,dur*1400+800))*(PMULT[AU().pause]||1));
+}
+const playable=st=>st.t==="say"&&(audOf(st.k)||ttsOK());
+
+/* --- sessions: a title and parts; each step is a chime, a "say" or a song --- */
+function Sess(title,sub){
+  let item=0,part="";const steps=[];
+  const S1={title,sub:sub||"",steps,
+    part(label){part=label;steps.push({t:"chime",part:label,item:++item})},
+    say(k,text,mean,o){steps.push(Object.assign({t:"say",k,text,mean:mean||null,part,item:o&&o.same?item:++item},o||{}))},
+    reps(it,n){const id=++item;for(let r=0;r<n;r++)steps.push({t:"say",k:it.akey||it.key,text:it.ru,mean:it,rep:1,v:r,part,item:id})},
+    whole(lines,gap){lines.forEach(l=>steps.push({t:"say",k:l.k,text:l.ru,mean:l,gap:gap==null?500:gap,part,item:++item}))},
+    lines(lines,n){lines.forEach(l=>{const id=++item;for(let r=0;r<n;r++)steps.push({t:"say",k:l.k,text:l.ru,mean:l,rep:1,v:r,part,item:id})})},
+    song(id){steps.push({t:"song",id,part,item:++item})}};
+  return S1;
+}
+const readLines=r=>(r.lines||[]).map(l=>({k:"S:"+plain(l[0]),ru:l[0],en:l[1],ar:l[2]}));
+const isDialog=r=>(r.lines||[]).filter(l=>/^\s*[—–-]/.test(l[0])).length>=2;
+const songLines=s=>lyrParse(LYR[s.id]||"").filter(x=>x.ru).map(x=>({k:"S:"+plain(x.ru),ru:x.ru,tr:x.tr||""}));
+function addReading(z,r,reps){
+  const L=readLines(r),d=isDialog(r),nm=L0(r);
+  z.part(d?T(`Dialogue: ${nm}. Just listen`,`حوار: ${nm}. استمع⟦ي|⟧ فقط`):T(`Text: ${nm}. Just listen`,`نص: ${nm}. استمع⟦ي|⟧ فقط`));z.whole(L);
+  z.part(T("Your turn: line by line. Say each line in the pause","دور⟦كِ|ك⟧: سطرًا سطرًا. ⟦قولي|قل⟧ كل سطر في الوقفة"));z.lines(L,reps);
+  z.part(T("The whole text again","النص كاملًا مرة أخرى"));z.whole(L);
+}
+function addSong(z,s,reps,short){
+  const L=songLines(s),poem=isPoem(s);
+  z.part(poem?T(`Poem: ${plain(s.ru)}. Just listen`,`قصيدة: ${plain(s.ru)}. استمع⟦ي|⟧ فقط`):T(`Song: ${plain(s.ru)}. Just listen`,`أغنية: ${plain(s.ru)}. استمع⟦ي|⟧ فقط`));
+  if(poem)z.whole(L,700);else z.song(s.id);
+  if(!L.length)return;
+  z.part(T("Your turn: line by line. Say each line in the pause","دور⟦كِ|ك⟧: سطرًا سطرًا. ⟦قولي|قل⟧ كل سطر في الوقفة"));z.lines(L,short?1:reps);
+  if(short)return;
+  z.part(poem?T("The whole poem again","القصيدة كاملة مرة أخرى"):T("The song again","الأغنية مرة أخرى"));
+  if(poem)z.whole(L,700);else z.song(s.id);
+}
+const L0=o=>o?(S.lang==="ar"?o.ar:o.en):"";
+function mixReading(){
+  const cur=curStep();
+  if(cur&&cur.k==="r")return READS.find(r=>r.id===cur.rid);
+  const before=STEPS.filter(x=>x.k==="r"&&stepDone(x)&&(!cur||x.i<cur.i));
+  const pick=before.length?before[before.length-1]:STEPS.find(x=>x.k==="r");
+  return pick?READS.find(r=>r.id===pick.rid):null;
+}
+const songsWithLines=()=>SONGS.filter(s=>songLines(s).length);
+function mixSong(){
+  const L=songsWithLines();if(!L.length)return null;
+  const started=L.filter(s=>s.lessons.some((_,i)=>S.done[sdKey(s.id,i)]));
+  const pool=started.length?started:L;return pool[today()%pool.length];
+}
+function sessMix(){
+  const A=AU(),cur=curStep(),due=new Set(dueKeys());
+  const learned=WORDS.filter(w=>seenOrDrilled(w));
+  const oldW=[...learned.filter(w=>due.has(w.key)),...shuffle(learned.filter(w=>!due.has(w.key)))].slice(0,12);
+  const newW=cur&&cur.k==="t"?cur.words.filter(w=>!seenOrDrilled(w)):[];
+  const oldP=shuffle(PHRASES.filter(p=>seenOrDrilled(p)&&ready(p))).slice(0,6);
+  const newP=cur?cur.phrases.filter(p=>!seenOrDrilled(p)):[];
+  const pex=cur&&cur.k==="p"?(PRm[cur.pid].ex||[]).map(x=>({key:"S:"+plain(x[0]),akey:"S:"+plain(x[0]),ru:x[0],en:x[1],ar:x[2]})):[];
+  const z=Sess(T("Today's listening","استماع اليوم"),T("Words, sentences and a text from your path","كلمات وجمل ونص من مسارك"));
+  if(oldW.length){z.part(T("Words you know. Say each one after the voice","كلمات تعرف⟦ين|⟧ها. ⟦ردّديها|ردّدها⟧ بعد الصوت"));oldW.forEach(w=>z.reps(w,A.reps))}
+  if(newW.length){z.part(T("Coming up next on your path: first listen","التالي في مسارك: استماع أول"));newW.forEach(w=>z.reps(w,A.reps))}
+  const ph=[...oldP,...newP,...pex];
+  if(ph.length){z.part(T("Sentences. Say each one after the voice","جمل. ⟦ردّديها|ردّدها⟧ بعد الصوت"));ph.forEach(p=>z.reps(p,A.reps))}
+  const r=mixReading();if(r)addReading(z,r,A.reps);
+  const echo=[...oldW,...newW];
+  if(echo.length>3){z.part(T("Once more, from the start","مرة أخرى، من البداية"));shuffle(echo).forEach(w=>z.reps(w,1))}
+  const s=A.song?mixSong():null;if(s)addSong(z,s,A.reps,true);
+  return z;
+}
+function sessReading(id){const r=READS.find(x=>x.id===id);if(!r)return null;const z=Sess(L0(r),isDialog(r)?T("Dialogue","حوار"):T("Text","نص"));addReading(z,r,AU().reps);return z}
+function sessSong(id){const s=SONGm[id];if(!s)return null;const z=Sess(plain(s.ru),plain(s.by));addSong(z,s,AU().reps,false);return z}
+function sessTopic(id){
+  const t=TOPm[id];if(!t)return null;const A=AU(),z=Sess(L0(t),T("Words and sentences","كلمات وجمل"));
+  const ws=wordsOf(id),ps=phrasesOf(id);
+  if(ws.length){z.part(T("Words. Say each one after the voice","كلمات. ⟦ردّديها|ردّدها⟧ بعد الصوت"));ws.forEach(w=>z.reps(w,A.reps))}
+  if(ps.length){z.part(T("Sentences. Say each one after the voice","جمل. ⟦ردّديها|ردّدها⟧ بعد الصوت"));ps.forEach(p=>z.reps(p,A.reps))}
+  return z;
+}
+function sessInfo(z){
+  if(!z)return {min:0,rec:0,n:0};let sec=0,rec=0,n=0;const seen=new Set();
+  z.steps.forEach(st=>{if(st.t==="chime")sec+=.8;else if(st.t==="song")sec+=210;
+    else{const d=estDur(st.text);sec+=d+gapAfter(st,d)/1000;if(!seen.has(st.k)){seen.add(st.k);n++;if(audOf(st.k))rec++}}});
+  return {min:Math.max(1,Math.round(sec/60)),rec,n};
+}
+
+/* --- the player --- */
+async function bakeFrom(i,tok){ /* clips, pauses and chimes from step i on, as one WAV (up to 4 minutes) */
+  const parts=[],offs=[];let n=0,j=i;
+  while(j<AP.steps.length&&n<SR*240){
+    const st=AP.steps[j];
+    if(st.t==="chime"){const c=chime(),g=new Float32Array(Math.round(SR*.4));offs.push({j,t0:n/SR,t1:(n+c.length)/SR});parts.push(c,g);n+=c.length+g.length;j++;continue}
+    if(st.t!=="say"||st.live)break;
+    const arr=audOf(st.k);if(!arr)break;
+    const pcm=await decodeClip(pickClip(arr,st.v||0));if(tok!==AP.tok)return null;
+    if(!pcm){st.live=1;break}
+    const g=new Float32Array(Math.round(SR*gapAfter(st,pcm.length/SR)/1000));
+    offs.push({j,t0:n/SR,t1:(n+pcm.length)/SR});parts.push(pcm,g);n+=pcm.length+g.length;j++;
+  }
+  if(j===i)return null;
+  return {start:i,end:j,offs,url:URL.createObjectURL(wavBlob(parts,n))};
+}
+const bakeable=st=>st&&(st.t==="chime"||(st.t==="say"&&!st.live&&!!audOf(st.k)));
+function apClear(keep){
+  clearTimeout(AP.timer);AP.onEnd=null;AP.say=false;AP.blocked=false;
+  try{speechSynthesis.cancel()}catch(e){}
+  AP.quiet=true;try{aplayer.pause()}catch(e){}AP.quiet=false;
+  if(AP.yt){try{AP.yt.destroy()}catch(e){}AP.yt=null}
+  if(AP.blk){URL.revokeObjectURL(AP.blk.url);AP.blk=null}
+  if(AP.fileUrl){URL.revokeObjectURL(AP.fileUrl);AP.fileUrl=null}
+  if(!keep&&AP.next){AP.next.p.then(b=>{if(b)URL.revokeObjectURL(b.url)});AP.next=null}
+  AP.mode="";
+}
+function apPlay(){AP.on=true;const p=aplayer.play();if(p&&p.catch)p.catch(()=>{AP.blocked=true;AP.on=false;apUI()})}
+async function apGo(i,keep){
+  const tok=++AP.tok;apClear(keep);AP.on=true;
+  if(i>=AP.steps.length){apFinish();return}
+  AP.i=Math.max(0,i);AP.done=false;apUI();
+  const st=AP.steps[AP.i];
+  if(st.t==="song")return apSong(st,tok);
+  if(bakeable(st)){
+    let b=null;if(AP.next&&AP.next.start===AP.i){b=await AP.next.p;AP.next=null}
+    if(!b&&tok===AP.tok)b=await bakeFrom(AP.i,tok);
+    if(tok!==AP.tok){if(b)URL.revokeObjectURL(b.url);return}
+    if(b){AP.blk=b;AP.mode="blk";aplayer.src=b.url;apPlay();
+      if(bakeable(AP.steps[b.end]))AP.next={start:b.end,p:bakeFrom(b.end,tok)};return}
+  }
+  apLive(st,tok);
+}
+function apLive(st,tok){
+  AP.mode="live";
+  const fin=dur=>{if(tok!==AP.tok)return;AP.say=!!st.rep;apUI();AP.timer=setTimeout(()=>{if(tok===AP.tok)apGo(AP.i+1,true)},gapAfter(st,dur))};
+  if(st.t!=="say")return apGo(AP.i+1,true);
+  const arr=audOf(st.k);
+  if(arr){AP.mode="file";aplayer.src=clipURL(pickClip(arr,st.v||0));AP.onEnd=()=>fin(aplayer.duration||estDur(st.text));apPlay();return}
+  if(ttsOK()){const t0=Date.now();let ended=false;const end=d=>{if(ended)return;ended=true;clearTimeout(AP.timer);fin(d)};
+    try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(plain(st.text));u.lang="ru-RU";u.rate=.85;if(ruVoice)u.voice=ruVoice;
+      u.onend=()=>end((Date.now()-t0)/1000);u.onerror=()=>end(estDur(st.text));speechSynthesis.speak(u);
+      AP.timer=setTimeout(()=>{if(tok===AP.tok)end(estDur(st.text))},estDur(st.text)*2500+3000)}catch(e){end(estDur(st.text))} /* some phones never say "ended" */
+    return}
+  AP.timer=setTimeout(()=>{if(tok===AP.tok)apGo(AP.i+1,true)},50); /* nothing to play it with: skip */
+}
+async function apSong(st,tok){
+  const s=SONGm[st.id];let f=null;
+  try{f=await idbGet("songfile:"+st.id)}catch(e){}
+  if(tok!==AP.tok)return;
+  if(f&&f.blob){AP.mode="file";AP.fileUrl=URL.createObjectURL(f.blob);aplayer.src=AP.fileUrl;AP.onEnd=()=>apGo(AP.i+1);apPlay();return}
+  if(s&&s.video&&navigator.onLine!==false){AP.mode="yt";AP.ytVid=s.video;apUI();ytMount(tok);return}
+  AP.mode="skip";apUI();AP.timer=setTimeout(()=>{if(tok===AP.tok)apGo(AP.i+1)},3000);
+}
+let YTP=null;
+function ytAPI(){
+  if(window.YT&&window.YT.Player)return Promise.resolve();if(YTP)return YTP;
+  YTP=new Promise((res,rej)=>{const prev=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=()=>{if(prev)prev();res()};
+    const sc=document.createElement("script");sc.src="https://www.youtube.com/iframe_api";sc.onerror=()=>{YTP=null;rej(new Error("yt"))};document.head.appendChild(sc)});
+  return YTP;
+}
+async function ytMount(tok){
+  tok=tok||AP.tok;
+  try{await ytAPI()}catch(e){if(tok===AP.tok&&AP.mode==="yt"){AP.mode="skip";apUI();AP.timer=setTimeout(()=>{if(tok===AP.tok)apGo(AP.i+1)},3000)}return}
+  const el=$("#ap-yt");if(tok!==AP.tok||AP.mode!=="yt"||!el||AP.yt)return; /* not on the player screen: it starts when they open it */
+  AP.on=false;apUI();
+  AP.yt=new YT.Player(el,{videoId:AP.ytVid,host:"https://www.youtube-nocookie.com",playerVars:{autoplay:1,playsinline:1,rel:0},
+    events:{onReady:e=>{try{e.target.playVideo()}catch(x){}},
+      onStateChange:e=>{if(tok!==AP.tok)return;if(e.data===1){AP.on=true;apUI()}else if(e.data===2){AP.on=false;apUI()}else if(e.data===0)apGo(AP.i+1)}}});
+}
+function apFinish(){AP.on=false;AP.done=true;AP.mode="";apUI();msState()}
+function apPause(){
+  if(!AP.sess)return;AP.on=false;
+  if(AP.mode==="yt"){try{AP.yt.pauseVideo()}catch(e){}}
+  else if(AP.mode==="blk"||AP.mode==="file"){AP.quiet=true;aplayer.pause();AP.quiet=false}
+  else{AP.tok++;clearTimeout(AP.timer);try{speechSynthesis.cancel()}catch(e){}}
+  apUI();
+}
+function apResume(){
+  if(!AP.sess)return;if(AP.done)return apGo(0);
+  if(AP.mode==="yt"){try{AP.yt.playVideo()}catch(e){}AP.on=true}
+  else if((AP.mode==="blk"||AP.mode==="file")&&aplayer.src&&!aplayer.ended)apPlay();
+  else apGo(AP.i);
+  apUI();
+}
+function apJump(i){ /* inside the current block: just seek */
+  i=Math.max(0,Math.min(i,AP.steps.length-1));
+  const b=AP.blk;
+  if(AP.mode==="blk"&&b&&i>=b.start&&i<b.end){const o=b.offs.find(x=>x.j===i);if(o){aplayer.currentTime=o.t0;AP.i=i;if(!AP.on)apPlay();apUI();return}}
+  apGo(i);
+}
+function apSkip(d){ /* by item: the repetitions of a word count as one */
+  const st=AP.steps,cur=st[AP.i];if(!cur)return;let i=AP.i;
+  if(d>0){while(i<st.length&&st[i].item===cur.item)i++;if(i>=st.length){apGo(st.length);return}}
+  else if(d<0){while(i>0&&st[i-1].item===cur.item)i--;if(i>0){const it=st[i-1].item;i--;while(i>0&&st[i-1].item===it)i--}}
+  else{while(i>0&&st[i-1].item===cur.item)i--}
+  apJump(i);
+}
+function apStart(z){
+  if(!z||!z.steps.some(st=>st.t==="song"||playable(st)))return false;
+  apClear();AP.sess=z;AP.steps=z.steps;AP.i=0;AP.done=false;msInit();apGo(0);return true;
+}
+function apStop(){AP.tok++;apClear();AP.on=false;AP.sess=null;AP.steps=[];AP.done=false;try{aplayer.removeAttribute("src");aplayer.load()}catch(e){}
+  if("mediaSession" in navigator){try{navigator.mediaSession.metadata=null}catch(e){}}msState();apUI()}
+/* iOS lets a page start sound only from a tap: wake both the player and the phone voice right in the tap */
+function apUnlock(){try{aplayer.src=SILENT;const p=aplayer.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}
+  if(ttsOK()){try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u)}catch(e){}}}
+aplayer.addEventListener("timeupdate",()=>{
+  if(AP.mode!=="blk"||!AP.blk)return;const t=aplayer.currentTime,o=AP.blk.offs;let k=0;
+  for(let x=0;x<o.length;x++)if(o[x].t0<=t+.02)k=x;
+  const j=o[k].j,say=!!AP.steps[j].rep&&t>o[k].t1;
+  if(j!==AP.i||say!==AP.say){AP.i=j;AP.say=say;apUI()}
+});
+aplayer.addEventListener("ended",()=>{if(AP.mode==="blk"&&AP.blk)apGo(AP.blk.end,true);else if(AP.onEnd){const f=AP.onEnd;AP.onEnd=null;f()}});
+aplayer.addEventListener("pause",()=>{if(!AP.quiet&&!aplayer.ended&&AP.sess&&(AP.mode==="blk"||AP.mode==="file")&&AP.on){AP.on=false;apUI()}});
+aplayer.addEventListener("play",()=>{if(AP.sess&&(AP.mode==="blk"||AP.mode==="file")&&!AP.on){AP.on=true;apUI()}});
+function msInit(){
+  if(!("mediaSession" in navigator))return;const h=(a,f)=>{try{navigator.mediaSession.setActionHandler(a,f)}catch(e){}};
+  h("play",()=>apResume());h("pause",()=>apPause());h("nexttrack",()=>apSkip(1));h("previoustrack",()=>apSkip(-1));h("stop",()=>apStop());
+}
+function msState(){if("mediaSession" in navigator){try{navigator.mediaSession.playbackState=AP.sess?(AP.on?"playing":"paused"):"none"}catch(e){}}}
+let msLast="";
+function msMeta(st){
+  if(!("mediaSession" in navigator)||!window.MediaMetadata||!AP.sess)return;
+  const title=st?(st.t==="say"?plain(st.text):st.part||AP.sess.title):AP.sess.title,k=title+"|"+(st&&st.part);
+  if(k===msLast)return;msLast=k;
+  try{navigator.mediaSession.metadata=new MediaMetadata({title,artist:"Koren · "+((st&&st.part)||AP.sess.title),album:AP.sess.title,artwork:[{src:"icons/icon-512.png",sizes:"512x512",type:"image/png"}]})}catch(e){}
+}
+
+/* --- screens --- */
+const PLAYI='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>';
+const PAUSEI='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>';
+const PREVI='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z" fill="currentColor"/></svg>';
+const NEXTI='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l11-7z" fill="currentColor"/></svg>';
+const AGAINI='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.6h4.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const HEADI='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/></svg>';
+const listenBtn=(kind,id,label,primary)=>`<button type="button" class="btn${primary?" primary":""} wide" data-act="listen" data-kind="${kind}"${id?` data-id="${esc(id)}"`:""}>${HEADI} ${label}</button>`;
+function seg(act,cur,opts){return `<div class="seg">${opts.map(([v,l])=>`<button type="button" data-act="${act}" data-v="${v}" aria-pressed="${String(cur)===String(v)}">${l}</button>`).join("")}</div>`}
+function vListen(){
+  const A=AU(),mix=sessMix(),mi=sessInfo(mix),rs=STEPS.filter(x=>x.k==="r").map(x=>READS.find(r=>r.id===x.rid)).filter(Boolean),cur=curStep();
+  const nA=Object.keys(AUD).length;
+  return `<div class="seg" style="margin-bottom:12px"><button type="button" data-go="#practice" aria-pressed="false">${T("Drills","التمارين")}</button><button type="button" aria-pressed="true">${T("Listen","الاستماع")}</button></div>
+  <h1>${T("Listen and repeat","استمع⟦ي|⟧ وردّد⟦ي|⟧")}</h1>
+  <p class="lead">${T("Hands-free, for the street or the bus. The app plays native voices and leaves a pause after each one: say it aloud in the pause. Nothing is checked or scored, and it doesn't change your progress.","بلا يدين، للشارع أو الحافلة. يشغّل التطبيق أصواتًا روسية ويترك وقفة بعد كل واحد: ⟦قوليه|قله⟧ بصوت عالٍ في الوقفة. لا شيء يُصحَّح أو يُحسب، ولا يغيّر تقدمك.")}</p>
+  <div class="card"><span class="label">${T("Today's mix","مزيج اليوم")}</span>
+   <p class="lead">${T(`Words you know, what's next on your path, sentences, a text line by line${A.song&&mixSong()?", and a few lines of a song":""}. About ${mi.min} min.`,`كلمات تعرف⟦ين|⟧ها، والتالي في مسارك، وجمل، ونص سطرًا سطرًا${A.song&&mixSong()?"، وبضعة أسطر من أغنية":""}. حوالي ${mi.min} دقيقة.`)}</p>
+   ${listenBtn("mix","",T("Start listening","⟦ابدئي|ابدأ⟧ الاستماع"),true)}
+   <p class="count">${mi.n?(mi.rec===mi.n?T("Every item has a real voice, so it keeps playing with the screen locked.","لكل عنصر صوت حقيقي، لذلك يستمر التشغيل والشاشة مقفلة."):T(`${mi.rec} of ${mi.n} items have a real voice and play with the screen locked. The rest use the phone voice, which needs the screen on.`,`${mi.rec} من ${mi.n} عنصرًا بصوت حقيقي ويعمل والشاشة مقفلة. الباقي بصوت الهاتف، وهو يحتاج إلى شاشة مفتوحة.`)):""}</p></div>
+  <div class="card"><span class="label">${T("Settings","الإعدادات")}</span>
+   <div class="switch"><span>${T("Pause to repeat","وقفة الترديد")}</span>${seg("aupause",A.pause,[["s",T("Short","قصيرة")],["m",T("Medium","متوسطة")],["l",T("Long","طويلة")]])}</div>
+   <div class="switch"><span>${T("Hear each item","سماع كل عنصر")}</span>${seg("aureps",A.reps,[[1,"1×"],[2,"2×"],[3,"3×"]])}</div>
+   <div class="switch"><span>${T("A song in today's mix","أغنية في مزيج اليوم")}</span>${seg("ausong",A.song?1:0,[[1,T("On","تشغيل")],[0,T("Off","إيقاف")]])}</div>
+   <p class="count">${T("The pause grows with the length of what you hear. Make it longer if you can't finish in time.","الوقفة تطول مع طول ما تسمع⟦ين|⟧ه. ⟦اجعليها|اجعلها⟧ أطول إذا لم تلحق⟦ي|⟧.")}</p></div>
+  ${rs.length?`<div class="card"><span class="label">${T("Texts and dialogues","النصوص والحوارات")}</span><p class="count">${T("The whole text, then line by line with pauses, then the whole text again.","النص كاملًا، ثم سطرًا سطرًا مع وقفات، ثم النص كاملًا مرة أخرى.")}</p>
+   <div class="list">${rs.map(r=>{const st=STEPm["r:"+r.id],reached=st&&(stepDone(st)||cur&&st.i<=cur.i);
+     return `<button type="button" class="li" data-act="listen" data-kind="r" data-id="${esc(r.id)}"><div class="grow"><div class="t">${esc(L0(r))}</div><div class="s">${isDialog(r)?T("Dialogue","حوار"):T("Text","نص")} · ${esc(tname(r.topic))}${reached?"":" · "+T("later on your path","لاحقًا في مسارك")}</div></div>${HEADI}</button>`}).join("")}</div></div>`:""}
+  ${SONGS.length?`<div class="card"><span class="label">${T("Songs and poems","الأغاني والقصائد")}</span>
+   <p class="count">${T("The song, then line by line with pauses, then the song again. Lines come from the lyrics you added on the song page.","الأغنية، ثم سطرًا سطرًا مع وقفات، ثم الأغنية مرة أخرى. السطور من الكلمات التي ⟦أضفتِها|أضفتها⟧ في صفحة الأغنية.")}</p>
+   <div class="list">${SONGS.map(s=>{const L=songLines(s),rec=L.filter(l=>audOf(l.k)).length;
+     return `<div class="li" style="flex-wrap:wrap"><button type="button" class="grow" data-act="listen" data-kind="s" data-id="${esc(s.id)}" style="background:none;border:0;padding:0;text-align:start;display:flex;align-items:center;gap:10px"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s">${isPoem(s)?T("Poem","قصيدة"):T("Song","أغنية")} · ${L.length?(rec?T(`${L.length} lines, ${rec} with a real voice`,`${L.length} سطرًا، ${rec} بصوت حقيقي`):T(`${L.length} lines, phone voice`,`${L.length} سطرًا، بصوت الهاتف`)):T("add the lyrics on the song page first","⟦أضيفي|أضف⟧ الكلمات في صفحة الأغنية أولًا")}</div></div>${HEADI}</button>
+      ${isPoem(s)?"":`<div class="row" style="width:100%;margin-top:6px"><label class="btn small">${SONGF[s.id]?T("Replace my audio file","استبدال ملفي الصوتي"):T("Use my own audio file","استخدام ملفي الصوتي")}<input type="file" accept="audio/*" data-act="songfile" data-id="${esc(s.id)}" class="sr"></label>${SONGF[s.id]?`<button type="button" class="btn small" data-act="songfilerm" data-id="${esc(s.id)}">${T("Remove","إزالة")}</button><span class="count">${esc(SONGF[s.id])}</span>`:""}</div>`}</div>`}).join("")}</div>
+   <p class="count">${T("With your own audio file (a song you bought or downloaded), the song plays with the screen locked too. It stays on this phone. Without one, the video plays, which needs the screen on and the internet; tap it if it doesn't start by itself.","مع ملفك الصوتي (أغنية اشتريتِها أو نزّلتِها) تعمل الأغنية والشاشة مقفلة أيضًا، ويبقى الملف على هذا الهاتف. من دونه يعمل الفيديو، وهو يحتاج إلى شاشة مفتوحة وإنترنت؛ ⟦اضغطي|اضغط⟧ عليه إذا لم يبدأ وحده.")}</p></div>`:""}
+  <div class="card"><span class="label">${T("Words by topic","الكلمات حسب الموضوع")}</span>
+   <div class="list">${TOP.filter(t=>!t.song&&wordsOf(t.id).length).map(t=>`<button type="button" class="li" data-act="listen" data-kind="t" data-id="${esc(t.id)}"><div class="grow"><div class="t">${esc(L0(t))}</div><div class="s">${T(`${wordsOf(t.id).length} words, ${phrasesOf(t.id).length} sentences`,`${wordsOf(t.id).length} كلمة، ${phrasesOf(t.id).length} جملة`)}</div></div>${HEADI}</button>`).join("")}</div></div>
+  <div class="card"><span class="label">${T("Real voices","أصوات حقيقية")}</span><p class="lead">${T(`${nA} items have a real voice so far. A speaker records more on the recorder page, including song lines.`,`${nA} عنصرًا بصوت حقيقي حتى الآن. يسجّل المتحدّث المزيد في صفحة التسجيل، ومنها سطور الأغاني.`)}</p><a class="btn small" href="#more" style="align-self:flex-start">${T("Recordings in More","التسجيلات في «المزيد»")}</a></div>`;
+}
+function vListenPlay(){
+  if(!AP.sess)return vListen();
+  return `<button type="button" class="back" data-go="#listen">← ${T("Listen","الاستماع")}</button>
+  <div class="card ap" id="ap">
+   <span class="label" id="ap-title">${esc(AP.sess.title)}</span>
+   <div class="ap-part" id="ap-part"></div>
+   <div class="ap-stage">
+    <div class="ap-cue" id="ap-cue"></div>
+    <button type="button" class="ap-ru ru" id="ap-ru" data-act="apmean" lang="ru"></button>
+    <div class="ap-mean" id="ap-mean" hidden></div>
+    <div id="ap-ytbox" hidden><div class="vid"><div id="ap-yt"></div></div><p class="count">${T("If the song doesn't start, tap play on the video.","إذا لم تبدأ الأغنية، ⟦اضغطي|اضغط⟧ تشغيل على الفيديو.")}</p></div>
+    <p class="count" id="ap-note" hidden></p>
+   </div>
+   <div class="meter"><i id="ap-prog" style="width:0"></i></div>
+   <div class="ap-ctl">
+    <button type="button" class="ap-b" data-act="apskip" data-v="-1" aria-label="${T("Previous","السابق")}">${PREVI}</button>
+    <button type="button" class="ap-b" data-act="apskip" data-v="0" aria-label="${T("Again","مرة أخرى")}">${AGAINI}</button>
+    <button type="button" class="ap-b ap-pp" data-act="aptoggle" id="ap-pp" aria-label="${T("Play or pause","تشغيل أو إيقاف مؤقت")}"></button>
+    <button type="button" class="ap-b" data-act="apskip" data-v="1" aria-label="${T("Next","التالي")}">${NEXTI}</button>
+    <button type="button" class="ap-b" data-act="apstop" aria-label="${T("Stop","إيقاف")}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg></button>
+   </div>
+   <p class="count" id="ap-count"></p>
+  </div>
+  <p class="count" style="text-align:center">${T("Tap the Russian to see the meaning. With headphones, the lock screen and the headphone buttons control it too.","⟦اضغطي|اضغط⟧ على النص الروسي لتر⟦ي|ى⟧ المعنى. مع السماعات، تتحكّم فيه شاشة القفل وأزرار السماعة أيضًا.")}</p>`;
+}
+let apShown=-1;
+function apUI(){
+  msState();
+  const mini=$("#mini"),onPlay=(location.hash||"").startsWith("#listen/play");
+  const st=AP.steps[AP.i];
+  if(mini){
+    if(AP.sess&&!onPlay&&!(location.hash==="#drill"&&Q)){mini.hidden=false;
+      mini.innerHTML=`<button type="button" class="ap-b" data-act="aptoggle" aria-label="${T("Play or pause","تشغيل أو إيقاف مؤقت")}">${AP.on?PAUSEI:PLAYI}</button><button type="button" class="grow mini-t" data-go="#listen/play"><span class="ru">${esc(st&&st.t==="say"?plain(st.text):AP.done?T("Finished","انتهى"):AP.sess.title)}</span><small>${esc(AP.mode==="yt"&&!AP.on?T("The song is waiting: tap to open","الأغنية تنتظر: ⟦اضغطي|اضغط⟧ للفتح"):AP.sess.title)}</small></button><button type="button" class="ap-b" data-act="apstop" aria-label="${T("Stop","إيقاف")}">✕</button>`;
+    }else mini.hidden=true;
+  }
+  document.body.classList.toggle("has-mini",!!(mini&&!mini.hidden));
+  if(!$("#ap"))return;
+  if(st)msMeta(st);
+  const pp=$("#ap-pp");if(pp)pp.innerHTML=AP.on?PAUSEI:PLAYI;
+  $("#ap-prog").style.width=(AP.done?100:Math.round(AP.i/Math.max(1,AP.steps.length)*100))+"%";
+  const yb=$("#ap-ytbox");yb.hidden=AP.mode!=="yt";
+  const note=$("#ap-note");
+  const ru=$("#ap-ru"),mean=$("#ap-mean"),cue=$("#ap-cue"),part=$("#ap-part");
+  if(AP.done){part.textContent=T("Finished. Well done!","انتهى. أحسنت⟦ِ|⟧!");ru.textContent="";cue.textContent="";mean.hidden=true;
+    note.hidden=false;note.innerHTML=T("Tap play to hear it all again.","⟦اضغطي|اضغط⟧ تشغيل لتسمع⟦ي|⟧ كل شيء مرة أخرى.");$("#ap-count").textContent="";return}
+  if(!st)return;
+  part.textContent=st.part||"";
+  note.hidden=!(AP.blocked||AP.mode==="skip");
+  note.textContent=AP.blocked?T("Tap play to start the sound.","⟦اضغطي|اضغط⟧ تشغيل لبدء الصوت."):AP.mode==="skip"?T("The song needs the internet or your own audio file, so it's skipped this time.","الأغنية تحتاج إلى الإنترنت أو ملفك الصوتي، لذلك تُتخطّى هذه المرة."):"";
+  cue.textContent=st.t==="chime"?"":st.t==="song"?"♪":AP.say?T("Your turn: say it","دور⟦كِ|ك⟧: ⟦قوليها|قلها⟧"):st.rep?T("Listen","استمع⟦ي|⟧"):"";
+  cue.classList.toggle("say",!!AP.say);
+  if(apShown!==st.item||ru.dataset.i!==String(AP.i)){
+    const m=st.mean,mt=m?(m.tr!=null?m.tr:L0(m)):"";
+    ru.dataset.i=String(AP.i);
+    ru.textContent=st.t==="say"?st.text:st.t==="song"?(SONGm[st.id]?plain(SONGm[st.id].ru):""):"";
+    if(apShown!==st.item){mean.hidden=true;mean.textContent=mt;apShown=st.item}else mean.textContent=mt;
+    ru.disabled=!mt;
+  }
+  const items=new Set(AP.steps.filter(x=>x.t!=="chime").map(x=>x.item)).size,done=new Set(AP.steps.slice(0,AP.i).filter(x=>x.t!=="chime").map(x=>x.item)).size;
+  $("#ap-count").textContent=T(`${Math.min(done+1,items)} of ${items}`,`${Math.min(done+1,items)} من ${items}`)+(AP.mode==="live"&&st.t==="say"?" · "+T("phone voice: keep the screen on","صوت الهاتف: ⟦أبقي|أبقِ⟧ الشاشة مفتوحة"):"");
+}
+/* the learner's own song files, kept on this phone */
+const SONGF={};
+async function loadSongFiles(){for(const s of SONGS){try{const f=await idbGet("songfile:"+s.id);if(f&&f.blob)SONGF[s.id]=f.name||T("your file","ملفك")}catch(e){}}}
 
 /* ================= practice: building questions ================= */
 const lenScore=(a,b)=>Math.abs(plain(a).length-plain(b).length)+(plain(a).split(" ").length===plain(b).split(" ").length?0:6);
@@ -1006,7 +1432,7 @@ function readingQs(id){
   return q;
 }
 function startQ(list,title,src){
-  if(!list.length)return;
+  if(!list.length)return;if(AP.on)apPause();
   Q={list,i:0,answered:false,title,src:src||"Practice",qid:Date.now().toString(36),res:[],right:0,touched:new Set(),finished:false,factShown:0,facts:new Set()};
   if(location.hash==="#drill")render();else location.hash="#drill";
   autoPlay();
@@ -1176,7 +1602,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.lang){S.lang=t.dataset.lang;save();render();return}
   if(t.dataset.gender){S.gender=t.dataset.gender==="m"?"m":"f";save();build();render();return}
   if(t.dataset.go){e.preventDefault();if(location.hash===t.dataset.go)render();else location.hash=t.dataset.go;return}
-  if(t.dataset.play){e.stopPropagation();stopSeq();play(t.dataset.play,t.dataset.text,t);return}
+  if(t.dataset.play){e.stopPropagation();stopSeq();if(AP.on)apPause();play(t.dataset.play,t.dataset.text,t);return}
   if(t.dataset.say!==undefined&&t.classList.contains("say")){const txt=t.dataset.say.replace(/\s*→\s*/g,", ");stopSeq();play(/\s/.test(txt.trim())?"S:"+txt.trim():wkey(txt),txt,t);return}
   if(t.hasAttribute("data-reveal")){const m=t.querySelector(".m");if(m){m.hidden=!m.hidden;
     if(!m.hidden&&autoOn()){const sb=t.parentNode.querySelector("[data-play]");if(sb){stopSeq();play(sb.dataset.play,sb.dataset.text,sb)}}}return}
@@ -1187,6 +1613,16 @@ document.addEventListener("click",e=>{
   if(t.dataset.tile!==undefined&&Q&&!Q.answered){Q.list[Q.i].built.push(+t.dataset.tile);renderQ();return}
   if(t.dataset.unbuild!==undefined&&Q&&!Q.answered){Q.list[Q.i].built.splice(+t.dataset.unbuild,1);renderQ();return}
   const a=t.dataset.act;if(!a)return;
+  if(a==="listen"){const k=t.dataset.kind,id=t.dataset.id;stopSeq();stopAudio();apUnlock();
+    const z=k==="r"?sessReading(id):k==="s"?sessSong(id):k==="t"?sessTopic(id):sessMix();
+    if(!apStart(z)){alert(T("There's nothing to play yet: no recordings, and the phone voice is off in More.","لا شيء للتشغيل بعد: لا تسجيلات، وصوت الهاتف مُطفأ في «المزيد»."));return}
+    location.hash="#listen/play";return}
+  if(a==="aptoggle"){if(AP.on)apPause();else apResume();return}
+  if(a==="apskip"){apSkip(+t.dataset.v);return}
+  if(a==="apstop"){apStop();if((location.hash||"").startsWith("#listen/play"))location.hash="#listen";return}
+  if(a==="apmean"){const m=$("#ap-mean");if(m&&m.textContent)m.hidden=!m.hidden;return}
+  if(a==="aupause"||a==="aureps"||a==="ausong"){const k={aupause:"pause",aureps:"reps",ausong:"song"}[a],v=t.dataset.v;S.au=Object.assign({},S.au||{},{[k]:k==="pause"?v:+v});save();render();return}
+  if(a==="songfilerm"){const id=t.dataset.id;if(t.dataset.sure){idbOp("readwrite",st=>st.delete("songfile:"+id)).catch(()=>{});delete SONGF[id];render()}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط⟦ي|⟧ مرة أخرى للإزالة")}return}
   if(a==="step"){startStep(t.dataset.id);return}
   if(a==="song"){startSong(t.dataset.id,+t.dataset.li);return}
   if(a==="songpractice"){const f={song:t.dataset.id},l=practiceQs(f,15);if(!l.length)return;startQ(l,"practice",`Practice: song ${t.dataset.id}`);if(Q)Q.filter=f;return}
@@ -1224,11 +1660,16 @@ document.addEventListener("keydown",e=>{
 });
 document.addEventListener("change",async e=>{
   const t=e.target;if(!t.dataset||!t.files||!t.files[0])return;
+  if(t.dataset.act==="songfile"){const f=t.files[0],id=t.dataset.id;t.value="";
+    try{await idbSet("songfile:"+id,{blob:f,name:f.name,type:f.type});SONGF[id]=f.name}catch(err){alert(T("Couldn't save the file on this phone (storage full or private mode).","تعذّر حفظ الملف على هذا الهاتف (التخزين ممتلئ أو وضع خاص)."))}
+    render();return}
   const f=t.files[0];let o=null;try{o=JSON.parse(await f.text())}catch(err){}
   if(t.dataset.act==="impaudio"){
     const m=$("#audmsg");if(!o||o.app!=="koren-audio"){m.textContent=T("That isn't a Koren recordings file.","هذا ليس ملف تسجيلات لكورين.");return}
-    const sp=+o.speaker===2?2:1;try{await idbSet(sp===1?"audio":"audio2",o)}catch(err){}
-    const n=addClips(o,"local",sp);m.textContent=T(`Added ${n} recordings (voice ${sp}).`,`أُضيف ${n} تسجيلًا (الصوت ${sp}).`);return;
+    const sp=+o.speaker===2?2:1,lines=o.kind==="lines";
+    if(lines){const old=await idbGet("lines"+sp).catch(()=>null);if(old&&old.clips)o.clips=Object.assign({},old.clips,o.clips)} /* song lines add up, song by song */
+    try{await idbSet(lines?"lines"+sp:sp===1?"audio":"audio2",o)}catch(err){}
+    const n=addClips(o,lines?"lines":"local",sp);m.textContent=lines?T(`Added ${n} song and poem lines (voice ${sp}). They stay on this phone.`,`أُضيف ${n} سطرًا من الأغاني والقصائد (الصوت ${sp}). تبقى على هذا الهاتف.`):T(`Added ${n} recordings (voice ${sp}).`,`أُضيف ${n} تسجيلًا (الصوت ${sp}).`);render();return;
   }
   if(t.dataset.act==="restore"){
     const m=$("#bkmsg");if(!o||o.app!=="koren-backup"||!o.state){m.textContent=T("That isn't a Koren backup file.","هذا ليس ملف نسخة احتياطية لكورين.");return}

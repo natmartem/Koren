@@ -165,6 +165,14 @@ C.phrases.forEach(p => scan(p[0], "phrase"));
 }
 if (unknown.size && process.argv.includes("--words")) console.log("Not yet taught as a word or form:\n" + [...unknown].map(([k, w]) => `  ${k}  (${w})`).join("\n"));
 
+// The app's own code: a single syntax slip blanks the whole app, so parse every inline script
+for (const f of ["index.html", "record.html"]) {
+  const html = readFileSync(new URL("../" + f, import.meta.url), "utf8");
+  [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].forEach((m, i) => {
+    try { new vm.Script(m[1], { filename: `${f} script ${i + 1}` }); } catch (e) { err(`${f} script ${i + 1}`, "JavaScript syntax error: " + e.message); }
+  });
+}
+
 if (errors.length) { console.error(errors.join("\n")); console.error(`\n${errors.length} problem(s).`); process.exit(1); }
 const C = RAW;
 console.log(`OK · ${C.topics.length} topics · ${C.principles.length} principles · ${C.words.length} words · ${C.phrases.length} phrases · ${C.readings.length} readings · ${(C.songs || []).length} songs`);

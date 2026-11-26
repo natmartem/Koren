@@ -79,6 +79,7 @@ details.sec>summary::-webkit-details-marker{display:none}
   <div id="msg"></div>
 </section>
 <div id="list"></div>
+<section class="card" id="lyrcard"></section>
 <section class="card">
   <h2>Moving to another phone?</h2>
   <p class="muted">Load a recordings file you sent earlier to continue where you left off.</p>
@@ -119,6 +120,22 @@ C.principles.forEach(p=>{const it=[];[(p.body||{}).en||"",...(p.parts||[]).map(x
   add("Card examples · "+p.en,it,"Examples from the explanation card. Say each one naturally; for single letters say just the sound.")});
 (C.readings||[]).forEach(r=>add("Reading · "+r.en,r.lines.map(l=>({key:"S:"+plain(l[0]),ru:l[0],en:l[1],ph:1})),"A short text: read each line naturally, as if telling it to a friend."));
 }
+/* ---- song and poem lines (Listen mode: line by line). Lyrics are copyrighted, so they never go into the app's files:
+   they come from the lyrics added in the app on this phone, or are pasted here, and the lines are sent as a separate file
+   that the learner imports on her phone (not uploaded to GitHub). */
+const COURSEKEYS=new Set(SECTIONS.flatMap(s=>s.items.map(i=>i.key)));
+let RLYR={};try{RLYR=Object.assign({},JSON.parse(localStorage.getItem("koren-rec-lyrics")||"{}"))}catch(e){}
+let ALYR={};try{ALYR=JSON.parse(localStorage.getItem("koren-lyrics")||"{}")||{}}catch(e){}
+const lyrLines=t=>String(t||"").replace(/\r/g,"").split("\n").map(l=>l.split(/\s+\|\s+|\t/)[0].replace(/[ \u00a0]+/g," ").trim()).filter(l=>l&&/[А-Яа-яЁё]/.test(l)&&!/^\[[^\]]*\]$/.test(l));
+const LYRSONGS=[];
+(C0.songs||[]).forEach(sg=>{
+  const txt=ALYR[sg.id]||RLYR[sg.id]||"",lines=[...new Set(lyrLines(txt))];
+  const t=(sg.kind==="poem"?"Poem lines · ":"Song lines · ")+plain(sg.ru)+" ("+plain(sg.by)+")";
+  LYRSONGS.push({id:sg.id,t,n:lines.length,own:!ALYR[sg.id]&&!!RLYR[sg.id]});
+  if(lines.length)SECTIONS.push({t,lyr:sg.id,items:lines.map(l=>({key:"S:"+plain(l),ru:l,en:"",lyr:1})),rec:"One line at a time, in a clear speaking voice that keeps the rhythm of the "+(sg.kind==="poem"?"poem":"song")+". No need to sing. These go into a separate file (Send song lines), not the main one."});
+});
+const LYRKEYS=new Set(SECTIONS.filter(s=>s.lyr).flatMap(s=>s.items.map(i=>i.key)).filter(k=>!COURSEKEYS.has(k)));
+const LFILE=SP===1?"koren-song-lines.json":`koren-song-lines-${SP}.json`;
 const ALL=SECTIONS.flatMap(s=>s.items);
 /* ---- storage (IndexedDB on this phone) ---- */
 function db(){return new Promise((res,rej)=>{const r=indexedDB.open(SP===1?"koren-rec":"koren-rec-"+SP,1);r.onupgradeneeded=()=>r.result.createObjectStore("clips");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
@@ -217,14 +234,29 @@ function playKey(key){
   const p=$("#player");p.src=urls[key];p.play().catch(()=>{});
 }
 /* ---- export / import ---- */
-function bundle(){
-  const clips={};ALL.forEach(i=>{if(CLIPS[i.key])clips[i.key]=CLIPS[i.key]});
-  Object.keys(CLIPS).forEach(k=>{if(!clips[k])clips[k]=CLIPS[k]});
-  return JSON.stringify({app:"koren-audio",v:1,speaker:SP,made:new Date().toISOString(),clips});
+function bundle(lines){
+  const clips={};
+  if(lines)LYRKEYS.forEach(k=>{if(CLIPS[k])clips[k]=CLIPS[k]});
+  else{ALL.forEach(i=>{if(CLIPS[i.key]&&!LYRKEYS.has(i.key))clips[i.key]=CLIPS[i.key]});
+    Object.keys(CLIPS).forEach(k=>{if(!clips[k]&&!LYRKEYS.has(k)&&!LINEONLY.has(k))clips[k]=CLIPS[k]})}
+  return JSON.stringify(Object.assign({app:"koren-audio",v:1,speaker:SP,made:new Date().toISOString()},lines?{kind:"lines"}:{},{clips}));
+}
+/* song lines recorded earlier whose lyrics are no longer on this phone: still kept out of the main file */
+let LINEONLY=new Set();try{LINEONLY=new Set(JSON.parse(localStorage.getItem("koren-rec-linekeys")||"[]"))}catch(e){}
+LYRKEYS.forEach(k=>LINEONLY.add(k));try{localStorage.setItem("koren-rec-linekeys",JSON.stringify([...LINEONLY]))}catch(e){}
+async function sendLines(){
+  const n=[...LYRKEYS].filter(k=>CLIPS[k]).length;if(!n){msg("bad","Record some song lines first.");return}
+  const file=new File([bundle(true)],LFILE,{type:"application/json"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:"Koren song lines"});msg("ok","Sent. Thank you!");return}catch(e){if(e&&e.name==="AbortError")return}
+  }
+  const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=LFILE;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
+  msg("ok","Saved as "+LFILE+" in your Downloads. Send it to the learner; they import it in the app (More → Import a recordings file). It is not for GitHub.");
 }
 async function send(){
   const n=Object.keys(CLIPS).length;if(!n){msg("bad","Record something first.");return}
-  const text=bundle(),file=new File([text],FILE,{type:"application/json"});
+  const text=bundle(false),file=new File([text],FILE,{type:"application/json"});
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{await navigator.share({files:[file],title:"Koren recordings"});msg("ok","Sent. Thank you!");return}catch(e){if(e&&e.name==="AbortError")return}
   }
@@ -235,6 +267,7 @@ async function send(){
 async function load(file){
   let o;try{o=JSON.parse(await file.text())}catch(e){return msg("bad","That is not a recordings file.")}
   if(!o||o.app!=="koren-audio"||!o.clips)return msg("bad","That is not a recordings file.");
+  if(o.kind==="lines")Object.keys(o.clips).forEach(k=>LINEONLY.add(k));
   let n=0;for(const k of Object.keys(o.clips)){const c=o.clips[k];if(/^[WPS]:/.test(k)&&c&&typeof c.m==="string"&&typeof c.d==="string"){await put(k,{m:c.m,d:c.d});CLIPS[k]={m:c.m,d:c.d};n++}}
   renderList();msg("ok","Loaded "+n+" recordings.");
 }
@@ -245,11 +278,25 @@ document.addEventListener("click",e=>{
   if(b.dataset.rec!==undefined){if(active&&active.row===row)return stopRec();return startRec(row)}
   if(b.dataset.play!==undefined){if(active)stopRec();return playKey(row.dataset.key)}
   if(b.id==="send")return send();
+  if(b.id==="sendlines")return sendLines();
+  if(b.dataset.lyrsave){const id=b.dataset.lyrsave,ta=document.getElementById("rl-"+id);RLYR[id]=ta?ta.value:"";if(!RLYR[id].trim())delete RLYR[id];
+    try{localStorage.setItem("koren-rec-lyrics",JSON.stringify(RLYR))}catch(e){}location.reload()}
 });
 $("#hide").addEventListener("change",e=>$("#list").classList.toggle("hidedone",e.target.checked));
 $("#load").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];e.target.value="";if(f)load(f)});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopRec()});
 if(SP>1)document.getElementById("sptag").textContent=" · speaker "+SP;
+function lyrCard(){
+  const el=$("#lyrcard");if(!LYRSONGS.length){el.remove();return}
+  const any=LYRKEYS.size;
+  el.innerHTML=`<h2>Songs and poems, line by line</h2>
+  <p class="muted">The learner repeats these lines in Listen mode. Lyrics are copyrighted, so they are not part of the app: the lines come from the lyrics added in the app on this phone, or you can paste the Russian text of a song below (it stays on this phone).</p>
+  ${LYRSONGS.map(x=>`<details${x.n?"":" open"}><summary><b>${esc(x.t.replace(/^(Song|Poem) lines · /,""))}</b> <small>${x.n?x.n+" lines":"no lyrics yet"}</small></summary>
+   ${ALYR[x.id]?`<p class="muted" style="font-size:13px">Lyrics come from the app on this phone.</p>`:`<textarea id="rl-${esc(x.id)}" rows="5" style="width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg);color:var(--ink)" placeholder="Paste the Russian text, one line per line">${esc(RLYR[x.id]||"")}</textarea>
+   <button type="button" class="btn" data-lyrsave="${esc(x.id)}" style="margin-top:6px">Save the text</button>`}</details>`).join("")}
+  ${any?`<button type="button" class="btn primary" id="sendlines" style="align-self:flex-start">Send song lines</button><p class="muted" style="font-size:13px">A separate file, ${esc(LFILE)}, that the learner imports on her phone. Please don't upload it anywhere public.</p>`:""}`;
+}
+lyrCard();
 (async()=>{try{CLIPS=await getAll()}catch(e){msg("bad","This browser cannot save recordings (private mode?). Please use a normal window.")}renderList()})();
 </script>
 </body>
