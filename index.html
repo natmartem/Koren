@@ -788,7 +788,7 @@ function renderQ(){
      <button type="button" class="btn primary wide" data-act="next">${T("Got it, let's practise","فهمت، لنتدرّب")}</button>`;
   }else if(q.t==="intro"){const it=q.it;S.seen[it.key]=1;save();
     body=`<p class="prompt">${T("New word","كلمة جديدة")} · ${esc(tname(it.topic))}</p><div class="big ru">${esc(it.ru)}</div><div class="center">${spk(it.akey||it.key,it.ru,true)}</div>
-     <button type="button" class="btn" data-reveal-mean>${T("Show meaning","أظهر المعنى")}</button><p class="hint" id="introm" hidden style="font-size:20px">${M(it)}</p>${pchips(it.ps)}
+     <p class="hint" style="font-size:22px;color:var(--ink)">${M(it)}</p>${pchips(it.ps)}
      <button type="button" class="btn primary wide" data-act="next">${T("Next","التالي")}</button>`;
   }else{
     let head="",opts="";
