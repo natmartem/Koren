@@ -93,6 +93,9 @@ html[dir=rtl] .chev{transform:scaleX(-1)}
 .body p+p,.body p+ul,.body ul+p,.body p+ol,.body ol+p{margin-top:10px}
 .body ul,.body ol{margin:6px 0 0;padding-inline-start:22px}
 .body li+li{margin-top:4px}
+.say svg{width:13px;height:13px;margin-inline-start:4px;vertical-align:-1px;color:var(--accent);opacity:.85}
+.say.playing{background:var(--accent);color:var(--accent-ink)}
+.say.playing svg{color:var(--accent-ink)}
 .say{border:0;background:var(--tint);border-radius:6px;padding:0 5px;font-size:1.04em;color:var(--ink);font-family:var(--f-body);direction:ltr;unicode-bidi:isolate;line-height:1.5}
 .bridge{background:var(--root-tint);border-radius:14px;padding:14px;border:0}
 .bridge .label{color:var(--root)}
@@ -520,7 +523,8 @@ function practiceQs(f,n){
 const nextPrinciple=()=>{const x=STEPS.find(y=>y.k==="p"&&!stepDone(y));return x?PRm[x.pid]:null};
 
 /* ================= text helpers ================= */
-const md=s=>String(s||"").replace(/\{([^}]+)\}/g,(m,x)=>`<button type="button" class="say" data-say="${esc(plain(x))}">${esc(x)}</button>`).replace(/<ar>/g,'<span class="ar">').replace(/<\/ar>/g,"</span>");
+const SAYICON=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+const md=s=>String(s||"").replace(/\{([^}]+)\}/g,(m,x)=>/^-|-$|^[^а-яё]*$/i.test(plain(x).trim())?`<span class="say">${esc(x)}</span>`:`<button type="button" class="say" data-say="${esc(plain(x))}" aria-label="${T("Play","تشغيل")}">${esc(x)}${SAYICON}</button>`).replace(/<ar>/g,'<span class="ar">').replace(/<\/ar>/g,"</span>");
 const L=o=>o?(S.lang==="ar"?o.ar:o.en):"";
 const tname=id=>TOPm[id]?L(TOPm[id]):id;
 const pname=id=>PRm[id]?L(PRm[id]):id;
@@ -949,7 +953,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.lang){S.lang=t.dataset.lang;save();render();return}
   if(t.dataset.go){e.preventDefault();if(location.hash===t.dataset.go)render();else location.hash=t.dataset.go;return}
   if(t.dataset.play){e.stopPropagation();stopSeq();play(t.dataset.play,t.dataset.text,t);return}
-  if(t.dataset.say!==undefined&&t.classList.contains("say")){play(wkey(t.dataset.say),t.dataset.say);return}
+  if(t.dataset.say!==undefined&&t.classList.contains("say")){const txt=t.dataset.say.replace(/\s*→\s*/g,", ");stopSeq();play(/\s/.test(txt.trim())?"S:"+txt.trim():wkey(txt),txt,t);return}
   if(t.hasAttribute("data-reveal")){const m=t.querySelector(".m");if(m){m.hidden=!m.hidden;
     if(!m.hidden&&autoOn()){const sb=t.parentNode.querySelector("[data-play]");if(sb){stopSeq();play(sb.dataset.play,sb.dataset.text,sb)}}}return}
   if(t.dataset.act==="playall"){if(SEQ){stopSeq();try{speechSynthesis.cancel()}catch(e){}player.pause();return}
