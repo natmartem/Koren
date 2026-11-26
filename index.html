@@ -576,7 +576,7 @@ const ICON={
  songs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
  more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>'};
 function renderTabs(cur){
-  const tabs=[["path",T("Path","المسار")],["practice",T("Practice","التدريب")],["songs",T("Songs","الأغاني")],["topics",T("Topics","المواضيع")],["principles",T("Principles","المبادئ")],["more",T("More","المزيد")]];
+  const tabs=[["path",T("Path","المسار")],["practice",T("Practice","التدريب")],["songs",T("Culture","ثقافة")],["topics",T("Topics","المواضيع")],["principles",T("Principles","المبادئ")],["more",T("More","المزيد")]];
   $("#tabs").innerHTML=tabs.map(([id,n])=>`<button type="button" data-go="#${id}" ${cur===id?'aria-current="page"':""}>${ICON[id]}<span>${n}</span></button>`).join("");
 }
 
@@ -696,13 +696,15 @@ const songWords=s=>[...new Set(s.lessons.flatMap(l=>l.words||[]))].map(r=>ITEMS[
 const songPhrases=s=>[...new Set(s.lessons.flatMap(l=>l.phrases||[]))].map(r=>ITEMS[pkey(r)]).filter(Boolean);
 const songItems=s=>[...songWords(s),...songPhrases(s)];
 const sdKey=(id,i)=>`s:${id}:${i+1}`;
+const isPoem=s=>s&&s.kind==="poem";
+const TK=(s,song,poem)=>isPoem(s)?poem:song; /* the same sentence for a song or a poem */
 const songNext=s=>s.lessons.findIndex((_,i)=>!S.done[sdKey(s.id,i)]);
 function vSongs(){
-  return `<h1>${T("Songs","الأغاني")}</h1>
-  <p class="lead">${T("Watch, learn the song's words in small lessons, then listen again. Words you learn here count as known on your path and come back in Practice.","شاهد، وتعلّم كلمات الأغنية في دروس صغيرة، ثم استمع مرة أخرى. الكلمات التي تتعلّمها هنا تُحسب معروفة في مسارك وتعود في التدريب.")}</p>
+  return `<h1>${T("Culture","ثقافة")}</h1>
+  <p class="lead">${T("Songs and poems, easiest first. Listen or read, learn the words in small lessons, then come back to the original. Words you learn here count as known on your path and come back in Practice.","أغانٍ وقصائد، من الأسهل إلى الأصعب. استمع أو اقرأ، وتعلّم الكلمات في دروس صغيرة، ثم عُد إلى النص الأصلي. الكلمات التي تتعلّمها هنا تُحسب معروفة في مسارك وتعود في التدريب.")}</p>
   <div class="card">${SONGS.length?`<div class="list">${SONGS.map(s=>{const ws=songWords(s),n=recognised(ws),d=s.lessons.filter((_,i)=>S.done[sdKey(s.id,i)]).length;
-    return `<a class="li" href="#song/${esc(s.id)}"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s"><span class="ru">${esc(s.by)}</span> · ${T(`${d} of ${s.lessons.length} lessons`,`${d} من ${s.lessons.length} دروس`)}${n?` · ${T(`you recognise ${n} of ${ws.length} words`,`تعرف ${n} من ${ws.length} كلمة`)}`:""}</div>${d?`<div class="meter"><i style="width:${Math.round(d/s.lessons.length*100)}%"></i></div>`:""}</div>${d===s.lessons.length?`<span class="pill good">✓</span>`:""}${CHEV}</a>`}).join("")}</div>`
-   :`<p class="lead">${T("No songs yet.","لا توجد أغانٍ بعد.")}</p>`}</div>`;
+    return `<a class="li" href="#song/${esc(s.id)}"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s">${isPoem(s)?T("Poem","قصيدة"):T("Song","أغنية")} · <span class="ru">${esc(s.by)}</span> · ${T(`${d} of ${s.lessons.length} lessons`,`${d} من ${s.lessons.length} دروس`)}${n?` · ${T(`you recognise ${n} of ${ws.length} words`,`تعرف ${n} من ${ws.length} كلمة`)}`:""}</div>${d?`<div class="meter"><i style="width:${Math.round(d/s.lessons.length*100)}%"></i></div>`:""}</div>${d===s.lessons.length?`<span class="pill good">✓</span>`:""}${CHEV}</a>`}).join("")}</div>`
+   :`<p class="lead">${T("Nothing here yet.","لا شيء هنا بعد.")}</p>`}</div>`;
 }
 /* ---- lyrics: pasted by the learner, any common format ----
    Accepted: Russian only; "Russian | translation" or tab-separated; Russian and translation on alternating lines;
@@ -781,22 +783,23 @@ const lyrMark=ru=>String(ru).split(/(\s+)/).map(tok=>!tok.trim()?tok:knownTok(to
 function lyricsCard(s){
   const id=s.id,txt=LYR[id]||"",L=lyrParse(txt),lines=L.filter(x=>x.ru),nt=lines.filter(x=>x.tr).length,msg=LYRMSG&&LYRMSG.id===id?LYRMSG:null;
   const link=(u,label)=>u?`<a href="${esc(u)}" target="_blank" rel="noopener">${label}</a>`:"";
-  const ruLink=s.lyrics?link(s.lyrics,T("Open the lyrics on LyricsTranslate","افتح الكلمات على LyricsTranslate")):T("Find the lyrics online, for example on LyricsTranslate or Genius.","ابحث عن الكلمات على الإنترنت، مثلًا في LyricsTranslate أو Genius.");
+  const ruLink=s.lyrics?link(s.lyrics,TK(s,T("Open the lyrics","افتح الكلمات"),T("Open the poem","افتح القصيدة"))):T("Find the lyrics online, for example on LyricsTranslate or Genius.","ابحث عن الكلمات على الإنترنت، مثلًا في LyricsTranslate أو Genius.");
+  const LBL=TK(s,T("Lyrics","كلمات الأغنية"),T("The poem","القصيدة"));
   const trLink=link(s.translation||s.lyrics,T("Open a translation","افتح ترجمة"));
-  const why=`<p class="lead">${T("Lyrics are copyrighted, so Koren doesn't include them. Add them for your own study: they stay on this phone only, never uploaded to GitHub or added to feedback.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها «كورين». أضفها لدراستك الشخصية: تبقى على هذا الهاتف فقط، ولا تُرفع إلى GitHub ولا تُضاف إلى الملاحظات.")}</p>`;
+  const why=`<p class="lead">${TK(s,T("Lyrics are copyrighted, so Koren doesn't include them.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها «كورين»."),T("Koren doesn't include texts it doesn't hold the rights to.","«كورين» لا يتضمّن نصوصًا لا يملك حقوقها."))} ${T("Add the text for your own study: it stays on this phone only, never uploaded to GitHub or added to feedback.","أضف النص لدراستك الشخصية: يبقى على هذا الهاتف فقط، ولا يُرفع إلى GitHub ولا يُضاف إلى الملاحظات.")}</p>`;
   const P=(mode,label,primary)=>`<button type="button" class="btn small${primary?" primary":""}" data-act="lyrpaste" data-id="${esc(id)}" data-mode="${mode}">${label}</button>`;
   const editor=`<details class="fbk"${msg&&msg.open?" open":""}><summary>✎ ${lines.length?T("Edit by hand","التعديل يدويًا"):T("Or paste or type by hand","أو الصق أو اكتب يدويًا")}</summary><div class="fbk-in">
    <p class="tap-hint">${T("Any format works: Russian only, Russian | translation, alternating lines, or Russian first and the translation after.","أي صيغة تصلح: الروسية وحدها، أو الروسية | الترجمة، أو سطر بسطر، أو الروسية أولًا ثم الترجمة.")}</p>
-   <textarea class="fbk-ta" id="lyr-${esc(id)}" rows="8" spellcheck="false" aria-label="${T("Lyrics","كلمات الأغنية")}">${esc(txt)}</textarea>
-   <div class="row"><button type="button" class="btn small primary" data-act="lyrsave" data-id="${esc(id)}">${T("Save","احفظ")}</button>${txt?`<button type="button" class="btn small" data-act="lyrrm" data-id="${esc(id)}">${T("Remove lyrics","احذف الكلمات")}</button>`:""}</div></div></details>`;
+   <textarea class="fbk-ta" id="lyr-${esc(id)}" rows="8" spellcheck="false" aria-label="${LBL}">${esc(txt)}</textarea>
+   <div class="row"><button type="button" class="btn small primary" data-act="lyrsave" data-id="${esc(id)}">${T("Save","احفظ")}</button>${txt?`<button type="button" class="btn small" data-act="lyrrm" data-id="${esc(id)}">${T("Remove the text","احذف النص")}</button>`:""}</div></div></details>`;
   const note=msg?`<p class="msg" aria-live="polite">${esc(msg.text)}</p>`:"";
-  if(!lines.length)return `<div class="card" id="lyrics"><span class="label">${T("Lyrics","كلمات الأغنية")}</span>${why}
+  if(!lines.length)return `<div class="card" id="lyrics"><span class="label">${LBL}</span>${why}
    <ol class="body" style="margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:8px">
     <li>${ruLink}${s.lyrics?T(", then select the Russian text and copy it.","، ثم حدّد النص الروسي وانسخه."):""}</li>
-    <li>${T("Come back and tap:","عُد واضغط:")} ${P("ru",T("Paste lyrics","الصق الكلمات"),true)}</li>
+    <li>${T("Come back and tap:","عُد واضغط:")} ${P("ru",TK(s,T("Paste lyrics","الصق الكلمات"),T("Paste the poem","الصق القصيدة")),true)}</li>
     <li>${T("Optional: copy a translation and paste it the same way. It lines up with the Russian lines by itself.","اختياري: انسخ ترجمة والصقها بالطريقة نفسها. ستتطابق مع السطور الروسية تلقائيًا.")}</li></ol>
    ${note}${editor}</div>`;
-  return `<div class="card reading" id="lyrics"><span class="label">${T("Lyrics","كلمات الأغنية")}</span>
+  return `<div class="card reading" id="lyrics"><div class="row" style="justify-content:space-between"><span class="label">${LBL}</span>${canPlay("S:"+plain(lines[0].ru))?`<button type="button" class="btn small" data-act="lyrplay" data-id="${esc(id)}">▶ ${T("Play all","تشغيل الكل")}</button>`:""}</div>
    <span class="tap-hint">${T("Underlined: words you already know.","تحت الخط: كلمات تعرفها.")} ${nt?T("Tap a line to see the translation.","اضغط على السطر لترى الترجمة."):T("Tap the speaker to hear a line.","اضغط على السمّاعة لتسمع السطر.")}</span>
    ${note}
    <div>${L.map(l=>l.head?`<p class="label" style="margin-top:12px">${esc(l.head)}</p>`:l.gap?`<div style="height:10px"></div>`:`<div class="line">${spk("S:"+plain(l.ru),l.ru)}<button type="button" class="reveal" data-reveal><span class="rl ru">${lyrMark(l.ru)}</span>${l.tr?`<span class="m" hidden>${esc(l.tr)}</span>`:""}</button></div>`).join("")}</div>
@@ -807,14 +810,14 @@ function vSong(id){
   const s=SONGm[id],ws=songWords(s),ph=songPhrases(s),nx=songNext(s),started=s.lessons.some((_,i)=>S.done[sdKey(id,i)]);
   const lessonRow=(l,i)=>{const d=!!S.done[sdKey(id,i)],cur=i===nx;
     return `<button type="button" class="li" data-act="song" data-id="${esc(id)}" data-li="${i}"><span class="pill${d?" good":""}" style="min-width:34px;justify-content:center;${cur?"background:var(--accent);color:var(--accent-ink)":""}">${d?"✓":i+1}</span><div class="grow"><div class="t">${esc(L(l))}</div><div class="s ru">${esc((l.words||[]).slice(0,4).map(plain).join(", "))}${(l.words||[]).length>4?"…":""}</div></div>${CHEV}</button>`};
-  return `<a class="back" href="#songs">← ${T("Songs","الأغاني")}</a>
+  return `<a class="back" href="#songs">← ${T("Culture","ثقافة")}</a>
   <h1 class="ru">${esc(s.ru)}</h1>
   <button type="button" class="reveal" data-reveal style="background:none;border:0;padding:0;text-align:start;display:flex;flex-direction:column;gap:2px"><span class="lead"><span class="ru">${esc(s.by)}</span>${s.year?" · "+esc(s.year):""} · <span class="tap-hint">${T("tap for the title's meaning","اضغط لمعنى العنوان")}</span></span><span class="m" hidden style="font-size:17px">${esc(L(s))}</span></button>
   ${s.video?`<div class="card"><div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(s.video)}" title="${esc(plain(s.ru))}, ${esc(plain(s.by))}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
    <a href="https://www.youtube.com/watch?v=${encodeURIComponent(s.video)}" target="_blank" rel="noopener">${T("If the video doesn't load, open it on YouTube","إذا لم يعمل الفيديو، افتحه على يوتيوب")}</a></div>`:""}
   ${(s.notes||[]).map(n=>`<div class="card body"><span class="label">${esc(L(n))}</span>${md(L(n.body))}</div>`).join("")}
-  <div class="card"><span class="label">${T("Learn the song's words","تعلّم كلمات الأغنية")}</span>
-   ${nx<0?`<p class="lead">${T("All lessons done. Listen again: you'll recognise much more now.","أنهيت كل الدروس. استمع مرة أخرى: ستعرف أكثر بكثير الآن.")}</p><button type="button" class="btn primary wide" data-act="songpractice" data-id="${esc(id)}">${T("Practise this song","تدرّب على هذه الأغنية")}</button>`
+  <div class="card"><span class="label">${TK(s,T("Learn the song's words","تعلّم كلمات الأغنية"),T("Learn the poem's words","تعلّم كلمات القصيدة"))}</span>
+   ${nx<0?`<p class="lead">${TK(s,T("All lessons done. Listen again: you'll recognise much more now.","أنهيت كل الدروس. استمع مرة أخرى: ستعرف أكثر بكثير الآن."),T("All lessons done. Read the poem again: you'll recognise much more now.","أنهيت كل الدروس. اقرأ القصيدة مرة أخرى: ستعرف أكثر بكثير الآن."))}</p><button type="button" class="btn primary wide" data-act="songpractice" data-id="${esc(id)}">${TK(s,T("Practise this song","تدرّب على هذه الأغنية"),T("Practise this poem","تدرّب على هذه القصيدة"))}</button>`
      :`<button type="button" class="btn primary wide" data-act="song" data-id="${esc(id)}" data-li="${nx}">${started?T("Continue","تابع"):T("Start","ابدأ")}: ${esc(L(s.lessons[nx]))}</button>`}
    <div class="list">${s.lessons.map(lessonRow).join("")}</div>
    <p class="count">${T(`You recognise ${recognised(ws)} of ${ws.length} words.`,`تعرف ${recognised(ws)} من ${ws.length} كلمة.`)}</p></div>
@@ -822,8 +825,8 @@ function vSong(id){
   <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning.","اضغط على الكلمة لتسمعها وترى معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
   ${ph.length?`<div class="card"><span class="label">${T("Sentences","الجمل")}</span><div>${ph.map(x=>{const need=x.ps.filter(p=>!unlocked(p));
     return wordRow(x)+(need.length?`<div class="chips" style="margin:-4px 0 6px">${need.map(p=>`<a class="pill root" href="#p/${esc(p.split(":")[0])}">${T("Practised after:","يُتدرَّب عليها بعد:")} ${esc(pname(p))}</a>`).join("")}</div>`:"")}).join("")}</div></div>`:""}
-  ${(s.ps||[]).length?`<div class="card"><span class="label">${T("Grammar in this song","القواعد في هذه الأغنية")}</span><p class="lead">${T("Each card explains one building block the song uses.","كل بطاقة تشرح قطعة بناء واحدة تستخدمها الأغنية.")}</p>${pchips(s.ps)}</div>`:""}
-  ${fbBox("s:"+id,()=>({kind:"song",src:`Song “${plain(s.ru)}” by ${plain(s.by)} (id ${id})`}))}`;
+  ${(s.ps||[]).length?`<div class="card"><span class="label">${TK(s,T("Grammar in this song","القواعد في هذه الأغنية"),T("Grammar in this poem","القواعد في هذه القصيدة"))}</span><p class="lead">${T("Each card explains one building block it uses.","كل بطاقة تشرح قطعة بناء واحدة مستخدمة فيها.")}</p>${pchips(s.ps)}</div>`:""}
+  ${fbBox("s:"+id,()=>({kind:"song",src:`${isPoem(s)?"Poem":"Song"} “${plain(s.ru)}” by ${plain(s.by)} (id ${id})`}))}`;
 }
 function songQs(s,li){
   const l=s.lessons[li],q=[{t:"snote",sid:s.id,li}];
@@ -855,8 +858,8 @@ function vMore(){
    <div class="switch"><span>${T("Play sound automatically","تشغيل الصوت تلقائيًا")}</span><div class="seg"><button type="button" data-act="auto" data-v="1" aria-pressed="${autoOn()}">${T("On","تشغيل")}</button><button type="button" data-act="auto" data-v="0" aria-pressed="${!autoOn()}">${T("Off","إيقاف")}</button></div></div>
    <div class="switch"><span>${T("Phone voice when there's no recording","صوت الهاتف عند غياب التسجيل")}</span><div class="seg"><button type="button" data-act="tts" data-v="1" aria-pressed="${S.tts}">${T("On","تشغيل")}</button><button type="button" data-act="tts" data-v="0" aria-pressed="${!S.tts}">${T("Off","إيقاف")}</button></div></div>
   </div>
-  ${SONGS.length?`<div class="card"><span class="label">${T("Song lyrics","كلمات الأغاني")}</span>
-   <p class="lead">${T("Lyrics are copyrighted, so the app doesn't include them. Add them on each song's page: they stay on this phone only, for your own study.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها التطبيق. أضفها في صفحة كل أغنية: تبقى على هذا الهاتف فقط، لدراستك الشخصية.")}</p>
+  ${SONGS.length?`<div class="card"><span class="label">${T("Lyrics and poem texts","كلمات الأغاني ونصوص القصائد")}</span>
+   <p class="lead">${T("Lyrics are copyrighted, so the app doesn't include them. Paste them on each page with one tap: they stay on this phone only, for your own study.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها التطبيق. الصقها في كل صفحة بضغطة واحدة: تبقى على هذا الهاتف فقط، لدراستك الشخصية.")}</p>
    <div class="list">${SONGS.map(s=>`<a class="li" href="#song/${esc(s.id)}/lyrics"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s">${LYR[s.id]?T("Added on this phone","مضافة على هذا الهاتف"):T("Not added yet: tap to add","لم تُضف بعد: اضغط للإضافة")}</div></div>${CHEV}</a>`).join("")}</div></div>`:""}
   <div class="card"><span class="label">${T("Recordings","التسجيلات")}</span>
    <p>${T(`${nA} items have a real voice.`,`${nA} عنصرًا بصوت حقيقي.`)} ${T("A speaker records them on the recorder page, then the file goes into the app's GitHub folder (or import it here to hear it on this phone now).","يسجّلها متحدّث في صفحة التسجيل، ثم يوضع الملف في مجلد التطبيق على GitHub (أو استورده هنا لتسمعه على هذا الهاتف الآن).")}</p>
@@ -1058,7 +1061,7 @@ function renderQ(){
      <div class="card body" style="margin:0">${md(L(p.body))}</div>${p.bridge?`<div class="card bridge body" style="margin:0"><span class="label">${T("From what you already know","ممّا تعرفه أصلًا")}</span><p>${md(L(p.bridge))}</p></div>`:""}
      <button type="button" class="btn primary wide" data-act="next">${T("Got it, let's practise","فهمت، لنتدرّب")}</button>`;
   }else if(q.t==="snote"){const s=SONGm[q.sid],l=s.lessons[q.li];
-    body=`<p class="prompt">${T("Song","أغنية")} · <span class="ru">${esc(s.ru)}</span> · ${T(`lesson ${q.li+1} of ${s.lessons.length}`,`الدرس ${q.li+1} من ${s.lessons.length}`)}</p><h1 style="margin:0">${esc(L(l))}</h1>
+    body=`<p class="prompt">${isPoem(s)?T("Poem","قصيدة"):T("Song","أغنية")} · <span class="ru">${esc(s.ru)}</span> · ${T(`lesson ${q.li+1} of ${s.lessons.length}`,`الدرس ${q.li+1} من ${s.lessons.length}`)}</p><h1 style="margin:0">${esc(L(l))}</h1>
      <div class="card body" style="margin:0">${md(L(l.body))}</div>${l.bridge?`<div class="card bridge body" style="margin:0"><span class="label">${T("From what you already know","ممّا تعرفه أصلًا")}</span><p>${md(L(l.bridge))}</p></div>`:""}
      <button type="button" class="btn primary wide" data-act="next">${T("Got it, let's practise","فهمت، لنتدرّب")}</button>`;
   }else if(q.t==="intro"){const it=q.it;S.seen[it.key]=1;save();
@@ -1150,9 +1153,9 @@ function renderEnd(){
      <button type="button" class="btn primary wide" data-act="step" data-id="${esc(nx.id)}">${T("Next","التالي")}</button></div>`:""}
    ${sg&&snx>=0?`<div class="card"><span class="label">${T(`Next: lesson ${snx+1} of ${sg.lessons.length}`,`التالي: الدرس ${snx+1} من ${sg.lessons.length}`)}</span><h2>${esc(L(sg.lessons[snx]))}</h2>
      <button type="button" class="btn primary wide" data-act="song" data-id="${esc(sg.id)}" data-li="${snx}">${T("Next","التالي")}</button></div>`:""}
-   ${sg&&snx<0?`<div class="card"><h2>${T("You've learned the song's words","تعلّمت كلمات الأغنية")}</h2><p class="lead">${T("Play the song again: you'll recognise much more now.","شغّل الأغنية مرة أخرى: ستعرف أكثر بكثير الآن.")}</p></div>`:""}
+   ${sg&&snx<0?`<div class="card"><h2>${TK(sg,T("You've learned the song's words","تعلّمت كلمات الأغنية"),T("You've learned the poem's words","تعلّمت كلمات القصيدة"))}</h2><p class="lead">${TK(sg,T("Play the song again: you'll recognise much more now.","شغّل الأغنية مرة أخرى: ستعرف أكثر بكثير الآن."),T("Read the poem again: you'll recognise much more now.","اقرأ القصيدة مرة أخرى: ستعرف أكثر بكثير الآن."))}</p></div>`:""}
    ${Q.title==="practice"?`<button type="button" class="btn primary wide" data-act="again">${T("Another round","جولة أخرى")}</button>`:""}
-   <button type="button" class="btn wide" data-act="quit">${fromPath?T("Back to the path","العودة إلى المسار"):sg?T("Back to the song","العودة إلى الأغنية"):Q.title==="practice"?T("Back to Practice","العودة إلى التدريب"):T("Back","رجوع")}</button>
+   <button type="button" class="btn wide" data-act="quit">${fromPath?T("Back to the path","العودة إلى المسار"):sg?TK(sg,T("Back to the song","العودة إلى الأغنية"),T("Back to the poem","العودة إلى القصيدة")):Q.title==="practice"?T("Back to Practice","العودة إلى التدريب"):T("Back","رجوع")}</button>
    ${fbBox("d:"+Q.qid,()=>{const qs=Q.list.filter(q=>q.t!=="intro"&&q.t!=="card"&&q.t!=="text"),wr=Q.list.map((q,i)=>Q.res[i]===false?(q.t==="form"||q.t==="fty"?q.x.full:(q.x||q.it).ru):null).filter(Boolean);return {kind:"drill",src:Q.src,score:`${Q.right}/${qs.length} right`,wrong:wr.join(", ")}})}</div>`;
 }
 
@@ -1176,6 +1179,8 @@ document.addEventListener("click",e=>{
   if(a==="song"){startSong(t.dataset.id,+t.dataset.li);return}
   if(a==="songpractice"){const f={song:t.dataset.id},l=practiceQs(f,15);if(!l.length)return;startQ(l,"practice",`Practice: song ${t.dataset.id}`);if(Q)Q.filter=f;return}
   if(a==="lyrpaste"){lyrPaste(t.dataset.id,t.dataset.mode);return}
+  if(a==="lyrplay"){if(SEQ){stopSeq();try{speechSynthesis.cancel()}catch(e){}player.pause();return}
+    playSeq(lyrParse(LYR[t.dataset.id]||"").filter(x=>x.ru).map(x=>({k:"S:"+plain(x.ru),text:x.ru})),t);return}
   if(a==="lyrsave"){const id=t.dataset.id,ta=document.getElementById("lyr-"+id),v=ta?ta.value:"";
     if(v.trim())lyrSet(id,v);else{delete LYR[id];saveLyr();LYRMSG=null}
     render();const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"});return}

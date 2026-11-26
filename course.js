@@ -816,6 +816,8 @@ nouns: [
 ["не́бо","sky","سماء","n","L","","не́бо","не́ба","не́бу",""],
 ["со́лнце","sun","شمس","n","T","","со́лнце","со́лнца","со́лнцу",""],
 ["ла́мпа","lamp","مصباح","f","T","","ла́мпу","ла́мпы","ла́мпе","ламп"],
+["ча́шка","cup","فنجان","f","T","","ча́шку","ча́шки","ча́шке","ча́шек"],
+["ло́жка","spoon","ملعقة","f","T","","ло́жку","ло́жки","ло́жке","ло́жек"],
 ["вино́","wine","نبيذ","n","F","","вино́","вина́","вину́",""],
 /* words from songs (topic "songs"): their sentences only show up once the word is learned in the song */
 ["океа́н","ocean","محيط","m","L","","океа́н","океа́на","океа́ну",""],
@@ -894,6 +896,7 @@ words: [
 ["всё","everything","كل شيء","hello",""],
 ["когда́","when","متى","hello",""],
 ["и́ли","or","أو","hello",""],
+["куда́","where to","إلى أين","hello",""],
 
 /* people */
 ["ма́ма","mum","أمّ","people","acc-fem moy-tvoy"],
@@ -966,6 +969,8 @@ words: [
 ["ко́шка","cat (female)","قطّة","home",""],
 ["письмо́","letter","رسالة","home","roots"],
 ["ла́мпа","lamp","مصباح","home","acc-fem moy-tvoy"],
+["ча́шка","cup","فنجان","home","acc-fem moy-tvoy"],
+["ло́жка","spoon","ملعقة","home","acc-fem moy-tvoy"],
 
 /* city */
 ["го́род","city","مدينة","city","acc-masc stress"],
@@ -1133,6 +1138,7 @@ words: [
 ["пло́хо","badly, it is bad","سيئ، بشكل سيئ","describe","nravitsya"],
 ["интере́сно","it is interesting","مثير للاهتمام","describe","nravitsya"],
 ["темно́","it's dark","الجو مظلم","describe",""],
+["лу́чше","better","أفضل","describe",""],
 
 /* shop */
 ["де́ньги","money","مال / نقود","shop",""],
@@ -1219,7 +1225,14 @@ words: [
 ["ба́бушки","grandmothers","جدّات","songs",""],
 ["неве́сты","brides","عرائس","songs",""],
 ["ми́лый","dear, sweet","عزيز، لطيف","songs",""],
-["ме́сто","place, seat","مكان، مقعد","songs",""]
+["ме́сто","place, seat","مكان، مقعد","songs",""],
+["му́ха","fly","ذبابة","songs",""],
+["нелегко́","it's not easy","ليس سهلًا","songs",""],
+["немно́жко","a little bit","قليلًا","songs",""],
+["тебе́","to you (to a friend)","لكَ / لكِ","songs",""],
+["помогу́","I'll help","سأساعد","songs",""],
+["пожале́й","have pity! (to a friend)","ارحَمْ (أمر لصديق)","songs",""],
+["переле́й","pour it over! (to a friend)","اسكُبْ (أمر لصديق)","songs",""]
 ],
 
 /* ============ phrases: same shape ============ */
@@ -1343,7 +1356,14 @@ phrases: [
 ["Мы е́дем в Пари́ж.","We're going to Paris.","نحن ذاهبون إلى باريس.","songs","ya-form v-prep:to"],
 ["В самолёте нет ме́ста.","There's no room on the plane.","لا مكان في الطائرة.","songs","v-prep u-menya:net"],
 ["Бра́тья и ба́бушки в самолёте.","Brothers and grandmothers are on the plane.","الإخوة والجدّات في الطائرة.","songs","no-is v-prep"],
-["Ты мой ми́лый друг.","You're my dear friend.","أنت صديقي العزيز.","songs","no-is moy-tvoy:adj"]
+["Ты мой ми́лый друг.","You're my dear friend.","أنت صديقي العزيز.","songs","no-is moy-tvoy:adj"],
+["Му́ха в молоке́.","There's a fly in the milk.","ذبابة في الحليب.","songs","no-is v-prep"],
+["Куда́ ты идёшь?","Where are you going?","إلى أين أنت ذاهب؟","songs","ya-form"],
+["Тебе́ хорошо́?","Are you all right?","هل أنت بخير؟","songs","nravitsya:state"],
+["Мне нелегко́.","It's not easy for me.","ليس الأمر سهلًا عليّ.","songs","nravitsya:state"],
+["Я не могу́.","I can't.","لا أستطيع.","songs","ya-form"],
+["Я тебе́ помогу́.","I'll help you.","سأساعدك.","songs",""],
+["Где ча́шка и ло́жка?","Where are the cup and the spoon?","أين الفنجان والملعقة؟","songs",""]
 ],
 
 /* ============ easy readings ============ */
@@ -1663,13 +1683,14 @@ facts: [
 ],
 
 /* ============ songs ============
-   A song page: the official video, short notes, and small lessons built from the song's words.
+   A song (or a poem, kind:"poem") page: the official video if any, short notes, and small lessons built from its words.
    Lyrics are NOT in the app (copyright): the learner pastes them on the song page and they stay on that phone.
    lessons[].words / phrases: Russian exactly as in words / phrases above. Song-only words use the topic "songs",
    which is not on the path; once learned in a song, a word counts as known everywhere (path, practice, readings).
    Phrases are drilled only after their principle cards are done on the path, like everywhere else.
    notes and lesson bodies: {…} marks Russian, <ar>…</ar> marks Arabic, as in principles. */
-/* Songs are listed from easiest to hardest: «Кофевино» (almost two words), «Хочешь?» (one verb, questions),
+/* Songs and poems, from easiest to hardest: «Кофевино» (almost two words), «Муха» (a 12-line poem, a dialogue),
+   «Хочешь?» (one verb, questions),
    «Жить в твоей голове» (a grammar-packed title, long words), «Выше крыш» (fast verses, many words). */
 songs: [
 {id:"kofevino", ru:"Кофеви́но", by:"Земфи́ра", en:"Coffee-wine", ar:"قهوة-نبيذ", year:2013,
@@ -1715,6 +1736,43 @@ songs: [
            ar:`{Мне не всё равно́} هي <ar>يهمّني</ar>: الأمر يعنيني، و«أنا» في صيغة «لِمَن»، تمامًا كما في العربية.`},
    words:["меня́","отпусти́","обними́","всё равно́","ду́маю","что","пожа́луйста"],
    phrases:["Мне всё равно́.","Мне не всё равно́.","Что ты ду́маешь?","Обними́ меня́."]}
+ ]},
+{id:"mukha", kind:"poem", ru:"Му́ха", by:"О́сип Мандельшта́м", en:"The fly", ar:"الذبابة",
+ lyrics:"https://www.culture.ru/poems/41716/mukha",
+ ps:["nravitsya:state","v-prep:to","ya-form","acc-masc:pron"],
+ notes:[
+  {id:"before", en:"Before you read", ar:"قبل أن تقرأ",
+   body:{en:`<p>A tiny poem for children by one of the greatest Russian poets. Twelve short lines: someone asks a fly that has fallen into the milk how it's doing, and the fly answers and asks for help.</p>
+<p>It's a dialogue, so read it aloud in two voices. Listen for {молоко́}, {ты} and {тебе́}.</p>`,
+         ar:`<p>قصيدة صغيرة للأطفال كتبها أحد أعظم الشعراء الروس. اثنا عشر سطرًا قصيرًا: شخص يسأل ذبابة وقعت في الحليب عن حالها، فتجيب الذبابة وتطلب المساعدة.</p>
+<p>إنها حوار، فاقرأها بصوت عالٍ بصوتين. انتبه لـ {молоко́} و{ты} و{тебе́}.</p>`}},
+  {id:"who", en:"Who is Mandelstam", ar:"من هو ماندلشتام",
+   body:{en:`<p>Osip Mandelstam (1891–1938) is one of the great Russian poets of the 20th century. In the 1920s, when he could hardly publish his own poems, he wrote small, playful books for children. He was arrested twice for his poetry and died in a Soviet transit camp near Vladivostok.</p>`,
+         ar:`<p>أوسيب ماندلشتام (1891–1938) من كبار الشعراء الروس في القرن العشرين. في العشرينيات، حين كان نشر قصائده شبه مستحيل، كتب كتبًا صغيرة مرحة للأطفال. اعتُقل مرتين بسبب شعره، ومات في معسكر عبور سوفيتي قرب فلاديفوستوك.</p>`}}
+ ],
+ lessons:[
+  {en:"A fly in the milk", ar:"ذبابة في الحليب",
+   body:{en:`<ul><li>{в молоко́} = into the milk: going into something. {в молоке́} = in the milk: being there. For an “it” word the where-to form doesn't change.</li>
+<li>{куда́?} = where to? {где?} = where? Russian keeps them apart, like <ar>إلى أين</ar> and <ar>أين</ar>.</li>
+<li>{Тебе́ хорошо́?} = are you all right? Word for word: “to you, good?”. It's built like {мне хо́лодно}. {нелегко́} = not easy: {не} + {легко́}.</li>
+<li>{немно́жко} = a little bit, a warm form of {немно́го}.</li></ul>`,
+         ar:`<ul><li>{в молоко́} = إلى داخل الحليب: الذهاب إلى داخل شيء. {в молоке́} = في الحليب: الوجود هناك. في الكلمة المحايدة لا تتغيّر صيغة «إلى أين».</li>
+<li>{куда́?} = إلى أين؟ {где?} = أين؟ الروسية تفرّق بينهما مثل <ar>إلى أين</ar> و<ar>أين</ar>.</li>
+<li>{Тебе́ хорошо́?} = هل أنت بخير؟ حرفيًا: «لك، جيد؟». مبنية مثل {мне хо́лодно}. {нелегко́} = ليس سهلًا: {не} + {легко́}.</li>
+<li>{немно́жко} = قليلًا، صيغة حانية من {немно́го}.</li></ul>`},
+   bridge:{en:`{Тебе́ хорошо́?} is close to <ar>هل يطيب لك؟</ar> or <ar>هل أنت مرتاح؟</ar>: the person who feels it stands in the “to whom” form, like <ar>لك</ar>.`,
+           ar:`{Тебе́ хорошо́?} قريبة من <ar>هل يطيب لك؟</ar>: صاحب الشعور في صيغة «لِمَن»، مثل <ar>لك</ar>.`},
+   words:["му́ха","молоко́","куда́","хорошо́","нелегко́","немно́жко","тебе́"],
+   phrases:["Му́ха в молоке́.","Куда́ ты идёшь?","Тебе́ хорошо́?","Мне нелегко́."]},
+  {en:"Help me!", ar:"ساعدني!",
+   body:{en:`<ul><li>{не могу́} = I can't. {помогу́} = I'll help: one finished action, so it's the future.</li>
+<li>Requests to a friend: after a vowel they end in {-й}: {пожале́й} (have pity), {переле́й} (pour it over). Otherwise in {-и}, like {обними́}.</li>
+<li>{ча́шка} = cup, {ло́жка} = spoon. {лу́чше} = better.</li></ul>`,
+         ar:`<ul><li>{не могу́} = لا أستطيع. {помогу́} = سأساعد: فعل واحد مكتمل، لذلك هو للمستقبل.</li>
+<li>الطلب من صديق: بعد حرف علّة ينتهي بـ {-й}: {пожале́й} (ارحمْ)، {переле́й} (اسكبْ). وإلا فبـ {-и} مثل {обними́}.</li>
+<li>{ча́шка} = فنجان، {ло́жка} = ملعقة. {лу́чше} = أفضل.</li></ul>`},
+   words:["могу́","помогу́","пожале́й","переле́й","ча́шка","ло́жка","лу́чше","меня́"],
+   phrases:["Я не могу́.","Я тебе́ помогу́.","Где ча́шка и ло́жка?"]}
  ]},
 {id:"khochesh", ru:"Хо́чешь?", by:"Земфи́ра", en:"Do you want…?", ar:"هل تريد…؟", year:2000,
  video:"xpJ_fYyAeYk",
