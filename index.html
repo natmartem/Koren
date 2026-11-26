@@ -180,7 +180,7 @@ const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(M
 const today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
 
 /* ================= state ================= */
-let S={v:1,lang:"en",srs:{},seen:{},ps:{},pseen:{},stressAll:false,tts:true,auto:true,read:{}};
+let S={v:1,lang:"en",srs:{},seen:{},ps:{},done:{},stressAll:false,tts:true,auto:true,read:{}};
 let storageOK=true;
 try{const raw=localStorage.getItem("koren-state");if(raw){const o=JSON.parse(raw);if(o&&typeof o==="object")S=Object.assign(S,o)}}catch(e){}
 try{localStorage.setItem("koren-probe","1");localStorage.removeItem("koren-probe")}catch(e){storageOK=false}
@@ -194,7 +194,7 @@ try{const a=JSON.parse(localStorage.getItem("koren-packs")||"[]");if(Array.isArr
 const savePacks=()=>{try{localStorage.setItem("koren-packs",JSON.stringify(PACKS));return true}catch(e){return false}};
 let TOP=[],PR=[],WORDS=[],PHRASES=[],READS=[],FACTS=[],ITEMS={},PITEMS={},TOPm={},PRm={};
 /* combination tables (from course.js) and lookups built from them */
-let N=[],ADJ=[],VERBS=[],FORMIDX=new Map(),BASEIDX={};
+let N=[],ADJ=[],VERBS=[],FORMIDX=new Map(),BASEIDX={},STEPS=[],STEPm={};
 const POSS={m:"мой",f:"моя́",n:"моё",pl:"мои́"},TPOSS={m:"твой",f:"твоя́",n:"твоё",pl:"твои́"},DEM={m:"э́тот",f:"э́та",n:"э́то",pl:"э́ти"};
 const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
 const prepOf=w=>w.split(" ")[0],nounOf=w=>w.split(" ").slice(1).join(" ");
@@ -226,6 +226,7 @@ function build(){
   /* reading lines are items too, so they come back for review */
   READS.forEach(r=>(r.lines||[]).forEach(l=>{const key="L:"+plain(l[0]);if(!ITEMS[key])ITEMS[key]={key,akey:"S:"+plain(l[0]),kind:"l",ru:l[0],en:l[1],ar:l[2],topic:r.topic,ps:[],read:r.id}}));
   generate(c);
+  buildPath();
 }
 /* ================= combinations: vocabulary × principles =================
    Every noun, adjective and verb in the tables is put through every principle it fits,
@@ -425,28 +426,93 @@ const levelPill=pid=>{const l=level(pid);return l===2?`<span class="pill good">$
 const recognised=list=>list.filter(w=>(S.srs[w.key]||{}).b>=2).length;
 const seenOrDrilled=it=>S.seen[it.key]||S.srs[it.key];
 function dueKeys(){const d=today();return Object.keys(S.srs).filter(k=>S.srs[k].d<=d&&(ITEMS[k]||PITEMS[k])).sort((a,b)=>S.srs[a].d-S.srs[b].d)}
-/* ================= the suggested path =================
-   Cards, topics and readings in an order where each card comes before the topics and texts that use it.
-   Nothing is locked. Drills only use phrases and combinations whose cards have been opened. */
-const PATH=()=>(BASE.path||[]).filter(st=>{const [k,id]=st.split(":");return k==="p"?PRm[id]:k==="t"?TOPm[id]:READS.some(r=>r.id===id)});
-const DRILLED=6; /* a principle counts once this many of its drills are done; opening its card alone changes nothing */
-const unlocked=pid=>!!(S.ps[pid]&&S.ps[pid].n>=DRILLED);
-const ready=it=>!it.ps||it.ps.every(unlocked);           /* a phrase whose grammar has been explained */
-function stepDone(st){const [k,id]=st.split(":");
-  if(k==="p")return unlocked(id);
-  if(k==="t"){const ws=wordsOf(id);return ws.filter(w=>seenOrDrilled(w)).length>=Math.ceil(ws.length*.6)} /* the rest keeps coming in later sessions */
-  return !!S.read[id]}
-function stepInfo(st){const [k,id]=st.split(":");
-  if(k==="p"){const p=PRm[id];return {href:"#p/"+id,t:L(p),s:L(p.can),kind:T("Principle: card and drills","مبدأ: بطاقة وتدريب")}}
-  if(k==="t"){const t=TOPm[id];return {href:"#topic/"+id,t:L(t),s:T("New words","كلمات جديدة"),kind:T("Topic","موضوع")}}
-  const r=READS.find(x=>x.id===id);return {href:"#r/"+id,t:L(r),s:tname(r.topic),kind:T("Reading","قراءة")}}
-const nextSteps=n=>PATH().filter(st=>!stepDone(st)).slice(0,n);
-const nextOf=k=>{const st=PATH().find(x=>x.startsWith(k+":")&&!stepDone(x));return st?st.slice(2):null};
-const nextPrinciple=()=>{ /* the principle to drill: the furthest opened card on the path that isn't comfortable yet */
-  const opened=PATH().filter(x=>x.startsWith("p:")&&unlocked(x.slice(2))).map(x=>PRm[x.slice(2)]);
-  return opened.reverse().find(p=>p.list&&p.list.length&&level(p.id)<2)||opened[0]||null};
-const nextTopic=()=>{const id=nextOf("t");return id?TOPm[id]:TOP[0]};
-const nextReading=()=>{const id=nextOf("r");return id?READS.find(r=>r.id===id):READS[0]};
+/* ================= the path =================
+   One line of small lessons that covers the whole course: every principle card, every word
+   (topics are split into lessons of about six words), every phrase, every reading.
+   A phrase is taught at the first step where its topic has been reached AND its grammar explained.
+   A step is done when its lesson is finished. Practice only ever reviews what the path has taught. */
+function buildPath(){
+  STEPS=[];STEPm={};const order=[...(BASE.path||[])];
+  TOP.forEach(t=>{if(!order.includes("t:"+t.id))order.push("t:"+t.id)});
+  PR.forEach(x=>{if(!order.includes("p:"+x.id))order.push("p:"+x.id)});
+  READS.forEach(r=>{if(!order.includes("r:"+r.id))order.push("r:"+r.id)});
+  order.forEach(st=>{const [k,id]=st.split(":");
+    if(k==="t"&&TOPm[id]){const ws=WORDS.filter(w=>w.topic===id);if(!ws.length)return;const n=Math.ceil(ws.length/7),size=Math.ceil(ws.length/n);
+      for(let i=0;i<n;i++)STEPS.push({id:`t:${id}:${i+1}`,k:"t",topic:id,words:ws.slice(i*size,(i+1)*size),part:i+1,parts:n,phrases:[]})}
+    else if(k==="p"&&PRm[id])STEPS.push({id:"p:"+id,k:"p",pid:id,phrases:[]});
+    else if(k==="r"&&READS.some(r=>r.id===id))STEPS.push({id:"r:"+id,k:"r",rid:id,phrases:[]});
+  });
+  STEPS.forEach((x,i)=>{x.i=i;STEPm[x.id]=x});
+  PHRASES.forEach(ph=>{let idx=STEPS.findIndex(x=>x.topic===ph.topic);
+    ph.ps.forEach(pid=>{const j=STEPS.findIndex(x=>x.id==="p:"+pid);if(j>idx)idx=j});
+    if(idx>=0)STEPS[idx].phrases.push(ph)});
+}
+const DRILLED=6;
+function stepDone(x){
+  if(!x)return false;if(S.done[x.id])return true;
+  if(x.k==="p")return !!(S.ps[x.pid]&&S.ps[x.pid].n>=DRILLED);
+  if(x.k==="r")return !!S.read[x.rid];
+  return x.words.every(w=>S.seen[w.key])&&x.phrases.every(w=>S.seen[w.key]);
+}
+const unlocked=pid=>stepDone(STEPm["p:"+pid]);
+const ready=it=>!it.ps||it.ps.every(unlocked);
+const curStep=()=>STEPS.find(x=>!stepDone(x))||null;
+function stepName(x){
+  if(x.k==="t"){const t=TOPm[x.topic];return L(t)+(x.parts>1?` · ${x.part}/${x.parts}`:"")}
+  if(x.k==="p")return L(PRm[x.pid]);
+  const r=READS.find(y=>y.id===x.rid);return L(r);
+}
+function stepKind(x){return x.k==="t"?T("New words","كلمات جديدة"):x.k==="p"?T("Principle","مبدأ"):T("Reading","قراءة")}
+function stepSub(x){
+  if(x.k==="t")return x.words.slice(0,4).map(w=>plain(w.ru)).join(", ")+(x.words.length>4?"…":"");
+  if(x.k==="p")return L(PRm[x.pid].can);
+  const r=READS.find(y=>y.id===x.rid);return tname(r.topic);
+}
+function lessonQs(x){
+  const q=[];
+  if(x.k==="p"){q.push({t:"card",pid:x.pid});q.push(...principleQs(x.pid,8))}
+  else if(x.k==="r"){q.push({t:"text",rid:x.rid});q.push(...readingQs(x.rid))}
+  else{
+    const set=x.words;set.forEach(w=>q.push({t:"intro",it:w}));
+    shuffle(set).forEach(w=>q.push(wordQ(w,"pm")));
+    shuffle(set).slice(0,4).forEach(w=>q.push(wordQ(w,canPlay(w.key)&&Math.random()<.5?"lp":"pr")));
+    shuffle(set).slice(0,2).forEach(w=>q.push(wordQ(w,"ty")));
+    shuffle(set.flatMap(w=>BASEIDX[w.key]||[]).filter(y=>unlocked(y.pid))).slice(0,3).forEach(y=>{const z=principleQ(y,null);if(z)q.push(z)});
+  }
+  /* phrases that become sayable at this step */
+  x.phrases.forEach(ph=>q.push({t:"intro",it:ph}));
+  shuffle(x.phrases).forEach(ph=>{const z=gapQ(ph)||buildQ(ph)||wordQ(ph,"pm");if(z)q.push(z)});
+  /* a little review of earlier steps */
+  q.push(...reviewQs(3));
+  return q.filter(Boolean);
+}
+function startStep(id){
+  const x=STEPm[id];if(!x)return;
+  startQ(lessonQs(x),"step",`Path step ${x.i+1}: ${x.k==="t"?TOPm[x.topic].en+(x.parts>1?` ${x.part}/${x.parts}`:""):x.k==="p"?PRm[x.pid].en:READS.find(r=>r.id===x.rid).en} (${x.id})`);
+  if(Q)Q.stepId=id;
+}
+/* ================= practice: only what the path has taught ================= */
+function poolOf(f){
+  f=f||{};
+  const met=x=>{const k=x.base?wkey(x.base):x.gen&&x.akey&&x.akey.startsWith("W:")?x.akey:null;if(!k)return true;const it=ITEMS[k];return !it||!!S.seen[it.key]||!!S.srs[it.key]};
+  let items=[...WORDS,...PHRASES].filter(x=>(S.seen[x.key]||S.srs[x.key])&&ready(x));
+  let lines=Object.values(ITEMS).filter(x=>x.kind==="l"&&(S.read[x.read]||S.done["r:"+x.read]));
+  let pr=PR.filter(x=>unlocked(x.id)).flatMap(x=>x.list.filter(met));
+  if(f.pid){items=items.filter(x=>x.ps.includes(f.pid));lines=[];pr=pr.filter(x=>x.pid===f.pid)}
+  if(f.topic){items=items.filter(x=>x.topic===f.topic);lines=lines.filter(x=>x.topic===f.topic);pr=pr.filter(x=>x.base&&ITEMS[wkey(x.base)]&&ITEMS[wkey(x.base)].topic===f.topic)}
+  return {items,lines,pr,size:items.length+lines.length+pr.length};
+}
+function practiceQs(f,n){
+  n=n||15;const P=poolOf(f),d=today(),q=[],used=new Set();
+  const due=k=>S.srs[k]&&S.srs[k].d<=d;
+  const pick=(arr,k)=>shuffle(arr).sort((a,b)=>(due(a.key)?0:1)-(due(b.key)?0:1)).slice(0,k);
+  const quota=[[P.pr,Math.ceil(n*.45)],[P.items,Math.ceil(n*.35)],[P.lines,Math.ceil(n*.2)]];
+  quota.forEach(([arr,k])=>pick(arr,k).forEach(x=>{if(used.has(x.key))return;used.add(x.key);
+    const z=x.pid?principleQ(x,Math.random()<.2?"type":["pick","mean","type"][Math.floor(Math.random()*3)]):itemQ(x);if(z)q.push(z)}));
+  if(q.length<n){[...P.items,...P.pr,...P.lines].filter(x=>!used.has(x.key)).sort(()=>Math.random()-.5).slice(0,n-q.length).forEach(x=>{const z=x.pid?principleQ(x,null):itemQ(x);if(z)q.push(z)})}
+  return shuffle(q).slice(0,n);
+}
+const nextPrinciple=()=>{const x=STEPS.find(y=>y.k==="p"&&!stepDone(y));return x?PRm[x.pid]:null};
 
 /* ================= text helpers ================= */
 const md=s=>String(s||"").replace(/\{([^}]+)\}/g,(m,x)=>`<button type="button" class="say" data-say="${esc(plain(x))}">${esc(x)}</button>`).replace(/<ar>/g,'<span class="ar">').replace(/<\/ar>/g,"</span>");
@@ -466,9 +532,11 @@ const ICON={
  topics:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>',
  principles:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 21V11M12 11c0-4 3-7 7-7 0 4-3 7-7 7zM12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z"/><path d="M8 21h8"/></svg>',
  read:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5c3-1 6-1 9 1 3-2 6-2 9-1v14c-3-1-6-1-9 1-3-2-6-2-9-1z"/><path d="M12 6v14"/></svg>',
+ path:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg>',
+ practice:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.7-5.7L20 8.6M20 4v4.6h-4.6M20 12a8 8 0 0 1-13.7 5.7L4 15.4M4 20v-4.6h4.6"/></svg>',
  more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>'};
 function renderTabs(cur){
-  const tabs=[["today",T("Today","اليوم")],["topics",T("Topics","المواضيع")],["principles",T("Principles","المبادئ")],["read",T("Read","القراءة")],["more",T("More","المزيد")]];
+  const tabs=[["path",T("Path","المسار")],["practice",T("Practice","التدريب")],["topics",T("Topics","المواضيع")],["principles",T("Principles","المبادئ")],["more",T("More","المزيد")]];
   $("#tabs").innerHTML=tabs.map(([id,n])=>`<button type="button" data-go="#${id}" ${cur===id?'aria-current="page"':""}>${ICON[id]}<span>${n}</span></button>`).join("");
 }
 
@@ -477,12 +545,12 @@ let Q=null; /* the running practice: {list,i,answered,title,back,done:[]} */
 function render(){
   document.documentElement.lang=S.lang==="ar"?"ar":"en";document.documentElement.dir=S.lang==="ar"?"rtl":"ltr";
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===S.lang)));
-  const h=(location.hash||"#today").slice(1),[v,arg]=h.split("/");
+  const h=(location.hash||"#path").slice(1),[v,arg]=h.split("/");
   $("#tabs").hidden=(v==="drill"&&!!Q);
   if(v==="drill"&&Q){
     if(Q.answered&&!Q.finished){Q.answered=false;Q.i++;if(Q.i>=Q.list.length)Q.finished=true} /* back from a card: carry on with the next one */
     return renderQ()}
-  const tab={topic:"topics",p:"principles",r:"read"}[v]||v;renderTabs(tab);
+  const tab={topic:"topics",p:"principles",r:"topics",read:"topics",today:"path"}[v]||v;renderTabs(tab);
   const view=$("#view");
   const back=Q&&!Q.finished?`<button type="button" class="back" data-go="#drill">← ${T("Back to practice","العودة إلى التدريب")}</button>`:"";
   let html="";
@@ -490,39 +558,46 @@ function render(){
   else if(v==="topic"&&TOPm[arg])html=vTopic(arg);
   else if(v==="principles")html=vPrinciples();
   else if(v==="p"&&PRm[arg])html=vPrinciple(arg);
-  else if(v==="read")html=vReads();
+  else if(v==="read")html=vTopics();
+  else if(v==="practice")html=vPractice();
   else if(v==="r")html=vReading(arg);
   else if(v==="more")html=vMore();
-  else html=vToday();
+  else html=vPath();
   view.innerHTML=back+html;
 }
-function vToday(){
-  const p=nextPrinciple(),t=nextTopic(),r=nextReading();
-  const started=PR.filter(x=>level(x.id)>0);
-  const tops=TOP.map(x=>({t:x,n:recognised(wordsOf(x.id))})).filter(x=>x.n>0);
-  const any=Object.keys(S.srs).length>0;
-  return `<h1>${T("Today","اليوم")}</h1>
-  <p class="lead">${T("About 20 minutes: a little review, one new step, then a short reading. Stop whenever you like.","حوالي عشرين دقيقة: مراجعة قليلة، خطوة جديدة، ثم قراءة قصيرة. توقّف متى شئت.")}</p>
-  <div class="card"><button type="button" class="btn primary wide" data-act="session">${any?T("Start today's session","ابدأ جلسة اليوم"):T("Start your first session","ابدأ أول جلسة")}</button></div>
-  ${pathCard()}
-  <div class="card"><span class="label">${T("What you can do now","ما تستطيع فعله الآن")}</span>
-   ${started.length||tops.length?`<div class="list">${started.map(x=>`<a class="li" href="#p/${esc(x.id)}"><div class="grow"><div class="t">${esc(L(x.can))}</div><div class="s">${esc(L(x))}</div></div>${levelPill(x.id)}</a>`).join("")}
-   ${tops.map(x=>`<a class="li" href="#topic/${esc(x.t.id)}"><div class="grow"><div class="t">${T(`You recognise ${x.n} words about ${esc(L(x.t)).toLowerCase()}`,`تعرف ${x.n} كلمة في موضوع «${esc(L(x.t))}»`)}</div></div>${CHEV}</a>`).join("")}</div>`
-   :`<p class="lead">${T("This fills in as you practise: each principle shows what it lets you do.","يمتلئ هذا مع التدريب: كل مبدأ يُظهر ما يمكّنك منه.")}</p>`}
-  </div>
+function stepRow(x,cur){
+  const d=stepDone(x),isCur=cur&&cur.id===x.id;
+  return `<button type="button" class="li" data-act="step" data-id="${esc(x.id)}"><span class="pill${d?" good":""}" style="min-width:34px;justify-content:center;${isCur?"background:var(--accent);color:var(--accent-ink)":""}">${d?"✓":x.i+1}</span><div class="grow"><div class="t">${esc(stepName(x))}</div><div class="s">${esc(stepKind(x))} · ${esc(stepSub(x))}</div></div>${CHEV}</button>`;
+}
+function vPath(){
+  const cur=curStep(),done=STEPS.filter(stepDone).length;
+  const from=cur?Math.max(0,cur.i-2):Math.max(0,STEPS.length-5),win=STEPS.slice(from,from+8);
+  return `<h1>${T("Your path","مسارك")}</h1>
+  <p class="lead">${T("Everything in the course is on this path, in small lessons. Tap Start, and Next at the end of each lesson.","كل ما في الدورة موجود في هذا المسار، في دروس صغيرة. اضغط «ابدأ»، ثم «التالي» في نهاية كل درس.")}</p>
+  <div class="card">${cur?`<span class="label">${T(`Step ${cur.i+1} of ${STEPS.length}`,`الخطوة ${cur.i+1} من ${STEPS.length}`)} · ${esc(stepKind(cur))}</span>
+   <h2 style="font-size:20px">${esc(stepName(cur))}</h2><p class="lead">${esc(stepSub(cur))}</p>
+   <button type="button" class="btn primary wide" data-act="step" data-id="${esc(cur.id)}">${done?T("Continue","تابع"):T("Start","ابدأ")}</button>
+   <div class="meter"><i style="width:${Math.round(done/STEPS.length*100)}%"></i></div><p class="count">${T(`${done} of ${STEPS.length} steps done`,`أنجزت ${done} من ${STEPS.length} خطوة`)}</p>`
+   :`<h2>${T("You've finished the whole path","أنهيت المسار كله")}</h2><p class="lead">${T("Everything is learned. Keep it fresh in Practice.","تعلّمت كل شيء. حافظ عليه في التدريب.")}</p><button type="button" class="btn primary wide" data-go="#practice">${T("Go to Practice","إلى التدريب")}</button>`}</div>
+  <div class="card"><div class="list">${win.map(x=>stepRow(x,cur)).join("")}</div>
+   <details class="fb-list"><summary>${T("See the whole path","أظهر المسار كاملًا")} (${STEPS.length})</summary><div class="list">${STEPS.map(x=>stepRow(x,cur)).join("")}</div></details></div>
   ${storageOK?"":`<div class="card"><p>${T("This browser is not saving progress (private mode?). Open the app normally to keep your progress.","هذا المتصفح لا يحفظ التقدم (وضع خاص؟). افتح التطبيق بشكل عادي لحفظ تقدمك.")}</p></div>`}`;
 }
-function pathCard(){
-  const all=PATH(),done=all.filter(stepDone).length,next=nextSteps(4);
-  const row=(st,i)=>{const x=stepInfo(st),d=stepDone(st);return `<a class="li" href="${esc(x.href)}"><span class="pill${d?" good":i===0?"":" "}" style="min-width:30px;justify-content:center">${d?"✓":all.indexOf(st)+1}</span><div class="grow"><div class="t">${esc(x.t)}</div><div class="s">${esc(x.kind)}${x.s?" · "+esc(x.s):""}</div></div>${CHEV}</a>`};
-  return `<div class="card"><span class="label">${T("Your path","مسارك")} · ${done}/${all.length}</span>
-   ${next.length?`<p class="lead">${T("Read each card before the topics and texts that use it. A step counts once its drills are done, and drills only use grammar you've already practised.","اقرأ كل بطاقة قبل المواضيع والنصوص التي تستخدمها. تُحسب الخطوة بعد إنهاء تدريبها، والتدريبات تستخدم فقط قواعد سبق أن تدرّبت عليها.")}</p><div class="list">${next.map(row).join("")}</div>`:`<p class="lead">${T("You've been through the whole path. Keep reviewing and reading.","أنهيت المسار كله. واصل المراجعة والقراءة.")}</p>`}
-   <details class="fb-list"><summary>${T("See the whole path","أظهر المسار كاملًا")}</summary><div class="list">${all.map(row).join("")}</div></details></div>`;
+function vPractice(){
+  const P=poolOf(),pr=PR.filter(x=>unlocked(x.id)),tops=TOP.map(t=>({t,n:poolOf({topic:t.id}).size})).filter(x=>x.n>0);
+  const tops2=TOP.map(x=>({t:x,n:recognised(wordsOf(x.id))})).filter(x=>x.n>0);
+  return `<h1>${T("Practice","التدريب")}</h1>
+  <p class="lead">${T("Review only: everything here comes from steps you've done on the path. Nothing new.","مراجعة فقط: كل ما هنا من خطوات أنجزتها في المسار. لا شيء جديد.")}</p>
+  <div class="card">${P.size?`<p class="count">${T(`${P.size} things to practise`,`${P.size} عنصرًا للتدريب`)}</p><button type="button" class="btn primary wide" data-act="practice">${T("Start practice","ابدأ التدريب")}</button>`
+   :`<p class="lead">${T("This fills up as you go along the path.","يمتلئ هذا كلما تقدّمت في المسار.")}</p><button type="button" class="btn primary wide" data-go="#path">${T("Go to the path","إلى المسار")}</button>`}</div>
+  ${pr.length?`<div class="card"><span class="label">${T("By principle","حسب المبدأ")}</span><div class="list">${pr.map(x=>`<button type="button" class="li" data-act="practice" data-pid="${esc(x.id)}"><div class="grow"><div class="t">${esc(L(x))}</div><div class="s">${esc(L(x.can))}</div></div>${levelPill(x.id)}${CHEV}</button>`).join("")}</div></div>`:""}
+  ${tops.length?`<div class="card"><span class="label">${T("By topic","حسب الموضوع")}</span><div class="list">${tops.map(x=>`<button type="button" class="li" data-act="practice" data-topic="${esc(x.t.id)}"><div class="grow"><div class="t">${esc(L(x.t))}</div><div class="s">${T(`You recognise ${recognised(wordsOf(x.t.id))} of ${wordsOf(x.t.id).length} words`,`تعرف ${recognised(wordsOf(x.t.id))} من ${wordsOf(x.t.id).length} كلمة`)}</div></div>${CHEV}</button>`).join("")}</div></div>`:""}`;
 }
 function vTopics(){
-  return `<h1>${T("Topics","المواضيع")}</h1><p class="lead">${T("Everyday words, grouped by where you'll need them. All open, in any order.","كلمات يومية مجمّعة حسب المكان الذي ستحتاجها فيه. كلها مفتوحة وبأي ترتيب.")}</p>
+  return `<h1>${T("Topics","المواضيع")}</h1><p class="lead">${T("Everyday words, grouped by where you'll need them. Reference only: learning happens on the path.","كلمات يومية مجمّعة حسب المكان الذي ستحتاجها فيه. للمرجع فقط: التعلّم يحدث في المسار.")}</p>
   <div class="card"><div class="list">${TOP.map(t=>{const ws=wordsOf(t.id),n=recognised(ws);
-    return `<a class="li" href="#topic/${esc(t.id)}"><div class="grow"><div class="t">${esc(L(t))}</div><div class="s">${n?T(`You recognise ${n} of ${ws.length}`,`تعرف ${n} من ${ws.length}`):T(`${ws.length} words`,`${ws.length} كلمة`)}</div>${n?`<div class="meter"><i style="width:${Math.round(n/ws.length*100)}%"></i></div>`:""}</div>${CHEV}</a>`}).join("")}</div></div>`;
+    return `<a class="li" href="#topic/${esc(t.id)}"><div class="grow"><div class="t">${esc(L(t))}</div><div class="s">${n?T(`You recognise ${n} of ${ws.length}`,`تعرف ${n} من ${ws.length}`):T(`${ws.length} words`,`${ws.length} كلمة`)}</div>${n?`<div class="meter"><i style="width:${Math.round(n/ws.length*100)}%"></i></div>`:""}</div>${CHEV}</a>`}).join("")}</div></div>
+  <div class="card"><span class="label">${T("Readings","القراءات")}</span><div class="list">${READS.map(r=>`<a class="li" href="#r/${esc(r.id)}"><div class="grow"><div class="t">${esc(L(r))}</div><div class="s">${esc(tname(r.topic))}</div></div>${S.read[r.id]?`<span class="pill good">✓</span>`:""}${CHEV}</a>`).join("")}</div></div>`;
 }
 function vTopic(id){
   const t=TOPm[id],ws=wordsOf(id),ph=phrasesOf(id);
@@ -530,12 +605,12 @@ function vTopic(id){
   const fresh=ws.filter(w=>!seenOrDrilled(w)).length;
   return `<a class="back" href="#topics">← ${T("Topics","المواضيع")}</a><h1>${esc(L(t))}</h1>
   <div class="card"><div class="row">
-   ${fresh?`<button type="button" class="btn primary" data-act="learn" data-id="${esc(id)}">${T(`Learn ${Math.min(fresh,6)} new words`,`تعلّم ${Math.min(fresh,6)} كلمات جديدة`)}</button>`:""}
-   <button type="button" class="btn${fresh?"":" primary"}" data-act="tpractice" data-id="${esc(id)}">${T("Practise this topic","تدرّب على هذا الموضوع")}</button></div>
+   ${poolOf({topic:id}).size?`<button type="button" class="btn primary" data-act="practice" data-topic="${esc(id)}">${T("Practise what you've learned here","تدرّب على ما تعلّمته هنا")}</button>`:`<span class="lead">${T("Words here are taught on the path.","تُعلَّم كلمات هذا الموضوع في المسار.")}</span>`}</div>
    ${ps.length?`<span class="label">${T("Principles you'll meet here","مبادئ ستجدها هنا")}</span>${pchips(ps)}`:""}</div>
   <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning.","اضغط على الكلمة لتسمعها وترى معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
   ${ph.length?`<div class="card"><span class="label">${T("Phrases","العبارات")}</span><div>${ph.map(x=>{const need=x.ps.filter(p=>!unlocked(p));
-    return wordRow(x)+(need.length?`<div class="chips" style="margin:-4px 0 6px">${need.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Drilled after practising:","يُدرَّب بعد التدرّب على:")} ${esc(pname(p))}</a>`).join("")}</div>`:"")}).join("")}</div></div>`:""}
+    return wordRow(x)+(need.length?`<div class="chips" style="margin:-4px 0 6px">${need.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Taught on the path after:","يُعلَّم في المسار بعد:")} ${esc(pname(p))}</a>`).join("")}</div>`:"")}).join("")}</div></div>`:""}
+  ${READS.some(r=>r.topic===id)?`<div class="card"><span class="label">${T("Readings","القراءات")}</span><div class="list">${READS.filter(r=>r.topic===id).map(r=>`<a class="li" href="#r/${esc(r.id)}"><div class="grow"><div class="t">${esc(L(r))}</div></div>${CHEV}</a>`).join("")}</div></div>`:""}
   ${fbBox("t:"+id,()=>({kind:"topic",src:`Topic “${t.en}” (id ${id})`}))}`;
 }
 function vPrinciples(){
@@ -716,20 +791,6 @@ function startQ(list,title,src){
   if(location.hash==="#drill")render();else location.hash="#drill";
   autoPlay();
 }
-function sessionList(){
-  const q=reviewQs(8);
-  const st=nextSteps(1)[0];
-  if(st&&st.startsWith("r:")){const rid=st.slice(2);q.push({t:"text",rid});q.push(...readingQs(rid).slice(0,8));q.readId=rid}
-  else if(st&&st.startsWith("p:")){const pid=st.slice(2);q.push({t:"card",pid});q.push(...principleQs(pid,6))}
-  else{const p=nextPrinciple();if(p)q.push(...principleQs(p.id,5))}
-  const t=nextTopic();if(t)q.push(...topicQs(t.id,true).slice(0,14));
-  /* a couple of leftover words from topics already passed on the path */
-  const passed=PATH().filter(x=>x.startsWith("t:")&&stepDone(x)).map(x=>x.slice(2)).find(id=>wordsOf(id).some(w=>!seenOrDrilled(w)));
-  if(passed)wordsOf(passed).filter(w=>!seenOrDrilled(w)).slice(0,2).forEach(w=>{q.push({t:"intro",it:w});q.push(wordQ(w,"pm"))});
-  if(t)shuffle(phrasesOf(t.id).filter(ready)).slice(0,2).forEach(x=>{const y=buildQ(x)||gapQ(x);if(y)q.push(y)});
-  const doneReads=READS.filter(r=>S.read[r.id]);if(doneReads.length){const r=doneReads[Math.floor(Math.random()*doneReads.length)],it=ITEMS["L:"+plain(r.lines[Math.floor(Math.random()*r.lines.length)][0])];const y=it&&(gapQ(it)||buildQ(it));if(y)q.push(y)}
-  return q;
-}
 
 /* what a question looked like, in words, for feedback notes */
 const TASK={fty:"Type the missing words",gap:"Fill the gap in a sentence",build:"Build the sentence from tiles",intro:"New word card",pm:"What does it mean?",pr:"Which one is it? (meaning → Russian)",lp:"Listen and pick",ty:"Type it in Russian",lt:"Listen and type",form:"Fill the gap",pat:"Which is the Russian word? (English → Russian)",pmean:"What does it mean? (rule word)",pty:"Use the rule: type it",stress:"Where is the stress?",read:"Read the sign"};
@@ -862,15 +923,15 @@ function nextQ(){
 }
 function renderEnd(){
   if(Q.title==="reading"){const m=/id ([^)]+)\)/.exec(Q.src);if(m&&!S.read[m[1]]){S.read[m[1]]=1;save()}}
-  if(Q.readId&&!S.read[Q.readId]){S.read[Q.readId]=1;save()}
-  const nx=nextSteps(2);
-  return `<div class="drill"><h1>${T("Done for now","انتهينا الآن")}</h1>
-   <p class="lead">${T(`You worked with ${Q.touched.size} words and patterns. They'll come back for review at the right time.`,`تدرّبت على ${Q.touched.size} من الكلمات والأنماط. ستعود للمراجعة في الوقت المناسب.`)}</p>
-   ${nx.length?`<div class="card"><span class="label">${T("Next on your path","التالي في مسارك")}</span><div class="list">
-    ${nx.map(st=>{const x=stepInfo(st);return `<a class="li" href="${esc(x.href)}"><div class="grow"><div class="t">${esc(x.t)}</div><div class="s">${esc(x.kind)}</div></div>${CHEV}</a>`}).join("")}
-   </div></div>`:""}
-   <button type="button" class="btn wide" data-act="quit">${T("Back to Today","العودة إلى اليوم")}</button>
-   ${fbBox("d:"+Q.qid,()=>{const qs=Q.list.filter(q=>q.t!=="intro"),wr=Q.list.map((q,i)=>Q.res[i]===false?(q.t==="form"?q.x.full:(q.x||q.it).ru):null).filter(Boolean);return {kind:"drill",src:Q.src,score:`${Q.right}/${qs.length} right`,wrong:wr.join(", ")}})}</div>`;
+  if(Q.stepId&&!Q.marked){Q.marked=1;S.done[Q.stepId]=1;const x=STEPm[Q.stepId];if(x&&x.k==="r")S.read[x.rid]=1;save()}
+  const nx=curStep(),fromPath=Q.title==="step";
+  return `<div class="drill"><h1>${fromPath?T("Step done","أنجزت الخطوة"):T("Done for now","انتهينا الآن")}</h1>
+   <p class="lead">${T(`You worked with ${Q.touched.size} words and patterns. They'll come back in Practice at the right time.`,`تدرّبت على ${Q.touched.size} من الكلمات والأنماط. ستعود في التدريب في الوقت المناسب.`)}</p>
+   ${fromPath&&nx?`<div class="card"><span class="label">${T(`Next: step ${nx.i+1} of ${STEPS.length}`,`التالي: الخطوة ${nx.i+1} من ${STEPS.length}`)} · ${esc(stepKind(nx))}</span><h2>${esc(stepName(nx))}</h2><p class="lead">${esc(stepSub(nx))}</p>
+     <button type="button" class="btn primary wide" data-act="step" data-id="${esc(nx.id)}">${T("Next","التالي")}</button></div>`:""}
+   ${Q.title==="practice"?`<button type="button" class="btn primary wide" data-act="again">${T("Another round","جولة أخرى")}</button>`:""}
+   <button type="button" class="btn wide" data-act="quit">${fromPath?T("Back to the path","العودة إلى المسار"):Q.title==="practice"?T("Back to Practice","العودة إلى التدريب"):T("Back","رجوع")}</button>
+   ${fbBox("d:"+Q.qid,()=>{const qs=Q.list.filter(q=>q.t!=="intro"&&q.t!=="card"&&q.t!=="text"),wr=Q.list.map((q,i)=>Q.res[i]===false?(q.t==="form"||q.t==="fty"?q.x.full:(q.x||q.it).ru):null).filter(Boolean);return {kind:"drill",src:Q.src,score:`${Q.right}/${qs.length} right`,wrong:wr.join(", ")}})}</div>`;
 }
 
 /* ================= events ================= */
@@ -889,15 +950,16 @@ document.addEventListener("click",e=>{
   if(t.dataset.tile!==undefined&&Q&&!Q.answered){Q.list[Q.i].built.push(+t.dataset.tile);renderQ();return}
   if(t.dataset.unbuild!==undefined&&Q&&!Q.answered){Q.list[Q.i].built.splice(+t.dataset.unbuild,1);renderQ();return}
   const a=t.dataset.act;if(!a)return;
-  if(a==="session"){const l=sessionList();if(l.length){startQ(l,"session","Today's session");Q.readId=l.readId||null}return}
-  if(a==="learn")return startQ(topicQs(t.dataset.id,true),"topic",`Learn new words, topic “${(TOPm[t.dataset.id]||{}).en}”`);
-  if(a==="tpractice")return startQ(topicQs(t.dataset.id,false),"topic",`Topic practice “${(TOPm[t.dataset.id]||{}).en}”`);
+  if(a==="step"){startStep(t.dataset.id);return}
+  if(a==="practice"){const f=t.dataset.pid?{pid:t.dataset.pid}:t.dataset.topic?{topic:t.dataset.topic}:null;
+    const l=practiceQs(f,15);if(!l.length)return;startQ(l,"practice",f?f.pid?`Practice: principle ${f.pid}`:`Practice: topic ${f.topic}`:"Mixed practice");if(Q)Q.filter=f;return}
   if(a==="ppractice")return startQ(principleQs(t.dataset.id,8),"principle",`Principle practice “${(PRm[t.dataset.id]||{}).en}” (id ${t.dataset.id})`);
   if(a==="bcheck"){const q=Q.list[Q.i];answer(q.built.map(i=>q.tiles[i]).join(" "));return}
   if(a==="rpractice"){const r=READS.find(x=>x.id===t.dataset.id);return startQ(readingQs(t.dataset.id),"reading",`Reading practice “${r?r.en:""}” (id ${t.dataset.id})`)}
   if(a==="check"){const v=($("#typein")||{}).value||"";if(!v.trim())return;answer(v);return}
   if(a==="next"){nextQ();return}
-  if(a==="quit"){Q=null;location.hash="#today";return}
+  if(a==="quit"){const back=Q&&Q.title==="practice"?"#practice":Q&&Q.title==="step"?"#path":null;Q=null;location.hash=back||"#path";return}
+  if(a==="again"){const f=Q&&Q.filter;const l=practiceQs(f,15);if(l.length){startQ(l,"practice",Q.src);Q.filter=f}return}
   if(a==="markread"){S.read[t.dataset.id]=S.read[t.dataset.id]?0:1;save();render();return}
   if(a==="stress"){S.stressAll=t.dataset.v==="1";save();render();return}
   if(a==="tts"){S.tts=t.dataset.v==="1";save();render();return}

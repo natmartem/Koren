@@ -9,6 +9,13 @@ The course has two dimensions:
 
 Every word names its topic and the principles it shows, so each principle points to real words inside the topics.
 
+**How the app is organised.**
+- **Path** — one line of small lessons that covers the whole course: every principle card, every word (topics are split into lessons of about seven words), every phrase and every reading. A phrase is taught at the first step where its topic has been reached and its grammar explained. A step is done when its lesson is finished; the end screen goes straight to the next one.
+- **Practice** — review only: a mixed pool of what the path has already taught (words, phrases, read texts, practised principles and their combinations), by principle or by topic. Nothing new.
+- **Topics** and **Principles** — reference: word lists, readings, explanation cards.
+
+The order of the path is `path` in `course.js`.
+
 **Combinations.** `course.js` also holds tables of noun forms, adjectives and verb forms. The app crosses them with the principles to generate drill sentences (about 1,300 at the moment): every noun in every case it fits, every adjective with the nouns it suits, every verb with every person. Wrong options are always the same word in other forms. Add a noun or verb to a table and it appears in every principle it fits.
 
 **Writing and reading drills.** Typed gaps, building sentences from word tiles (with one wrong form mixed in), gap-fills in real sentences, listen-and-type, and a “Practise this text” mode on every reading.
