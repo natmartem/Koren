@@ -671,7 +671,7 @@ function readingQs(id){
 }
 function startQ(list,title,src){
   if(!list.length)return;
-  Q={list,i:0,answered:false,title,src:src||"Practice",qid:Date.now().toString(36),res:[],right:0,touched:new Set(),finished:false,factShown:0};
+  Q={list,i:0,answered:false,title,src:src||"Practice",qid:Date.now().toString(36),res:[],right:0,touched:new Set(),finished:false,factShown:0,facts:new Set()};
   if(location.hash==="#drill")render();else location.hash="#drill";
   autoPlay();
 }
@@ -702,6 +702,23 @@ function qCtx(i){
       item:[(it.ru||x.ru||x.ans||""),(it.en||x.en||"")].filter(Boolean).join(" — "),key:it.key||x.key||"",
       lang:S.lang==="ar"?"Arabic":"English",result:q.t==="intro"?"just shown":r===undefined?"not answered yet":r?"right":"wrong"};
   };
+}
+
+/* a fun fact only when it fits what was just practised: its principle, topic or one of its words */
+function factFor(q){
+  if(!FACTS.length||Q.factShown>=3||Math.random()>.4)return null;
+  const it=q.it||q.x||{},ps=new Set(q.x?[q.x.pid]:it.ps||[]),topic=it.topic||(q.x&&q.x.base&&ITEMS[wkey(q.x.base)]?ITEMS[wkey(q.x.base)].topic:"");
+  const text=[it.ru,q.x&&q.x.full,q.x&&q.x.base,q.x&&q.x.hint].filter(Boolean).join(" ");
+  const toks=new Set(plain(text).toLowerCase().split(/[\s.,!?«»"“”:;…—–]+/).filter(Boolean));
+  const words=new Set([...toks].flatMap(k=>FORMIDX.has(k)?FORMIDX.get(k).map(f=>plain(f).toLowerCase()):[k]));
+  const list=v=>String(v||"").split(/\s+/).filter(Boolean);
+  const byWord=[],general=[];
+  FACTS.forEach(f=>{if(Q.facts.has(f))return;
+    const w=list(f.w);
+    if(w.length){if(w.some(x=>words.has(plain(x).toLowerCase())))byWord.push(f);return} /* a fact about words needs one of them here */
+    if(list(f.p).some(x=>ps.has(x))||list(f.t).some(x=>x===topic))general.push(f)});
+  const fits=byWord.length?byWord:general;
+  return fits.length?fits[Math.floor(Math.random()*fits.length)]:null;
 }
 
 /* ================= practice: drawing a question ================= */
@@ -769,7 +786,7 @@ function answer(given){
   let html="";
   if(ok){
     html=`<div class="fb"><div class="row"><span class="yes">✓ ${["form","fty","gap","build"].includes(q.t)?`<span class="ru">${esc(fullText)}</span>`:T("Yes","نعم")}</span>${spk(audioKey,audioText)}</div>`;
-    if(FACTS.length&&Math.random()<.18&&Q.factShown<2){Q.factShown++;const f=FACTS[Math.floor(Math.random()*FACTS.length)];html+=`<p class="fact">${esc(L(f))}</p>`}
+    const f=factFor(q);if(f){Q.factShown++;Q.facts.add(f);html+=`<p class="fact">${esc(L(f))}</p>`}
     html+=`</div>`;
   }else{
     html=`<div class="fb"><div class="row" style="justify-content:space-between"><div><div class="label">${T("The answer","الإجابة")}</div><div style="font-size:22px" class="ru">${esc(fullText)}</div>${q.t==="fty"||q.t==="build"?`<div class="lead">${T("You wrote","كتبت")}: <span class="ru">${esc(given)}</span></div>`:""}<div class="lead">${meaning}</div></div>${spk(audioKey,audioText)}</div>
