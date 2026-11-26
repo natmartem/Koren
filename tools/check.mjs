@@ -63,17 +63,48 @@ for (const p of C.principles) {
       checkStress(x[0], w);
       if ((plain(x[0]).match(VOW) || []).length < 2 || /ё/.test(x[0])) err(w, "stress items need 2+ vowels and no ё");
     } else {
-      if (x.length !== 3) err(w, "items need 3 fields");
+      if (x.length !== 3 && !(p.id === "roots" && x.length === 4)) err(w, "items need 3 fields (4 with a root)");
       if (p.drill !== "read") checkStress(x[0], w);
       if (seen.has(x[0])) err(w, "duplicate"); seen.add(x[0]);
     }
   });
 }
 
+// combination tables
+(C.nouns || []).forEach((n, i) => {
+  const w = `noun ${i + 1} (${n[0]})`;
+  if (n.length !== 10) err(w, "needs 10 fields");
+  if (!["m", "f", "n", "pl"].includes(n[3])) err(w, `gender “${n[3]}”`);
+  if (!"PLCTFVWBMD".includes(n[4]) || n[4].length !== 1) err(w, `kind “${n[4]}”`);
+  if (n[5] && !/^(в|во|на) /.test(n[5])) err(w, "where must start with в, во or на");
+  [0, 5, 6, 7, 8, 9].forEach(k => n[k] && checkStress(n[k], w));
+});
+(C.adjs || []).forEach((a, i) => { if (a.length !== 7) err(`adjective ${i + 1}`, "needs 7 fields"); a.slice(0, 4).forEach(f => checkStress(f, `adjective ${a[0]}`)); });
+(C.verbs || []).forEach((v, i) => {
+  if (v.length !== 10) err(`verb ${i + 1} (${v[0]})`, "needs 10 fields");
+  v.slice(0, 1).concat(v.slice(3, 9)).forEach(f => checkStress(f, `verb ${v[0]}`));
+  v[9].split("|").forEach(c => checkStress(c, `verb ${v[0]} sentence ending`));
+});
+
 for (const r of C.readings || []) {
   if (!topics.has(r.topic)) err(`reading ${r.id}`, `unknown topic “${r.topic}”`);
   r.lines.forEach((l, i) => { checkStress(l[0], `reading ${r.id} line ${i + 1}`); if (l.length !== 3) err(`reading ${r.id} line ${i + 1}`, "needs Russian, English, Arabic"); });
 }
+
+// words used in readings and phrases that the course doesn't teach (warning only)
+const taught = new Set();
+const addT = w => w && taught.add(plain(w).toLowerCase());
+C.words.forEach(w => plain(w[0]).split(/\s+/).forEach(addT));
+(C.nouns || []).forEach(n => [n[0], n[6], n[7], n[8], n[9], n[5] && n[5].split(" ").slice(1).join(" ")].forEach(addT));
+(C.adjs || []).forEach(a => a.slice(0, 4).forEach(addT));
+(C.verbs || []).forEach(v => [v[0], ...v.slice(3, 9)].forEach(addT));
+C.principles.forEach(p => (p.items || []).forEach(x => (p.drill === "form" ? [x[0], x[2]] : [x[0]]).forEach(t => plain(t).split(/[\s.,!?…]+/).forEach(addT))));
+["мой","моя","моё","мои","твой","твоя","твоё","твои","этот","эта","это","эти","его","её","их","меня","тебя","нас","вас","мне","тебе","ему","ей","нам","вам","им","у","в","во","на","не","с","к","по","до","что","нет"].forEach(addT);
+const unknown = new Map();
+const scan = (t, where) => plain(t).split(/[\s.,!?«»"“”:;…—–]+/).filter(Boolean).forEach(tok => { const k = tok.toLowerCase(); if (!taught.has(k) && !/^[А-ЯЁA-Z]/.test(tok)) unknown.set(k, where); });
+(C.readings || []).forEach(r => r.lines.forEach(l => scan(l[0], `reading ${r.id}`)));
+C.phrases.forEach(p => scan(p[0], "phrase"));
+if (unknown.size && process.argv.includes("--words")) console.log("Not yet taught as a word or form:\n" + [...unknown].map(([k, w]) => `  ${k}  (${w})`).join("\n"));
 
 if (errors.length) { console.error(errors.join("\n")); console.error(`\n${errors.length} problem(s).`); process.exit(1); }
 console.log(`OK · ${C.topics.length} topics · ${C.principles.length} principles · ${C.words.length} words · ${C.phrases.length} phrases · ${C.readings.length} readings`);
