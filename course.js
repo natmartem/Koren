@@ -811,10 +811,15 @@ nouns: [
 ["Бо́стон","Boston","بوسطن","m","C","в Бо́стоне","Бо́стон","Бо́стона","Бо́стону",""],
 ["Эр-Рия́д","Riyadh","الرياض","m","C","в Эр-Рия́де","Эр-Рия́д","Эр-Рия́да","Эр-Рия́ду",""],
 ["Росси́я","Russia","روسيا","f","C","в Росси́и","Росси́ю","Росси́и","Росси́и",""],
-/* words from songs: they only show up in drills once learned in the song */
-["океа́н","ocean","محيط","m","L","","океа́н","океа́на","океа́ну",""],
+["Пари́ж","Paris","باريس","m","C","в Пари́же","Пари́ж","Пари́жа","Пари́жу",""],
+["Петербу́рг","St Petersburg","سانت بطرسبرغ","m","C","в Петербу́рге","Петербу́рг","Петербу́рга","Петербу́ргу",""],
 ["не́бо","sky","سماء","n","L","","не́бо","не́ба","не́бу",""],
-["вино́","wine","نبيذ","n","F","","вино́","вина́","вину́",""]
+["со́лнце","sun","شمس","n","T","","со́лнце","со́лнца","со́лнцу",""],
+["ла́мпа","lamp","مصباح","f","T","","ла́мпу","ла́мпы","ла́мпе","ламп"],
+["вино́","wine","نبيذ","n","F","","вино́","вина́","вину́",""],
+/* words from songs (topic "songs"): their sentences only show up once the word is learned in the song */
+["океа́н","ocean","محيط","m","L","","океа́н","океа́на","океа́ну",""],
+["Ки́ев","Kyiv","كييف","m","C","в Ки́еве","Ки́ев","Ки́ева","Ки́еву",""]
 ],
 adjs: [
 ["хоро́ший","хоро́шая","хоро́шее","хоро́шие","good","جيد","PLTFVWB"],
@@ -846,6 +851,7 @@ verbs: [
 ["спать","sleep","ينام","сплю","спишь","спит","спим","спи́те","спят","до́ма|но́чью"],
 ["мочь","can","يستطيع","могу́","мо́жешь","мо́жет","мо́жем","мо́жете","мо́гут","чита́ть|рабо́тать"],
 ["ви́деть","see","يرى","ви́жу","ви́дишь","ви́дит","ви́дим","ви́дите","ви́дят","дом|го́род|ста́нцию"],
+["ду́мать","think","يفكّر","ду́маю","ду́маешь","ду́мает","ду́маем","ду́маете","ду́мают",""],
 ["люби́ть","love","يحبّ","люблю́","лю́бишь","лю́бит","лю́бим","лю́бите","лю́бят","ма́му|му́зыку|ко́фе"],
 ["хоте́ть","want","يريد","хочу́","хо́чешь","хо́чет","хоти́м","хоти́те","хотя́т","ко́фе|спать|пи́ццу"],
 ["обе́дать","have lunch","يتغدّى","обе́даю","обе́даешь","обе́дает","обе́даем","обе́даете","обе́дают","в кафе́|до́ма"],
@@ -887,6 +893,7 @@ words: [
 ["коне́чно","of course","طبعًا","hello",""],
 ["всё","everything","كل شيء","hello",""],
 ["когда́","when","متى","hello",""],
+["и́ли","or","أو","hello",""],
 
 /* people */
 ["ма́ма","mum","أمّ","people","acc-fem moy-tvoy"],
@@ -935,6 +942,7 @@ words: [
 ["пи́цца","pizza","بيتزا","food","acc-fem"],
 ["вку́сно","tasty","لذيذ","food",""],
 ["еда́","food","طعام","food","roots"],
+["вино́","wine","نبيذ","food",""],
 
 /* home */
 ["дом","house / building","بيت / مبنى","home","acc-masc"],
@@ -957,6 +965,7 @@ words: [
 ["кот","cat (male)","قطّ","home","acc-masc"],
 ["ко́шка","cat (female)","قطّة","home",""],
 ["письмо́","letter","رسالة","home","roots"],
+["ла́мпа","lamp","مصباح","home","acc-fem moy-tvoy"],
 
 /* city */
 ["го́род","city","مدينة","city","acc-masc stress"],
@@ -980,6 +989,10 @@ words: [
 ["пря́мо","straight ahead","إلى الأمام","city",""],
 ["здесь","here","هنا","city",""],
 ["там","there","هناك","city",""],
+["Москва́","Moscow","موسكو","city","v-prep"],
+["Пари́ж","Paris","باريس","city","v-prep"],
+["Петербу́рг","St Petersburg","سانت بطرسبرغ","city","v-prep"],
+["кино́","cinema, the movies","سينما","city",""],
 
 /* transport */
 ["метро́","metro","مترو","transport","v-prep"],
@@ -998,6 +1011,7 @@ words: [
 ["доро́га","road","طريق","transport","stress"],
 ["перехо́д","crossing / underpass","ممرّ عبور","transport","hod"],
 ["пешко́м","on foot","مشيًا","transport",""],
+["рейс","flight","رحلة جوية","transport",""],
 
 /* body */
 ["голова́","head","رأس","body","stress"],
@@ -1060,6 +1074,8 @@ words: [
 ["весна́","spring","ربيع","months",""],
 ["ле́то","summer","صيف","months",""],
 ["о́сень","autumn","خريف","months",""],
+["со́лнце","sun","شمس","months",""],
+["не́бо","sky","سماء","months",""],
 
 /* numbers */
 ["оди́н","one","واحد","numbers","numbers"],
@@ -1097,6 +1113,7 @@ words: [
 ["учу́","I learn, I teach","أتعلّم / أعلّم","verbs","ya-form roots"],
 ["обе́даю","I have lunch","أتغدّى","verbs","ya-form roots"],
 ["отдыха́ю","I rest","أرتاح","verbs","ya-form"],
+["ду́маю","I think","أفكّر","verbs","ya-form"],
 
 /* describe */
 ["хоро́ший","good","جيد","describe",""],
@@ -1115,6 +1132,7 @@ words: [
 ["ру́сский","Russian","روسي","describe","moy-tvoy"],
 ["пло́хо","badly, it is bad","سيئ، بشكل سيئ","describe","nravitsya"],
 ["интере́сно","it is interesting","مثير للاهتمام","describe","nravitsya"],
+["темно́","it's dark","الجو مظلم","describe",""],
 
 /* shop */
 ["де́ньги","money","مال / نقود","shop",""],
@@ -1182,10 +1200,26 @@ words: [
 ["неосо́знанно","without realising","دون وعي","songs",""],
 ["океа́н","ocean","محيط","songs",""],
 ["города́","cities","مدن","songs",""],
-["не́бо","sky","سماء","songs",""],
 ["ого́нь","fire","نار","songs",""],
 ["огни́","lights (of a city)","أضواء","songs",""],
-["вино́","wine","نبيذ","songs",""]
+["меня́","me (as the object)","ـني (مفعولًا به)","songs",""],
+["отпусти́","let go! (to a friend)","اتركْ (أمر لصديق)","songs",""],
+["обними́","hug! (to a friend)","عانِقْ (أمر لصديق)","songs",""],
+["всё равно́","all the same, I don't mind","سيّان، لا يهمّ","songs",""],
+["хо́чешь","you want (to a friend)","تريد (لصديق)","songs",""],
+["вме́сто","instead of","بدلًا من","songs",""],
+["око́шко","little window","نافذة صغيرة","songs",""],
+["живи́","live! (to a friend)","عِشْ (أمر لصديق)","songs",""],
+["звук","sound","صوت","songs",""],
+["вы́ше","higher","أعلى","songs",""],
+["кры́ша","roof","سطح","songs",""],
+["где́-то","somewhere","في مكانٍ ما","songs",""],
+["Ки́ев","Kyiv","كييف","songs",""],
+["бра́тья","brothers","إخوة","songs",""],
+["ба́бушки","grandmothers","جدّات","songs",""],
+["неве́сты","brides","عرائس","songs",""],
+["ми́лый","dear, sweet","عزيز، لطيف","songs",""],
+["ме́сто","place, seat","مكان، مقعد","songs",""]
 ],
 
 /* ============ phrases: same shape ============ */
@@ -1289,7 +1323,27 @@ phrases: [
 ["Моя́ любо́вь живёт в Эр-Рия́де.","My love lives in Riyadh.","حبّي يعيش في الرياض.","songs","moy-tvoy ya-form v-prep"],
 ["В мое́й ко́мнате ко́фе и вино́.","In my room there's coffee and wine.","في غرفتي قهوة ونبيذ.","songs","no-is v-prep"],
 ["Не́бо в Бо́стоне и в Эр-Рия́де одно́.","The sky over Boston and over Riyadh is one.","السماء فوق بوسطن وفوق الرياض واحدة.","songs","no-is v-prep numbers"],
-["Огни́ в го́роде, а я в ко́мнате.","Lights in the city, and I'm in my room.","أضواء في المدينة، وأنا في غرفتي.","songs","no-is v-prep"]
+["Огни́ в го́роде, а я в ко́мнате.","Lights in the city, and I'm in my room.","أضواء في المدينة، وأنا في غرفتي.","songs","no-is v-prep"],
+["Ко́фе и́ли вино́?","Coffee or wine?","قهوة أم نبيذ؟","songs",""],
+["Я люблю́ кино́.","I love the movies.","أحبّ السينما.","songs","ya-form"],
+["Ве́чером темно́.","It's dark in the evening.","المساء مظلم.","songs","chunks:more"],
+["Мне всё равно́.","I don't mind. / It's all the same to me.","سيّان عندي.","songs","nravitsya:state"],
+["Мне не всё равно́.","I do care.","يهمّني الأمر.","songs","nravitsya:state"],
+["Что ты ду́маешь?","What do you think?","ماذا تظنّ؟","songs","ya-form"],
+["Обними́ меня́.","Hug me.","عانِقني.","songs","acc-masc:pron"],
+["Хо́чешь ко́фе?","Do you want coffee?","هل تريد قهوة؟","songs","ya-form"],
+["Ты хо́чешь спать?","Do you want to sleep?","هل تريد أن تنام؟","songs","ya-form:inf"],
+["Хо́чешь чай вме́сто ко́фе?","Do you want tea instead of coffee?","هل تريد شايًا بدل القهوة؟","songs","ya-form"],
+["Я ви́жу со́лнце.","I see the sun.","أرى الشمس.","songs","ya-form"],
+["Где ла́мпа?","Where's the lamp?","أين المصباح؟","songs",""],
+["Сосе́ди спят.","The neighbours are asleep.","الجيران نائمون.","songs","ya-form"],
+["Самолёт вы́ше крыш.","The plane is higher than the roofs.","الطائرة أعلى من السطوح.","songs","no-is chunks"],
+["Рейс Москва́ — Пари́ж.","The Moscow–Paris flight.","رحلة موسكو – باريس.","songs",""],
+["Я живу́ в Петербу́рге.","I live in St Petersburg.","أسكن في سانت بطرسبرغ.","songs","ya-form v-prep"],
+["Мы е́дем в Пари́ж.","We're going to Paris.","نحن ذاهبون إلى باريس.","songs","ya-form v-prep:to"],
+["В самолёте нет ме́ста.","There's no room on the plane.","لا مكان في الطائرة.","songs","v-prep u-menya:net"],
+["Бра́тья и ба́бушки в самолёте.","Brothers and grandmothers are on the plane.","الإخوة والجدّات في الطائرة.","songs","no-is v-prep"],
+["Ты мой ми́лый друг.","You're my dear friend.","أنت صديقي العزيز.","songs","no-is moy-tvoy:adj"]
 ],
 
 /* ============ easy readings ============ */
@@ -1615,7 +1669,84 @@ facts: [
    which is not on the path; once learned in a song, a word counts as known everywhere (path, practice, readings).
    Phrases are drilled only after their principle cards are done on the path, like everywhere else.
    notes and lesson bodies: {…} marks Russian, <ar>…</ar> marks Arabic, as in principles. */
+/* Songs are listed from easiest to hardest: «Кофевино» (almost two words), «Хочешь?» (one verb, questions),
+   «Жить в твоей голове» (a grammar-packed title, long words), «Выше крыш» (fast verses, many words). */
 songs: [
+{id:"kofevino", ru:"Кофеви́но", by:"Земфи́ра", en:"Coffee-wine", ar:"قهوة-نبيذ", year:2013,
+ video:"YYGFmctvy0o",
+ ps:["nravitsya","acc-masc:pron","ya-form","chunks"],
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>From the same 2013 album as «Жить в твое́й голове́». The chorus is almost only two words, {ко́фе} and {вино́}, over and over, so this is the easiest song to start with.</p>
+<p>It's about not being able to choose and wanting to be let go, while still caring what one person thinks. On the first listen, just count how many times you hear {ко́фе} and {вино́}.</p>`,
+         ar:`<p>من ألبوم 2013 نفسه الذي فيه «Жить в твое́й голове́». اللازمة تكاد تكون كلمتين فقط، {ко́фе} و{вино́}، تتكرّران مرة بعد مرة، لذلك هذه أسهل أغنية للبداية.</p>
+<p>الأغنية عن العجز عن الاختيار والرغبة في التحرّر، مع الاهتمام برأي شخص واحد. في الاستماع الأول عُدّ فقط كم مرة تسمع {ко́фе} و{вино́}.</p>`}},
+  {id:"who", en:"Who is Zemfira", ar:"من هي زيمفيرا",
+   body:{en:`<p>Zemfira Ramazanova comes from Ufa and broke through in the late 1990s. She writes, arranges and produces her own music, and she is one of the most influential voices in Russian-language rock.</p>`,
+         ar:`<p>زيمفيرا رامازانوفا من مدينة أوفا، واشتهرت في أواخر التسعينيات. تكتب موسيقاها وتوزّعها وتنتجها بنفسها، وهي من أكثر الأصوات تأثيرًا في موسيقى الروك باللغة الروسية.</p>`}},
+  {id:"kino", en:"«Кино́» in the song", ar:"«Кино́» في الأغنية",
+   body:{en:`<p>{кино́} means the movies, but the song also names «Кино́», the band of Viktor Tsoi, the biggest name in Soviet rock of the 1980s. Coffee, wine and Kino: a whole mood in three words.</p>`,
+         ar:`<p>{кино́} تعني السينما، لكن الأغنية تذكر أيضًا «Кино́»، فرقة فيكتور تسوي، أشهر اسم في الروك السوفيتي في الثمانينيات. قهوة ونبيذ و«كينو»: مزاج كامل في ثلاث كلمات.</p>`}}
+ ],
+ lessons:[
+  {en:"Coffee, wine, the movies", ar:"القهوة والنبيذ والسينما",
+   body:{en:`<p>Most words here you can almost guess:</p>
+<ul><li>{ко́фе} came to Russian through Dutch and Turkish from Arabic <ar>قهوة</ar>. It's a “he” word: {мой ко́фе}.</li>
+<li>{вино́}, {кино́}, {окно́}: words ending in {-о} are “it” words.</li>
+<li>{и́ли} = or: {Ко́фе и́ли вино́?} A question needs only a rising voice.</li>
+<li>{темно́} = it's dark, like {хо́лодно}, it's cold. {Ве́чером темно́.}</li></ul>`,
+         ar:`<p>معظم الكلمات هنا تكاد تخمّنها:</p>
+<ul><li>{ко́фе} دخلت الروسية عبر الهولندية والتركية من العربية <ar>قهوة</ar>. وهي مذكّرة: {мой ко́фе}.</li>
+<li>{вино́}، {кино́}، {окно́}: الكلمات المنتهية بـ {-о} محايدة.</li>
+<li>{и́ли} = أو / أم: {Ко́фе и́ли вино́?} قهوة أم نبيذ؟ السؤال يحتاج فقط إلى رفع الصوت.</li>
+<li>{темно́} = الجو مظلم، مثل {хо́лодно} الجو بارد. {Ве́чером темно́.} المساء مظلم.</li></ul>`},
+   words:["ко́фе","вино́","кино́","и́ли","окно́","темно́","о́чень"],
+   phrases:["Ко́фе и́ли вино́?","Я хочу́ ко́фе.","Я люблю́ кино́.","Ве́чером темно́."]},
+  {en:"Let me go, hug me", ar:"اتركني، عانقني",
+   body:{en:`<ul><li>{отпусти́ меня́} = let me go, {обними́ меня́} = hug me. Asking a friend to do something often ends in {-и}. Learn these two whole.</li>
+<li>{меня́} is “me” as the object, the twin of {тебя́}.</li>
+<li>{мне всё равно́} = it's all the same to me, I don't mind. It's built like {мне хо́лодно}: “to me” + a state. The chorus turns it around: {мне не всё равно́}, I do care.</li>
+<li>{ду́маешь} = you think: the ты-ending {-ешь}, as in {живёшь}. {Что ты ду́маешь?}</li></ul>`,
+         ar:`<ul><li>{отпусти́ меня́} = اتركني، {обними́ меня́} = عانقني. الطلب من صديق ينتهي غالبًا بـ {-и}. احفظ هاتين كاملتين.</li>
+<li>{меня́} هي «ـني» مفعولًا به، توأم {тебя́}.</li>
+<li>{мне всё равно́} = سيّان عندي، لا يهمّني. مبنية مثل {мне хо́лодно}: «لي» + حالة. واللازمة تقلبها: {мне не всё равно́} يهمّني.</li>
+<li>{ду́маешь} = تفكّر / تظنّ: نهاية «أنت» {-ешь} كما في {живёшь}. {Что ты ду́маешь?} ماذا تظنّ؟</li></ul>`},
+   bridge:{en:`{Мне не всё равно́} is <ar>يهمّني</ar>: “it matters to me”, with “me” in the to-whom form, exactly like Arabic.`,
+           ar:`{Мне не всё равно́} هي <ar>يهمّني</ar>: الأمر يعنيني، و«أنا» في صيغة «لِمَن»، تمامًا كما في العربية.`},
+   words:["меня́","отпусти́","обними́","всё равно́","ду́маю","что","пожа́луйста"],
+   phrases:["Мне всё равно́.","Мне не всё равно́.","Что ты ду́маешь?","Обними́ меня́."]}
+ ]},
+{id:"khochesh", ru:"Хо́чешь?", by:"Земфи́ра", en:"Do you want…?", ar:"هل تريد…؟", year:2000,
+ video:"xpJ_fYyAeYk",
+ lyrics:"https://lyricstranslate.com/en/%D1%85%D0%BE%D1%87%D0%B5%D1%88%D1%8C-khochesh-do-you-want.html-0",
+ ps:["ya-form","ya-form:inf","no-is"],
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>One of Zemfira's best-known songs, from 2000. Almost every line is an offer that starts with the same word, {хо́чешь}: do you want…? Some offers are tender, some are wild.</p>
+<p>On the first listen, catch {хо́чешь} each time, and two things: {со́лнце} (the sun) and {ла́мпа} (a lamp).</p>`,
+         ar:`<p>من أشهر أغاني زيمفيرا، من عام 2000. كل سطر تقريبًا عرض يبدأ بالكلمة نفسها، {хо́чешь}: هل تريد…؟ بعض العروض رقيق وبعضها جامح.</p>
+<p>في الاستماع الأول التقط {хо́чешь} كل مرة، وشيئين: {со́лнце} (الشمس) و{ла́мпа} (المصباح).</p>`}},
+  {id:"who", en:"Who is Zemfira", ar:"من هي زيمفيرا",
+   body:{en:`<p>Zemfira Ramazanova comes from Ufa and broke through in the late 1990s. She writes, arranges and produces her own music, and she is one of the most influential voices in Russian-language rock.</p>`,
+         ar:`<p>زيمفيرا رامازانوفا من مدينة أوفا، واشتهرت في أواخر التسعينيات. تكتب موسيقاها وتوزّعها وتنتجها بنفسها، وهي من أكثر الأصوات تأثيرًا في موسيقى الروك باللغة الروسية.</p>`}}
+ ],
+ lessons:[
+  {en:"Do you want…?", ar:"هل تريد…؟",
+   body:{en:`<ul><li>{хочу́ → хо́чешь}: “want” is irregular, worth knowing by heart: {хочу́, хо́чешь, хо́чет, хоти́м, хоти́те, хотя́т}.</li>
+<li>A question needs no extra word, only a rising voice on the key word: {Хо́чешь ко́фе?}</li>
+<li>{вме́сто} = instead of: {чай вме́сто ко́фе}.</li>
+<li>{око́шко} is a small, dear {окно́}: {-шко} makes things small and warm.</li>
+<li>{живи́} = live! Asking a friend ends in {-и}, like {обними́} in «Кофеви́но».</li></ul>`,
+         ar:`<ul><li>{хочу́ ← хо́чешь}: فعل «يريد» شاذّ، يستحق الحفظ: {хочу́, хо́чешь, хо́чет, хоти́м, хоти́те, хотя́т}.</li>
+<li>السؤال لا يحتاج إلى كلمة إضافية، فقط رفع الصوت على الكلمة المهمّة: {Хо́чешь ко́фе?} هل تريد قهوة؟</li>
+<li>{вме́сто} = بدلًا من: {чай вме́сто ко́фе} شاي بدل القهوة.</li>
+<li>{око́шко} نافذة صغيرة عزيزة من {окно́}: {-шко} تصغّر الشيء وتحبّبه.</li>
+<li>{живи́} = عِشْ! الطلب من صديق ينتهي بـ {-и}، مثل {обними́} في «Кофеви́но».</li></ul>`},
+   bridge:{en:`{око́шко} works like the Arabic diminutive: <ar>كتاب ← كُتيّب</ar>, <ar>بيت ← بُيَيت</ar>. Arabic changes the inside of the word; Russian adds an ending.`,
+           ar:`{око́шко} مثل التصغير في العربية: <ar>كتاب ← كُتيّب</ar>، <ar>بيت ← بُيَيت</ar>. العربية تغيّر داخل الكلمة، والروسية تضيف نهاية.`},
+   words:["хо́чешь","хочу́","со́лнце","ла́мпа","вме́сто","око́шко","живи́","сосе́д"],
+   phrases:["Хо́чешь ко́фе?","Ты хо́чешь спать?","Хо́чешь чай вме́сто ко́фе?","Я ви́жу со́лнце.","Где ла́мпа?","Сосе́ди спят."]}
+ ]},
 {id:"golova", ru:"Жить в твое́й голове́", by:"Земфи́ра", en:"To live in your head", ar:"أن أعيش في رأسك", year:2013,
  video:"lfLBb-Q4hlc",
  lyrics:"https://lyricstranslate.com/en/zhit-v-tvoey-golove-%D0%B6%D0%B8%D1%82%D1%8C-%D0%B2-%D1%82%D0%B2%D0%BE%D0%B5%D0%B9-%D0%B3%D0%BE%D0%BB%D0%BE%D0%B2%D0%B5-live-your-head.html",
@@ -1681,6 +1812,52 @@ songs: [
 <li>{не́бо} كلمة محايدة، لذلك «واحدة» هي {одно́}: {Не́бо одно́.} السماء واحدة.</li></ul>`},
    words:["океа́н","го́род","города́","любо́вь","ко́мната","не́бо","ого́нь","огни́","вино́"],
    phrases:["Ме́жду на́ми океа́н.","Я живу́ в го́роде Бо́стон, а ты в Эр-Рия́де.","Моя́ любо́вь живёт в Эр-Рия́де.","В мое́й ко́мнате ко́фе и вино́.","Не́бо в Бо́стоне и в Эр-Рия́де одно́.","Огни́ в го́роде, а я в ко́мнате."]}
+ ]},
+{id:"vyshe", ru:"Вы́ше крыш", by:"Моне́точка", en:"Higher than the roofs", ar:"أعلى من السطوح", year:2024,
+ video:"FypH_UrpMSU",
+ lyrics:"https://lyricstranslate.com/en/monetochka-vyshe-krysh-lyrics",
+ translation:"https://lyricstranslate.com/en/monetochka-vyshe-krysh-english",
+ ps:["no-is","v-prep","v-prep:to","u-menya:net","moy-tvoy:adj","ya-form"],
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>The last song on Monetochka's 2024 album «Моли́твы. Анекдо́ты. То́сты.» Somewhere above the roofs, a full plane flies between four cities. Reviewers heard it as a hopeful picture of a time when people travel freely again.</p>
+<p>The verses are fast and full of words; don't chase them. The chorus comes back three times: listen for the four cities, {Москва́}, {Пари́ж}, {Ки́ев}, {Петербу́рг}, and for who is on board.</p>`,
+         ar:`<p>آخر أغنية في ألبوم مونيتوتشكا لعام 2024 «Моли́твы. Анекдо́ты. То́сты.». في مكانٍ ما فوق السطوح تطير طائرة ممتلئة بين أربع مدن. رأى النقّاد فيها صورة متفائلة لزمن يسافر فيه الناس بحرية من جديد.</p>
+<p>المقاطع سريعة ومليئة بالكلمات، فلا تلاحقها. اللازمة تعود ثلاث مرات: استمع للمدن الأربع، {Москва́} و{Пари́ж} و{Ки́ев} و{Петербу́рг}، ولمن في الطائرة.</p>`}},
+  {id:"who", en:"Who is Monetochka", ar:"من هي مونيتوتشكا",
+   body:{en:`<p>Liza Monetochka, from Yekaterinburg, became famous in 2017–2018 with witty, ironic songs about growing up. After speaking out against the war in Ukraine she left Russia; she now lives in Lithuania.</p>`,
+         ar:`<p>ليزا مونيتوتشكا من مدينة يكاترينبورغ، اشتهرت في 2017–2018 بأغانٍ ذكية وساخرة عن الكبر. بعد أن عارضت الحرب في أوكرانيا غادرت روسيا، وتعيش الآن في ليتوانيا.</p>`}}
+ ],
+ lessons:[
+  {en:"The flight", ar:"الرحلة",
+   body:{en:`<ul><li>{вы́ше крыш} = higher than the roofs. After {вы́ше} (higher) the thing you compare with takes its “of” form: {кры́ша → крыш}. Learn it whole.</li>
+<li>{где́-то} = somewhere. {-то} turns a question word into “some-”.</li>
+<li>{рейс} = a flight, {самолёт} = a plane, {звук} = sound.</li>
+<li>{Рейс Москва́ — Пари́ж.}: on tickets and boards the dash means “to”.</li></ul>`,
+         ar:`<ul><li>{вы́ше крыш} = أعلى من السطوح. بعد {вы́ше} (أعلى) يأخذ ما نقارن به صيغة «مِن»: {кры́ша → крыш}. احفظها كاملة.</li>
+<li>{где́-то} = في مكانٍ ما. {-то} تجعل كلمة السؤال «ما»: أين ← في مكانٍ ما.</li>
+<li>{рейс} = رحلة جوية، {самолёт} = طائرة، {звук} = صوت.</li>
+<li>{Рейс Москва́ — Пари́ж.}: على التذاكر واللوحات تعني الشَّرطة «إلى».</li></ul>`},
+   words:["самолёт","рейс","звук","вы́ше","кры́ша","где́-то"],
+   phrases:["Самолёт вы́ше крыш.","Рейс Москва́ — Пари́ж."]},
+  {en:"Four cities", ar:"أربع مدن",
+   body:{en:`<ul><li>City names take the where-ending like any word: {в Москве́}, {в Пари́же}, {в Ки́еве}, {в Петербу́рге}.</li>
+<li>Going there: {Мы е́дем в Пари́ж.} No change after {в} when you go somewhere in a “he” word.</li>
+<li>People often call St Petersburg simply {Пи́тер}.</li></ul>`,
+         ar:`<ul><li>أسماء المدن تأخذ نهاية المكان مثل أي كلمة: {в Москве́}، {в Пари́же}، {в Ки́еве}، {в Петербу́рге}.</li>
+<li>الذهاب إليها: {Мы е́дем в Пари́ж.} نحن ذاهبون إلى باريس. لا تغيير بعد {в} عند الذهاب إلى كلمة مذكّرة.</li>
+<li>كثيرًا ما يسمّي الناس سانت بطرسبرغ ببساطة {Пи́тер}.</li></ul>`},
+   words:["Москва́","Пари́ж","Ки́ев","Петербу́рг"],
+   phrases:["Я живу́ в Петербу́рге.","Мы е́дем в Пари́ж."]},
+  {en:"Everyone on board", ar:"الجميع على متن الطائرة",
+   body:{en:`<ul><li>Many: {ба́бушка → ба́бушки}, {неве́ста → неве́сты}: most {-а} words end in {-ы} or {-и}. {брат → бра́тья} is irregular.</li>
+<li>{нет ме́ста} = there's no room: after {нет}, the “of” form, like {нет вре́мени}.</li>
+<li>{мой ми́лый друг} = my dear friend: {ми́лый} follows {друг}, a “he” word.</li></ul>`,
+         ar:`<ul><li>الجمع: {ба́бушка → ба́бушки}، {неве́ста → неве́сты}: معظم الكلمات المنتهية بـ {-а} تنتهي بـ {-ы} أو {-и}. و{брат → бра́тья} شاذّة.</li>
+<li>{нет ме́ста} = لا مكان: بعد {нет} تأتي صيغة «مِن»، مثل {нет вре́мени}.</li>
+<li>{мой ми́лый друг} = صديقي العزيز: {ми́лый} تتبع {друг} المذكّرة.</li></ul>`},
+   words:["бра́тья","ба́бушки","неве́сты","друг","ми́лый","коне́чно","ме́сто"],
+   phrases:["В самолёте нет ме́ста.","Бра́тья и ба́бушки в самолёте.","Ты мой ми́лый друг."]}
  ]}
 ]
 };

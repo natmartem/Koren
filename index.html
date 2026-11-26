@@ -335,7 +335,7 @@ function generate(c){
   VERBS.forEach((v,vi)=>PERS.forEach(([pn,k],pi)=>{
     if(!v.forms[k])return;const compl=v.compl.length?" "+v.compl[(vi+pi)%v.compl.length]:"",neg=(vi*7+pi)%6===0;
     const cands=[...v.forms.filter((_,j)=>j!==k),v.inf],rot=(vi+pi)%cands.length;
-    const iFam=!["знать","понима́ть","рабо́тать","чита́ть","обе́дать","отдыха́ть"].includes(v.inf); /* the first verb lesson drills regular -ать verbs only */
+    const iFam=!["знать","понима́ть","рабо́тать","чита́ть","обе́дать","отдыха́ть","ду́мать"].includes(v.inf); /* the first verb lesson drills regular -ать verbs only */
     const inf=/^(спать|чита́ть|рабо́тать)$/.test(v.compl[(vi+pi)%Math.max(1,v.compl.length)]||"");
     gi("ya-form",`${pn} ${neg?"не ":""}…${compl}${k===1?"?":"."}`,v.inf,v.forms[k],cands.slice(rot).concat(cands.slice(0,rot)),null,{en:v.inf+" — "+v.en,ar:v.inf+" — "+v.ar},inf?"inf":iFam?"i":"");
   }));
@@ -704,28 +704,104 @@ function vSongs(){
     return `<a class="li" href="#song/${esc(s.id)}"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s"><span class="ru">${esc(s.by)}</span> · ${T(`${d} of ${s.lessons.length} lessons`,`${d} من ${s.lessons.length} دروس`)}${n?` · ${T(`you recognise ${n} of ${ws.length} words`,`تعرف ${n} من ${ws.length} كلمة`)}`:""}</div>${d?`<div class="meter"><i style="width:${Math.round(d/s.lessons.length*100)}%"></i></div>`:""}</div>${d===s.lessons.length?`<span class="pill good">✓</span>`:""}${CHEV}</a>`}).join("")}</div>`
    :`<p class="lead">${T("No songs yet.","لا توجد أغانٍ بعد.")}</p>`}</div>`;
 }
-function lyrLines(text){
-  const out=[];
-  String(text||"").split(/\r?\n/).forEach(raw=>{const l=raw.trim();
-    if(/\]\(https?:/i.test(l)||/^you might also like$/i.test(l)||/^\d+\s+contributors?\b/i.test(l))return; /* bits a lyrics site adds */
-    if(!l){if(out.length&&!out[out.length-1].gap)out.push({gap:1});return}
-    if(/^\[[^\]]*\]$/.test(l)){out.push({head:l.slice(1,-1)});return}
-    const m=l.split(/\s*\|\s*|\t+/);out.push({ru:m[0].trim(),tr:m.slice(1).join(" ").trim()})});
-  while(out.length&&out[out.length-1].gap)out.pop();
+/* ---- lyrics: pasted by the learner, any common format ----
+   Accepted: Russian only; "Russian | translation" or tab-separated; Russian and translation on alternating lines;
+   all Russian then all translation; LyricsTranslate's side-by-side copy ("…головеTo live…").
+   Section labels like [Припев] are kept; bits that lyrics sites add (links, "You might also like", "Embed") are dropped. */
+const CYR=/[А-Яа-яЁё]/,OTHER=/[A-Za-z؀-ۿ]/;
+const LYRHEAD=/^(припев|куплет|бридж|аутро|интро|chorus|verse|bridge|outro|intro|pre-chorus)[\s\d:.]*$/i;
+function lyrJunk(l){
+  return /\]\(https?:/i.test(l)||/^you might also like$/i.test(l)||/^\d*\s*contributors?\b/i.test(l)||/\d*\s*embed$/i.test(l)&&!CYR.test(l)
+   ||/\blyrics$/i.test(l)||/^(translations?|english|русский|українська|español|deutsch|français|العربية|read more|see .* live|get tickets.*)$/i.test(l)
+   ||/^(submitted by|last edited by|thanks!|thanks? \d|source:|translation:|\d+ thanks? received|\d+ times? favorited)/i.test(l)||/^\[?текст песни/i.test(l);
+}
+function lyrRaw(text){
+  return String(text||"").replace(/\r/g,"").replace(/ /g," ")
+    .replace(/([^\n\s])\[(?=[^\]\n]{1,40}\])/g,"$1\n[").replace(/\](?=[^\s\n(\]])/g,"]\n") /* "…Lyrics[Куплет 1]Жить…" → separate lines */
+    .split("\n").map(l=>l.replace(/[ \u00a0]+/g," ").replace(/^[ \t]+|[ \t]+$/g,""));
+}
+function lyrParse(text){
+  const raw=lyrRaw(text).filter(l=>!l||!lyrJunk(l)),out=[];
+  const isHead=l=>/^\[[^\]]*\]$/.test(l)||LYRHEAD.test(l);
+  const content=raw.filter(l=>l&&!isHead(l));
+  const C=content.filter(l=>CYR.test(l)),N=content.filter(l=>!CYR.test(l)&&OTHER.test(l));
+  const RUN=/^([^A-Za-z؀-ۿ]*[А-Яа-яЁё][^A-Za-z؀-ۿ]*?)\s*([A-Z؀-ۿ].*)$/;
+  let mode="ru";
+  if(content.some(l=>/\||\t/.test(l)))mode="sep";
+  else if(C.length&&C.filter(l=>RUN.test(l)).length>=C.length*.6)mode="run";
+  else if(C.length>=2&&N.length>=C.length*.7){
+    let alt=0;for(let i=0;i+1<content.length;i++)if(CYR.test(content[i])&&!CYR.test(content[i+1]))alt++;
+    mode=alt>=C.length*.7?"alt":"blocks";
+  }
+  const push=(ru,tr)=>{ru=ru.trim();if(ru)out.push({ru,tr:(tr||"").trim()})};
+  const gap=()=>{if(out.length&&!out[out.length-1].gap)out.push({gap:1})};
+  if(mode==="blocks"){ /* all Russian first, then all translation: pair them by position */
+    let k=0;raw.forEach(l=>{if(!l)return gap();if(isHead(l)){if(CYR.test(l)||!out.some(x=>x.ru))out.push({head:l.replace(/^\[|\]$/g,"")});return}if(CYR.test(l))push(l,N[k++]||"")});
+  }else{
+    for(let i=0;i<raw.length;i++){const l=raw[i];
+      if(!l){gap();continue}
+      if(isHead(l)){out.push({head:l.replace(/^\[|\]$/g,"")});continue}
+      if(mode==="sep"){const m=l.split(/\s*\|\s*|\t+/);if(CYR.test(m[0])||m.length===1)push(m[0],m.slice(1).join(" "));continue}
+      if(mode==="run"){const m=RUN.exec(l);if(m)push(m[1],m[2]);else if(CYR.test(l))push(l);continue}
+      if(mode==="alt"){if(CYR.test(l)){const nx=raw[i+1];if(nx&&!CYR.test(nx)&&OTHER.test(nx)&&!isHead(nx)){push(l,nx);i++}else push(l)}continue}
+      if(CYR.test(l))push(l); /* Russian only: lines without Russian are dropped */
+    }
+  }
+  while(out.length&&(out[0].gap))out.shift();
+  while(out.length&&(out[out.length-1].gap||out[out.length-1].head))out.pop();
   return out;
+}
+const lyrText=L=>L.map(x=>x.head?`[${x.head}]`:x.gap?"":x.ru+(x.tr?" | "+x.tr:"")).join("\n");
+/* a translation pasted on its own: its lines go to the Russian lines in order */
+function lyrAddTr(id,txt){
+  const L=lyrParse(LYR[id]||""),tr=lyrRaw(txt).filter(l=>l&&!lyrJunk(l)&&!/^\[[^\]]*\]$/.test(l)&&!LYRHEAD.test(l)&&!CYR.test(l));
+  const lines=L.filter(x=>x.ru);lines.forEach((x,i)=>x.tr=tr[i]||x.tr||"");
+  LYR[id]=lyrText(L);return {n:lines.length,t:tr.length};
+}
+let LYRMSG=null; /* {id,text,open}: shown once on the song page */
+function lyrSet(id,txt){
+  const L=lyrParse(txt),n=L.filter(x=>x.ru).length,nt=L.filter(x=>x.tr).length;
+  if(!n){LYRMSG={id,text:T("No Russian lines found there. Copy the Russian text of the song and try again.","لم أجد سطورًا روسية. انسخ النص الروسي للأغنية وحاول مرة أخرى."),open:true};return false}
+  LYR[id]=lyrText(L);const ok=saveLyr();
+  LYRMSG={id,text:!ok?T("Couldn't save: storage is full or blocked.","تعذّر الحفظ: التخزين ممتلئ أو محظور."):nt?T(`Added ${n} lines, ${nt} with a translation.`,`أُضيف ${n} سطرًا، منها ${nt} مع ترجمة.`):T(`Added ${n} lines. You can add a translation too.`,`أُضيف ${n} سطرًا. يمكنك إضافة ترجمة أيضًا.`)};
+  return true;
+}
+async function lyrPaste(id,mode){
+  let txt=null;
+  try{txt=await navigator.clipboard.readText()}catch(e){}
+  if(txt===null)LYRMSG={id,text:T("Your phone didn't let Koren read the clipboard. Paste into the box below instead (tap and hold, then Paste), and tap Save.","لم يسمح هاتفك لكورين بقراءة الحافظة. الصق في المربع أدناه (اضغط مطوّلًا ثم «لصق»)، ثم اضغط «احفظ»."),open:true};
+  else if(!txt.trim())LYRMSG={id,text:T("The clipboard is empty. Copy the text first, then tap Paste.","الحافظة فارغة. انسخ النص أولًا ثم اضغط «الصق».")};
+  else if(mode==="tr"){const r=lyrAddTr(id,txt),ok=saveLyr();
+    LYRMSG={id,text:!ok?T("Couldn't save: storage is full or blocked.","تعذّر الحفظ: التخزين ممتلئ أو محظور."):r.t===r.n?T(`Translation added to all ${r.n} lines.`,`أُضيفت الترجمة إلى ${r.n} سطرًا.`):T(`Translation added: ${r.t} lines for ${r.n} Russian lines. If they don't line up, fix them in “Edit by hand”.`,`أُضيفت الترجمة: ${r.t} سطرًا لـ ${r.n} سطرًا روسيًا. إذا لم تتطابق، صحّحها في «التعديل يدويًا».`)}}
+  else lyrSet(id,txt);
+  render();const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"});
 }
 const knownTok=tok=>{const a=LEX.get(norm(tok));return !!a&&a.some(k=>S.seen[k]||S.srs[k])};
 const lyrMark=ru=>String(ru).split(/(\s+)/).map(tok=>!tok.trim()?tok:knownTok(tok)?`<span class="kn">${esc(tok)}</span>`:esc(tok)).join("");
 function lyricsCard(s){
-  const id=s.id,txt=LYR[id]||"",lines=lyrLines(txt),hasTr=lines.some(l=>l.tr);
-  const why=`<p class="lead">${T("Lyrics are copyrighted, so Koren doesn't include them. Paste them here for your own study, for example from a site that licenses them. They stay on this phone only: they're never uploaded to GitHub or added to feedback.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها «كورين». الصقها هنا لدراستك الشخصية، مثلًا من موقع مرخّص لها. تبقى على هذا الهاتف فقط: لا تُرفع إلى GitHub ولا تُضاف إلى الملاحظات.")}</p>${s.lyrics?`<a href="${esc(s.lyrics)}" target="_blank" rel="noopener">${T("Lyrics and a translation on LyricsTranslate","الكلمات وترجمتها على LyricsTranslate")}</a>`:""}`;
-  const editor=`<textarea class="fbk-ta" id="lyr-${esc(id)}" rows="8" spellcheck="false" aria-label="${T("Lyrics","كلمات الأغنية")}" placeholder="${esc(T("One line per row. Add your translation after | if you like:\nЖить в твоей голове | To live in your head","سطر في كل صف. أضف ترجمتك بعد | إن أردت:\nЖить в твоей голове | أن أعيش في رأسك"))}">${esc(txt)}</textarea>
-   <div class="row"><button type="button" class="btn small primary" data-act="lyrsave" data-id="${esc(id)}">${T("Save on this phone","احفظ على هذا الهاتف")}</button>${txt?`<button type="button" class="btn small" data-act="lyrrm" data-id="${esc(id)}">${T("Remove lyrics","احذف الكلمات")}</button>`:""}</div><p class="msg" id="lyrmsg" aria-live="polite"></p>`;
-  if(!lines.some(l=>l.ru))return `<div class="card" id="lyrics"><span class="label">${T("Lyrics","كلمات الأغنية")}</span>${why}${editor}</div>`;
+  const id=s.id,txt=LYR[id]||"",L=lyrParse(txt),lines=L.filter(x=>x.ru),nt=lines.filter(x=>x.tr).length,msg=LYRMSG&&LYRMSG.id===id?LYRMSG:null;
+  const link=(u,label)=>u?`<a href="${esc(u)}" target="_blank" rel="noopener">${label}</a>`:"";
+  const ruLink=s.lyrics?link(s.lyrics,T("Open the lyrics on LyricsTranslate","افتح الكلمات على LyricsTranslate")):T("Find the lyrics online, for example on LyricsTranslate or Genius.","ابحث عن الكلمات على الإنترنت، مثلًا في LyricsTranslate أو Genius.");
+  const trLink=link(s.translation||s.lyrics,T("Open a translation","افتح ترجمة"));
+  const why=`<p class="lead">${T("Lyrics are copyrighted, so Koren doesn't include them. Add them for your own study: they stay on this phone only, never uploaded to GitHub or added to feedback.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها «كورين». أضفها لدراستك الشخصية: تبقى على هذا الهاتف فقط، ولا تُرفع إلى GitHub ولا تُضاف إلى الملاحظات.")}</p>`;
+  const P=(mode,label,primary)=>`<button type="button" class="btn small${primary?" primary":""}" data-act="lyrpaste" data-id="${esc(id)}" data-mode="${mode}">${label}</button>`;
+  const editor=`<details class="fbk"${msg&&msg.open?" open":""}><summary>✎ ${lines.length?T("Edit by hand","التعديل يدويًا"):T("Or paste or type by hand","أو الصق أو اكتب يدويًا")}</summary><div class="fbk-in">
+   <p class="tap-hint">${T("Any format works: Russian only, Russian | translation, alternating lines, or Russian first and the translation after.","أي صيغة تصلح: الروسية وحدها، أو الروسية | الترجمة، أو سطر بسطر، أو الروسية أولًا ثم الترجمة.")}</p>
+   <textarea class="fbk-ta" id="lyr-${esc(id)}" rows="8" spellcheck="false" aria-label="${T("Lyrics","كلمات الأغنية")}">${esc(txt)}</textarea>
+   <div class="row"><button type="button" class="btn small primary" data-act="lyrsave" data-id="${esc(id)}">${T("Save","احفظ")}</button>${txt?`<button type="button" class="btn small" data-act="lyrrm" data-id="${esc(id)}">${T("Remove lyrics","احذف الكلمات")}</button>`:""}</div></div></details>`;
+  const note=msg?`<p class="msg" aria-live="polite">${esc(msg.text)}</p>`:"";
+  if(!lines.length)return `<div class="card" id="lyrics"><span class="label">${T("Lyrics","كلمات الأغنية")}</span>${why}
+   <ol class="body" style="margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:8px">
+    <li>${ruLink}${s.lyrics?T(", then select the Russian text and copy it.","، ثم حدّد النص الروسي وانسخه."):""}</li>
+    <li>${T("Come back and tap:","عُد واضغط:")} ${P("ru",T("Paste lyrics","الصق الكلمات"),true)}</li>
+    <li>${T("Optional: copy a translation and paste it the same way. It lines up with the Russian lines by itself.","اختياري: انسخ ترجمة والصقها بالطريقة نفسها. ستتطابق مع السطور الروسية تلقائيًا.")}</li></ol>
+   ${note}${editor}</div>`;
   return `<div class="card reading" id="lyrics"><span class="label">${T("Lyrics","كلمات الأغنية")}</span>
-   <span class="tap-hint">${T("Underlined: words you already know.","تحت الخط: كلمات تعرفها.")} ${hasTr?T("Tap a line to see your translation.","اضغط على السطر لترى ترجمتك."):T("Tap the speaker to hear a line.","اضغط على السمّاعة لتسمع السطر.")}</span>
-   <div>${lines.map(l=>l.head?`<p class="label" style="margin-top:12px">${esc(l.head)}</p>`:l.gap?`<div style="height:10px"></div>`:`<div class="line">${spk("S:"+plain(l.ru),l.ru)}<button type="button" class="reveal" data-reveal><span class="rl ru">${lyrMark(l.ru)}</span>${l.tr?`<span class="m" hidden>${esc(l.tr)}</span>`:""}</button></div>`).join("")}</div>
-   <details class="fbk"><summary>✎ ${T("Edit lyrics","عدّل الكلمات")}</summary><div class="fbk-in">${why}${editor}</div></details></div>`;
+   <span class="tap-hint">${T("Underlined: words you already know.","تحت الخط: كلمات تعرفها.")} ${nt?T("Tap a line to see the translation.","اضغط على السطر لترى الترجمة."):T("Tap the speaker to hear a line.","اضغط على السمّاعة لتسمع السطر.")}</span>
+   ${note}
+   <div>${L.map(l=>l.head?`<p class="label" style="margin-top:12px">${esc(l.head)}</p>`:l.gap?`<div style="height:10px"></div>`:`<div class="line">${spk("S:"+plain(l.ru),l.ru)}<button type="button" class="reveal" data-reveal><span class="rl ru">${lyrMark(l.ru)}</span>${l.tr?`<span class="m" hidden>${esc(l.tr)}</span>`:""}</button></div>`).join("")}</div>
+   ${nt<lines.length?`<div class="row" style="margin-top:6px">${trLink}${P("tr",T("Paste a translation","الصق ترجمة"),true)}</div><p class="tap-hint">${T("Copy a translation of the whole song, then tap Paste: it lines up with the Russian lines.","انسخ ترجمة الأغنية كاملة ثم اضغط «الصق»: ستتطابق مع السطور الروسية.")}</p>`:""}
+   ${editor}</div>`;
 }
 function vSong(id){
   const s=SONGm[id],ws=songWords(s),ph=songPhrases(s),nx=songNext(s),started=s.lessons.some((_,i)=>S.done[sdKey(id,i)]);
@@ -1099,9 +1175,10 @@ document.addEventListener("click",e=>{
   if(a==="step"){startStep(t.dataset.id);return}
   if(a==="song"){startSong(t.dataset.id,+t.dataset.li);return}
   if(a==="songpractice"){const f={song:t.dataset.id},l=practiceQs(f,15);if(!l.length)return;startQ(l,"practice",`Practice: song ${t.dataset.id}`);if(Q)Q.filter=f;return}
-  if(a==="lyrsave"){const id=t.dataset.id,ta=document.getElementById("lyr-"+id),v=ta?ta.value:"";if(v.trim())LYR[id]=v;else delete LYR[id];
-    const ok=saveLyr();render();const m=$("#lyrmsg");if(m)m.textContent=ok?T("Saved on this phone.","حُفظت على هذا الهاتف."):T("Couldn't save: storage is full or blocked.","تعذّر الحفظ: التخزين ممتلئ أو محظور.");
-    const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"});return}
+  if(a==="lyrpaste"){lyrPaste(t.dataset.id,t.dataset.mode);return}
+  if(a==="lyrsave"){const id=t.dataset.id,ta=document.getElementById("lyr-"+id),v=ta?ta.value:"";
+    if(v.trim())lyrSet(id,v);else{delete LYR[id];saveLyr();LYRMSG=null}
+    render();const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"});return}
   if(a==="lyrrm"){if(t.dataset.sure){delete LYR[t.dataset.id];saveLyr();render();const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"})}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط مرة أخرى للحذف")}return}
   if(a==="practice"){const f=t.dataset.pid?{pid:t.dataset.pid}:t.dataset.topic?{topic:t.dataset.topic}:null;
     const l=practiceQs(f,15);if(!l.length)return;startQ(l,"practice",f?f.pid?`Practice: principle ${f.pid}`:`Practice: topic ${f.topic}`:"Mixed practice");if(Q)Q.filter=f;return}
@@ -1200,7 +1277,7 @@ function backup(){
   const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();a.remove();
   const m=$("#bkmsg");if(m)m.textContent=T("Backup saved to your downloads.","حُفظت النسخة في التنزيلات.");
 }
-window.addEventListener("hashchange",()=>{if(SEQ){stopSeq();try{speechSynthesis.cancel()}catch(e){}player.pause()}render();window.scrollTo(0,0)});
+window.addEventListener("hashchange",()=>{LYRMSG=null;if(SEQ){stopSeq();try{speechSynthesis.cancel()}catch(e){}player.pause()}render();window.scrollTo(0,0)});
 render();loadAudio();
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>

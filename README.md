@@ -11,7 +11,7 @@ Every word names its topic and the principles it shows, so each principle points
 
 **How the app is organised.**
 - **Path** — one line of small lessons that covers the whole course: every principle card, every word (topics are split into lessons of about seven words), every phrase and every reading. A phrase is taught at the first step where its topic has been reached and its grammar explained. A step is done when its lesson is finished; the end screen goes straight to the next one.
-- **Songs** — learn Russian through songs: the official video, short notes in English and Arabic, and small lessons built from the song's words. Song words live in the topic “Words from songs”, which is not on the path. Once learned in a song, a word counts as known everywhere: the path doesn't introduce it again, Practice reviews it, and drill sentences built on it appear. A song's sentences are drilled only after their principle cards are done on the path.
+- **Songs** — learn Russian through songs, from easiest to hardest (Кофевино, Хочешь?, Жить в твоей голове, Выше крыш): the official video, short notes in English and Arabic, and small lessons built from the song's words. Song words live in the topic “Words from songs”, which is not on the path. Once learned in a song, a word counts as known everywhere: the path doesn't introduce it again, Practice reviews it, and drill sentences built on it appear. A song's sentences are drilled only after their principle cards are done on the path.
 - **Practice** — review only: a mixed pool of what the path has already taught (words, phrases, read texts, practised principles and their combinations), by principle or by topic. Nothing new.
 - **Topics** and **Principles** — reference: word lists, readings, explanation cards.
 
@@ -47,7 +47,7 @@ Either edit `course.js` (the format is described at the top of the file) and run
 
 ## Songs and lyrics
 
-Songs are `songs` in `course.js` (the format is described above the list). Lyrics are **not** in the repository, because they are copyrighted. The learner pastes them on the song page (one line per row, optional translation after `|`), and they stay in that phone's storage only. They are never uploaded or added to feedback notes; backup files include them so they move with you to a new phone. Words the learner already knows are underlined in the lyrics.
+Songs are `songs` in `course.js` (the format is described above the list). Lyrics are **not** in the repository, because they are copyrighted. The learner adds them on the song page: copy the Russian text from a lyrics site and tap **Paste lyrics**, then (optionally) copy a translation and tap **Paste a translation**, which lines up with the Russian lines by itself. Any common format works: Russian only, `Russian | translation`, alternating lines, Russian first and the translation after, or LyricsTranslate's side-by-side copy; section labels like [Припев] are kept and bits lyrics sites add are dropped. They stay in that phone's storage only. They are never uploaded or added to feedback notes; backup files include them so they move with you to a new phone. Words the learner already knows are underlined in the lyrics.
 
 To add a song, ask Claude for a lesson pack with `songs`, `words` (topic `songs`) and `phrases`, or edit `course.js` and run `node tools/check.mjs`.
 
