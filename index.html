@@ -123,6 +123,7 @@ html[dir=rtl] .chev{transform:scaleX(-1)}
 .reading .line:first-child{border-top:0}
 .reading .line .reveal{flex:1;text-align:start;background:none;border:0;padding:0;display:flex;flex-direction:column;gap:4px}
 .reading .rl{font-size:20px;line-height:1.45}
+.reading .line.now .rl{color:var(--accent)}
 textarea{width:100%;min-height:120px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:10px;font:13px/1.4 ui-monospace,monospace;direction:ltr}
 .switch{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
 .seg{flex-shrink:0}
@@ -179,7 +180,7 @@ const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(M
 const today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
 
 /* ================= state ================= */
-let S={v:1,lang:"en",srs:{},seen:{},ps:{},stressAll:false,tts:true,read:{}};
+let S={v:1,lang:"en",srs:{},seen:{},ps:{},stressAll:false,tts:true,auto:true,read:{}};
 let storageOK=true;
 try{const raw=localStorage.getItem("koren-state");if(raw){const o=JSON.parse(raw);if(o&&typeof o==="object")S=Object.assign(S,o)}}catch(e){}
 try{localStorage.setItem("koren-probe","1");localStorage.removeItem("koren-probe")}catch(e){storageOK=false}
@@ -377,7 +378,19 @@ function play(k,text,btn){
   }
   speak(text);
 }
-player.addEventListener("ended",()=>{if(playingBtn)playingBtn.classList.remove("playing");playingBtn=null});
+player.addEventListener("ended",()=>{if(playingBtn)playingBtn.classList.remove("playing");playingBtn=null;if(SEQ)SEQ.next()});
+/* play several items one after another (a whole reading); recordings first, phone voice otherwise */
+let SEQ=null;
+function stopSeq(){if(SEQ){const b=SEQ.btn;SEQ=null;if(b)b.textContent=b.dataset.label}}
+function playSeq(list,btn){
+  stopSeq();try{speechSynthesis.cancel()}catch(e){}
+  const lines=[...document.querySelectorAll(".reading .line")];let i=-1;
+  const seq={btn,next(){if(SEQ!==seq)return;lines.forEach(l=>l.classList.remove("now"));i++;if(i>=list.length){stopSeq();return}
+    if(lines[i])lines[i].classList.add("now");const {k,text}=list[i];
+    if(hasA(k)){play(k,text)}else if(ttsOK()){try{const u=new SpeechSynthesisUtterance(plain(text));u.lang="ru-RU";u.rate=.85;if(ruVoice)u.voice=ruVoice;u.onend=()=>setTimeout(()=>seq.next(),350);speechSynthesis.speak(u)}catch(e){seq.next()}}else seq.next()}};
+  SEQ=seq;if(btn){btn.dataset.label=btn.dataset.label||btn.textContent;btn.textContent=T("Stop","إيقاف")}seq.next();
+}
+const autoOn=()=>S.auto!==false;
 function addClips(o,src,sp){
   if(!o||o.app!=="koren-audio"||!o.clips||typeof o.clips!=="object")return -1;let n=0;
   Object.keys(o.clips).forEach(k=>{const c=o.clips[k];
@@ -497,7 +510,7 @@ function vTopic(id){
    ${fresh?`<button type="button" class="btn primary" data-act="learn" data-id="${esc(id)}">${T(`Learn ${Math.min(fresh,5)} new words`,`تعلّم ${Math.min(fresh,5)} كلمات جديدة`)}</button>`:""}
    <button type="button" class="btn${fresh?"":" primary"}" data-act="tpractice" data-id="${esc(id)}">${T("Practise this topic","تدرّب على هذا الموضوع")}</button></div>
    ${ps.length?`<span class="label">${T("Principles you'll meet here","مبادئ ستجدها هنا")}</span>${pchips(ps)}`:""}</div>
-  <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to see its meaning.","اضغط على الكلمة لترى معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
+  <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning.","اضغط على الكلمة لتسمعها وترى معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
   ${ph.length?`<div class="card"><span class="label">${T("Phrases","العبارات")}</span><div>${ph.map(wordRow).join("")}</div></div>`:""}
   ${fbBox("t:"+id,()=>({kind:"topic",src:`Topic “${t.en}” (id ${id})`}))}`;
 }
@@ -528,7 +541,7 @@ function vReads(){
 function vReading(id){
   const r=READS.find(x=>x.id===id);if(!r)return vReads();
   return `<a class="back" href="#read">← ${T("Read","القراءة")}</a><h1>${esc(L(r))}</h1>
-  <div class="card reading"><span class="tap-hint">${T("Tap a line to check the meaning.","اضغط على السطر لتتأكد من المعنى.")}</span><div>${r.lines.map(l=>`<div class="line">${spk("S:"+plain(l[0]),l[0])}<button type="button" class="reveal" data-reveal><span class="rl ru">${RUt(l[0])}</span><span class="m" hidden>${esc(S.lang==="ar"?l[2]:l[1])}</span></button></div>`).join("")}</div></div>
+  <div class="card reading"><div class="row" style="justify-content:space-between"><span class="tap-hint">${T("Tap a line to hear it and check the meaning.","اضغط على السطر لتسمعه وتتأكد من معناه.")}</span>${canPlay("S:"+plain(r.lines[0][0]))?`<button type="button" class="btn small" data-act="playall" data-id="${esc(id)}">▶ ${T("Play all","تشغيل الكل")}</button>`:""}</div><div>${r.lines.map(l=>`<div class="line">${spk("S:"+plain(l[0]),l[0])}<button type="button" class="reveal" data-reveal><span class="rl ru">${RUt(l[0])}</span><span class="m" hidden>${esc(S.lang==="ar"?l[2]:l[1])}</span></button></div>`).join("")}</div></div>
   <div class="card"><button type="button" class="btn primary wide" data-act="rpractice" data-id="${esc(id)}">${T("Practise this text","تدرّب على هذا النص")}</button>
    <p class="count">${T("Meaning, gaps, building and typing with these exact lines.","المعنى والفراغات وترتيب الجمل والكتابة، بهذه السطور نفسها.")}</p>
    <button type="button" class="btn wide" data-act="markread" data-id="${esc(id)}">${S.read[id]?T("Read ✓","مقروء ✓"):T("I've read it","قرأته")}</button></div>
@@ -541,6 +554,7 @@ function vMore(){
   <div class="card"><span class="label">${T("Settings","الإعدادات")}</span>
    <div class="switch"><span>${T("Explanations in","لغة الشرح")}</span><div class="seg"><button type="button" data-lang="en" aria-pressed="${S.lang==="en"}">English</button><button type="button" data-lang="ar" aria-pressed="${S.lang==="ar"}" class="ar">العربية</button></div></div>
    <div class="switch"><span>${T("Stress marks","علامات النبر")}</span><div class="seg"><button type="button" data-act="stress" data-v="0" aria-pressed="${!S.stressAll}">${T("Fade when known","تختفي عند المعرفة")}</button><button type="button" data-act="stress" data-v="1" aria-pressed="${S.stressAll}">${T("Always","دائمًا")}</button></div></div>
+   <div class="switch"><span>${T("Play sound automatically","تشغيل الصوت تلقائيًا")}</span><div class="seg"><button type="button" data-act="auto" data-v="1" aria-pressed="${autoOn()}">${T("On","تشغيل")}</button><button type="button" data-act="auto" data-v="0" aria-pressed="${!autoOn()}">${T("Off","إيقاف")}</button></div></div>
    <div class="switch"><span>${T("Phone voice when there's no recording","صوت الهاتف عند غياب التسجيل")}</span><div class="seg"><button type="button" data-act="tts" data-v="1" aria-pressed="${S.tts}">${T("On","تشغيل")}</button><button type="button" data-act="tts" data-v="0" aria-pressed="${!S.tts}">${T("Off","إيقاف")}</button></div></div>
   </div>
   <div class="card"><span class="label">${T("Recordings","التسجيلات")}</span>
@@ -767,8 +781,11 @@ function renderQ(){
 }
 function autoPlay(){
   if(!Q||Q.finished)return;const q=Q.list[Q.i];if(!q)return;
-  if(q.t==="intro"||q.t==="lp"||q.t==="lt")play(q.it.akey||q.it.key,q.it.ru);
-  else if(q.t==="stress")play(q.x.akey,q.x.ru);
+  /* listening drills always play; otherwise only where the Russian is already on screen, so sound never gives the answer away */
+  if(q.t==="lp"||q.t==="lt")play(q.it.akey||q.it.key,q.it.ru);
+  else if(!autoOn())return;
+  else if(q.t==="intro"||q.t==="pm")play(q.it.akey||q.it.key,q.it.ru);
+  else if(q.t==="pmean")play(q.x.akey,q.x.ru);
 }
 function answer(given){
   if(Q.answered)return;Q.answered=true;
@@ -791,8 +808,8 @@ function answer(given){
   }else{
     html=`<div class="fb"><div class="row" style="justify-content:space-between"><div><div class="label">${T("The answer","الإجابة")}</div><div style="font-size:22px" class="ru">${esc(fullText)}</div>${q.t==="fty"||q.t==="build"?`<div class="lead">${T("You wrote","كتبت")}: <span class="ru">${esc(given)}</span></div>`:""}<div class="lead">${meaning}</div></div>${spk(audioKey,audioText)}</div>
      ${links.length?`<div class="chips">${links.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Open the card:","افتح البطاقة:")} ${esc(pname(p))}</a>`).join("")}</div>`:""}</div>`;
-    play(audioKey,audioText);
   }
+  if(autoOn()||!ok)play(audioKey,audioText); /* hear the right answer, whole sentence where there is one */
   html+=`<button type="button" class="btn primary wide" data-act="next">${Q.i+1<Q.list.length?T("Next","التالي"):T("Finish","إنهاء")}</button>`;
   $("#fb").innerHTML=html;
   const nb=$('#fb [data-act="next"]');if(nb)setTimeout(()=>{try{nb.focus({preventScroll:false});nb.scrollIntoView({block:"nearest",behavior:"smooth"})}catch(e){}},30);
@@ -818,9 +835,12 @@ document.addEventListener("click",e=>{
   const t=e.target.closest("button,a,[data-reveal]");if(!t)return;
   if(t.dataset.lang){S.lang=t.dataset.lang;save();render();return}
   if(t.dataset.go){e.preventDefault();if(location.hash===t.dataset.go)render();else location.hash=t.dataset.go;return}
-  if(t.dataset.play){e.stopPropagation();play(t.dataset.play,t.dataset.text,t);return}
+  if(t.dataset.play){e.stopPropagation();stopSeq();play(t.dataset.play,t.dataset.text,t);return}
   if(t.dataset.say!==undefined&&t.classList.contains("say")){play(wkey(t.dataset.say),t.dataset.say);return}
-  if(t.hasAttribute("data-reveal")){const m=t.querySelector(".m");if(m)m.hidden=!m.hidden;return}
+  if(t.hasAttribute("data-reveal")){const m=t.querySelector(".m");if(m){m.hidden=!m.hidden;
+    if(!m.hidden&&autoOn()){const sb=t.parentNode.querySelector("[data-play]");if(sb){stopSeq();play(sb.dataset.play,sb.dataset.text,sb)}}}return}
+  if(t.dataset.act==="playall"){if(SEQ){stopSeq();try{speechSynthesis.cancel()}catch(e){}player.pause();return}
+    const r=READS.find(x=>x.id===t.dataset.id);if(r)playSeq(r.lines.map(l=>({k:"S:"+plain(l[0]),text:l[0]})),t);return}
   if(t.hasAttribute("data-reveal-mean")){const m=$("#introm");if(m)m.hidden=false;t.remove();return}
   if(t.dataset.ans!==undefined){answer(t.dataset.ans);return}
   if(t.dataset.tile!==undefined&&Q&&!Q.answered){Q.list[Q.i].built.push(+t.dataset.tile);renderQ();return}
@@ -838,6 +858,7 @@ document.addEventListener("click",e=>{
   if(a==="markread"){S.read[t.dataset.id]=S.read[t.dataset.id]?0:1;save();render();return}
   if(a==="stress"){S.stressAll=t.dataset.v==="1";save();render();return}
   if(a==="tts"){S.tts=t.dataset.v==="1";save();render();return}
+  if(a==="auto"){S.auto=t.dataset.v==="1";save();render();return}
   if(a==="addpack"){addPack();return}
   if(a==="rmpack"){const i=+t.dataset.i;if(t.dataset.sure){PACKS.splice(i,1);savePacks();build();render()}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط مرة أخرى للإزالة")}return}
   if(a==="backup"){backup();return}
@@ -922,7 +943,7 @@ function backup(){
   const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();a.remove();
   const m=$("#bkmsg");if(m)m.textContent=T("Backup saved to your downloads.","حُفظت النسخة في التنزيلات.");
 }
-window.addEventListener("hashchange",()=>{render();window.scrollTo(0,0)});
+window.addEventListener("hashchange",()=>{if(SEQ){stopSeq();try{speechSynthesis.cancel()}catch(e){}player.pause()}render();window.scrollTo(0,0)});
 render();loadAudio();
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
