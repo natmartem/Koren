@@ -21,6 +21,26 @@
 window.COURSE = {
 version: 1,
 
+/* ============ suggested path ============
+   The order Today suggests: a principle card, then the topics and readings that use it.
+   Nothing is locked, but drills only use phrases and combinations whose principle cards
+   the learner has already opened. "p:" principle, "t:" topic, "r:" reading. */
+path: [
+ "p:no-is","t:hello","p:stress",
+ "p:moy-tvoy","t:people",
+ "p:acc-masc","p:acc-fem","t:food",
+ "p:v-prep","r:kot","t:home",
+ "p:ya-form","t:verbs","r:keys","r:kitchen",
+ "p:chunks","r:razgovor","r:amira","t:city","r:walk","r:pharmacy","t:transport","r:metro",
+ "p:nravitsya","r:flat",
+ "p:u-menya","r:family","r:grandma","r:commute","r:neighbour","t:body","r:doctor",
+ "p:numbers","t:numbers","r:bodyread","t:shop","r:cafe","r:market","r:taxi","r:airport",
+ "t:days","r:week","r:day","t:months","r:seasons","r:year","r:birthdays",
+ "p:tion","p:ism-ist","p:logy","t:ideas","r:brat","r:tourist","r:discussion","r:optimist",
+ "p:roots","p:doer","t:work","r:office","r:teacher","r:writer",
+ "p:hod","t:describe","p:lookalike"
+],
+
 topics: [
  {id:"hello",   en:"Hello and basics",     ar:"التحية والأساسيات"},
  {id:"people",  en:"People and family",    ar:"الناس والعائلة"},
@@ -45,26 +65,28 @@ principles: [
  en:"No “is” in the present", ar:"لا فعل «يكون» في المضارع",
  can:{en:"Say “I am…”, “this is…”, “mum is at home”", ar:"تقول «أنا…» و«هذا…» و«أمي في البيت»"},
  body:{
-  en:`<p>Russian simply drops “am / is / are” in the present: {Я студе́нт.} = I (am a) student. {Э́то мой брат.} = This (is) my brother. {Ма́ма до́ма.} = Mum (is) at home.</p>
-<p>In writing, a dash often stands where English would put “is” between two nouns: {Мой па́па — врач.}</p>
+  en:`<p>Russian simply drops “am / is / are” in the present: {Я студе́нт.} = I (am a) student. {Э́то Андре́й.} = This (is) Andrey. {Ма́ма до́ма.} = Mum (is) at home.</p>
+<p>In writing, a dash often stands where English would put “is” between two nouns: {Па́па — врач.}</p>
 <p>The verb comes back in the past: {Я был студе́нтом}, {она́ была́ до́ма}. That is a later card.</p>
-<p>A yes/no question uses the same words; only the voice rises on the key word: {Э́то твоя́ кни́га?} (Is this your book?) Arabic often does the same without <ar>هل</ar>.</p>`,
-  ar:`<p>الروسية تحذف «يكون» في المضارع تمامًا: {Я студе́нт.} = أنا طالب. {Э́то мой брат.} = هذا أخي. {Ма́ма до́ма.} = أمي في البيت.</p>
-<p>في الكتابة توضع شَرطة أحيانًا بين الاسمين: {Мой па́па — врач.} = أبي طبيب.</p>
+<p>A yes/no question uses the same words; only the voice rises on the key word: {Э́то кни́га?} (Is this a book?) Arabic often does the same without <ar>هل</ar>.</p>`,
+  ar:`<p>الروسية تحذف «يكون» في المضارع تمامًا: {Я студе́нт.} = أنا طالب. {Э́то Андре́й.} = هذا أندريه. {Ма́ма до́ма.} = أمي في البيت.</p>
+<p>في الكتابة توضع شَرطة أحيانًا بين الاسمين: {Па́па — врач.} = أبي طبيب.</p>
 <p>الفعل يعود في الماضي: {она́ была́ до́ма} = كانت في البيت. هذا في بطاقة لاحقة.</p>
-<p>سؤال «نعم / لا» يستخدم الكلمات نفسها، وترتفع نبرة الصوت فقط على الكلمة المهمّة: {Э́то твоя́ кни́га?} هل هذا كتابك؟ كما نسأل في العربية أحيانًا بلا «هل».</p>`},
+<p>سؤال «نعم / لا» يستخدم الكلمات نفسها، وترتفع نبرة الصوت فقط على الكلمة المهمّة: {Э́то кни́га?} هل هذا كتاب؟ كما نسأل في العربية أحيانًا بلا «هل».</p>`},
  bridge:{
   en:`This is the Arabic nominal sentence: <ar>أنا طالب</ar>, <ar>هذا أخي</ar>. You already think this way. Only English insists on “am”.`,
   ar:`هذه هي الجملة الاسمية تمامًا: <ar>أنا طالب</ar>، <ar>هذا أخي</ar>. أنت تفكّر هكذا أصلًا. الإنجليزية وحدها تحتاج إلى am.`},
- ex:[["Я студе́нт.","I'm a student.","أنا طالب."],["Э́то мой брат.","This is my brother.","هذا أخي."],["Ма́ма до́ма.","Mum is at home.","أمي في البيت."]],
+ ex:[["Я студе́нт.","I'm a student.","أنا طالب."],["Э́то Андре́й.","This is Andrey.","هذا أندريه."],["Ма́ма до́ма.","Mum is at home.","أمي في البيت."]],
  items:[
   ["…","","Я студе́нт.","Я есть студе́нт.","Я студе́нта.","Я быть студе́нт.","I am a student.","أنا طالب."],
-  ["…","","Э́то мой брат.","Э́то есть мой брат.","Э́то мой бра́та.","Э́то быть мой брат.","This is my brother.","هذا أخي."],
+  ["…","","Э́то Андре́й.","Э́то есть Андре́й.","Э́то Андре́я.","Э́то быть Андре́й.","This is Andrey.","هذا أندريه."],
   ["…","","Ма́ма до́ма.","Ма́ма есть до́ма.","Ма́му до́ма.","Ма́ма быть до́ма.","Mum is at home.","أمي في البيت."],
   ["…","","Он врач.","Он есть врач.","Он врача́.","Он быть врач.","He is a doctor.","هو طبيب."],
-  ["…","","Ко́фе горя́чий.","Ко́фе есть горя́чий.","Ко́фе горя́чая.","Ко́фе быть горя́чий.","The coffee is hot.","القهوة ساخنة."],
-  ["…","","Мы в Москве́.","Мы есть в Москве́.","Мы в Москва́.","Мы быть в Москве́.","We are in Moscow.","نحن في موسكو."],
+  ["…","","Ма́ма врач.","Ма́ма есть врач.","Ма́му врач.","Ма́ма быть врач.","Mum is a doctor.","أمي طبيبة."],
+  ["…","","Па́па до́ма.","Па́па есть до́ма.","Па́пу до́ма.","Па́па быть до́ма.","Dad is at home.","أبي في البيت."],
   ["…","","Я до́ма.","Я есть до́ма.","Я дом.","Я быть до́ма.","I'm at home.","أنا في البيت."],
+  ["…","","Э́то кни́га?","Э́то есть кни́га?","Э́то кни́гу?","Э́то быть кни́га?","Is this a book?","هل هذا كتاب؟"],
+  ["…","","Где метро́?","Где есть метро́?","Где метра́?","Где быть метро́?","Where is the metro?","أين المترو؟"],
   ["…","","Она́ врач.","Она́ есть врач.","Она́ врача́.","Она́ быть врач.","She is a doctor.","هي طبيبة."]
  ]},
 
@@ -286,12 +308,12 @@ principles: [
   ["Где … брат?","","твой","твоя́","твоё","твои́","Where is your brother?","أين أخوك؟"],
   ["… сестра́ до́ма?","","Твоя́","Твой","Твоё","Твои́","Is your sister at home?","هل أختك في البيت؟"],
   ["Э́то … пальто́?","","твоё","твой","твоя́","твои́","Is this your coat?","هل هذا معطفك؟"],
-  ["… де́ти в шко́ле?","","Твои́","Твой","Твоя́","Твоё","Are your children at school?","هل أطفالك في المدرسة؟"],
+  ["… де́ти до́ма?","","Твои́","Твой","Твоя́","Твоё","Are your children at home?","هل أطفالك في البيت؟"],
   ["Э́то … ко́мната.","","моя́","мой","моё","мои́","This is my room.","هذه غرفتي."],
   ["Как … день?","","твой","твоя́","твоё","твои́","How is your day?","كيف يومك؟"],
   ["Э́то … кни́га.","но́вый","но́вая","но́вый","но́вое","но́вые","This is a new book.","هذا كتاب جديد."],
-  ["Мне нра́вится … го́род.","э́тот","э́тот","э́та","э́то","э́ти","I like this city.","تعجبني هذه المدينة."],
-  ["У тебя́ … глаза́.","краси́вый","краси́вые","краси́вый","краси́вая","краси́вое","You have beautiful eyes.","عيناك جميلتان."],
+  ["… го́род о́чень краси́вый.","э́тот","Э́тот","Э́та","Э́то","Э́ти","This city is very beautiful.","هذه المدينة جميلة جدًّا."],
+  ["Твои́ глаза́ … .","краси́вый","краси́вые","краси́вый","краси́вая","краси́вое","Your eyes are beautiful.","عيناك جميلتان."],
   ["Э́то … информа́ция.","интере́сный","интере́сная","интере́сный","интере́сное","интере́сные","This is interesting information.","هذه معلومات مثيرة للاهتمام."],
   ["Кварти́ра … .","ма́ленький","ма́ленькая","ма́ленький","ма́ленькое","ма́ленькие","The flat is small.","الشقة صغيرة."]
  ]},
@@ -1163,16 +1185,16 @@ phrases: [
 
 ["У меня́ есть брат.","I have a brother.","عندي أخ.","people","u-menya"],
 ["Э́то моя́ сестра́.","This is my sister.","هذه أختي.","people","moy-tvoy no-is"],
-["Я люблю́ ма́му.","I love my mum.","أحب أمي.","people","acc-fem"],
-["Я жду дру́га.","I'm waiting for a friend.","أنتظر صديقي.","people","acc-masc"],
+["Я люблю́ ма́му.","I love my mum.","أحب أمي.","people","acc-fem ya-form"],
+["Я жду дру́га.","I'm waiting for a friend.","أنتظر صديقي.","people","acc-masc ya-form"],
 ["У тебя́ есть де́ти?","Do you have children?","هل عندك أطفال؟","people","u-menya"],
 ["Мой па́па — врач.","My dad is a doctor.","أبي طبيب.","people","no-is moy-tvoy"],
 
 ["Я хочу́ ко́фе.","I want coffee.","أريد قهوة.","food","acc-masc ya-form"],
 ["Ко́фе с молоко́м, пожа́луйста.","Coffee with milk, please.","قهوة بالحليب من فضلك.","food","chunks"],
-["Э́то о́чень вку́сно!","This is very tasty!","هذا لذيذ جدًّا!","food",""],
-["Счёт, пожа́луйста.","The bill, please.","الحساب من فضلك.","food",""],
-["Я не ем мя́со.","I don't eat meat.","لا آكل اللحم.","food",""],
+["Э́то о́чень вку́сно!","This is very tasty!","هذا لذيذ جدًّا!","food","no-is"],
+["Счёт, пожа́луйста.","The bill, please.","الحساب من فضلك.","food","chunks"],
+["Я не ем мя́со.","I don't eat meat.","لا آكل اللحم.","food","ya-form"],
 ["Мне нра́вится чай.","I like tea.","يعجبني الشاي.","food","nravitsya"],
 
 ["Кни́га на столе́.","The book is on the table.","الكتاب على الطاولة.","home","v-prep no-is"],
@@ -1185,28 +1207,28 @@ phrases: [
 ["Где метро́?","Where is the metro?","أين المترو؟","city","no-is"],
 ["Я живу́ в Москве́.","I live in Moscow.","أسكن في موسكو.","city","v-prep ya-form"],
 ["Вы́ход нале́во.","The exit is on the left.","المخرج على اليسار.","city","hod no-is"],
-["Где здесь апте́ка?","Is there a pharmacy near here?","أين توجد صيدلية هنا؟","city",""],
+["Где здесь апте́ка?","Is there a pharmacy near here?","أين توجد صيدلية هنا؟","city","no-is"],
 ["Мне нра́вится э́тот го́род.","I like this city.","تعجبني هذه المدينة.","city","nravitsya moy-tvoy"],
 
 ["Я е́ду на метро́.","I'm going by metro.","أذهب بالمترو.","transport","v-prep ya-form"],
 ["Я е́ду на авто́бусе.","I'm going by bus.","أذهب بالحافلة.","transport","v-prep"],
-["Оди́н биле́т, пожа́луйста.","One ticket, please.","تذكرة واحدة من فضلك.","transport",""],
-["Где остано́вка?","Where is the stop?","أين الموقف؟","transport",""],
-["Когда́ по́езд?","When is the train?","متى القطار؟","transport",""],
+["Оди́н биле́т, пожа́луйста.","One ticket, please.","تذكرة واحدة من فضلك.","transport","numbers"],
+["Где остано́вка?","Where is the stop?","أين الموقف؟","transport","no-is"],
+["Когда́ по́езд?","When is the train?","متى القطار؟","transport","no-is"],
 ["Я иду́ пешко́м.","I'm walking.","أمشي على قدميّ.","transport","ya-form chunks"],
 
 ["У меня́ боли́т голова́.","I have a headache.","رأسي يؤلمني.","body","u-menya"],
 ["У тебя́ краси́вые глаза́.","You have beautiful eyes.","عيناك جميلتان.","body","u-menya moy-tvoy"],
 ["Мне на́до к врачу́.","I need to see a doctor.","يجب أن أذهب إلى الطبيب.","body","chunks nravitsya"],
 ["Мне бо́льно.","It hurts.","أشعر بالألم.","body","nravitsya"],
-["Где бо́льно?","Where does it hurt?","أين يؤلمك؟","body",""],
+["Где бо́льно?","Where does it hurt?","أين يؤلمك؟","body","no-is nravitsya"],
 
 ["Кото́рый час?","What time is it?","كم الساعة؟","days","chunks"],
-["До́брое у́тро!","Good morning!","صباح الخير!","days",""],
-["До́брый ве́чер!","Good evening!","مساء الخير!","days",""],
+["До́брое у́тро!","Good morning!","صباح الخير!","days","chunks"],
+["До́брый ве́чер!","Good evening!","مساء الخير!","days","chunks"],
 ["У меня́ нет вре́мени.","I have no time.","ليس عندي وقت.","days","u-menya"],
 ["До за́втра!","See you tomorrow!","إلى الغد!","days","chunks"],
-["Я рабо́таю в сре́ду.","I work on Wednesday.","أعمل يوم الأربعاء.","days","acc-fem"],
+["Я рабо́таю в сре́ду.","I work on Wednesday.","أعمل يوم الأربعاء.","days","acc-fem ya-form"],
 
 ["Мой день рожде́ния в ма́рте.","My birthday is in March.","عيد ميلادي في مارس.","months","v-prep moy-tvoy chunks"],
 ["В январе́ хо́лодно.","It's cold in January.","الجو بارد في يناير.","months","v-prep"],
@@ -1221,10 +1243,10 @@ phrases: [
 ["Я ви́жу мо́ре.","I see the sea.","أرى البحر.","verbs","ya-form"],
 
 ["Здесь хо́лодно.","It's cold here.","الجو بارد هنا.","describe","nravitsya"],
-["Э́то о́чень интере́сно.","That's very interesting.","هذا مثير جدًّا للاهتمام.","describe",""],
+["Э́то о́чень интере́сно.","That's very interesting.","هذا مثير جدًّا للاهتمام.","describe","no-is nravitsya"],
 
 ["Ско́лько сто́ит?","How much is it?","بكم؟","shop","chunks"],
-["Э́то до́рого.","That's expensive.","هذا غالٍ.","shop",""],
+["Э́то до́рого.","That's expensive.","هذا غالٍ.","shop","no-is"],
 ["Мо́жно ка́ртой?","Can I pay by card?","هل يمكن الدفع بالبطاقة؟","shop","chunks"],
 ["Пять рубле́й.","Five roubles.","خمسة روبلات.","shop","numbers"],
 
@@ -1235,7 +1257,7 @@ phrases: [
 
 ["Э́то интере́сная информа́ция.","This is interesting information.","هذه معلومات مثيرة للاهتمام.","ideas","tion moy-tvoy"],
 ["Я журнали́ст.","I'm a journalist.","أنا صحفي.","ideas","ism-ist no-is"],
-["Я люблю́ му́зыку.","I love music.","أحب الموسيقى.","ideas","acc-fem"],
+["Я люблю́ му́зыку.","I love music.","أحب الموسيقى.","ideas","acc-fem ya-form"],
 ["Кака́я ситуа́ция!","What a situation!","يا له من موقف!","ideas","tion chunks"]
 ],
 
