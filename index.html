@@ -377,7 +377,7 @@ function generate(c){
       const o={pid:"stress",part:"",tag:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
 }
 build();
-const APP_VERSION="1.5";
+const APP_VERSION="1.6";
 
 /* ================= feedback notes (localStorage "koren-feedback") =================
    A note box under each drill question, drill result, topic, principle and reading.
@@ -1667,9 +1667,17 @@ document.addEventListener("change",async e=>{
   if(t.dataset.act==="impaudio"){
     const m=$("#audmsg");if(!o||o.app!=="koren-audio"){m.textContent=T("That isn't a Koren recordings file.","هذا ليس ملف تسجيلات لكورين.");return}
     const sp=+o.speaker===2?2:1,lines=o.kind==="lines";
+    /* the speaker's song text comes with the lines: fill songs that have no lyrics yet, keep the learner's own */
+    let lyrNote="";
+    if(lines&&o.lyrics&&typeof o.lyrics==="object"){const got=[],kept=[];
+      Object.entries(o.lyrics).forEach(([id,txt])=>{const sg=SONGm[id];if(!sg||typeof txt!=="string"||!txt.trim())return;
+        if(!LYR[id]){LYR[id]=txt;got.push(plain(sg.ru))}else if(LYR[id]!==txt)kept.push(plain(sg.ru))});
+      if(got.length)saveLyr();delete o.lyrics;
+      if(got.length)lyrNote+=" "+T(`Lyrics added: ${got.join(", ")}.`,`أُضيفت الكلمات: ${got.join("، ")}.`);
+      if(kept.length)lyrNote+=" "+T(`You already had lyrics for ${kept.join(", ")}, so yours stay; lines written differently won't play. To use the speaker's text, delete yours on the song page and import again.`,`كانت عند⟦كِ|ك⟧ كلمات ${kept.join("، ")} فبقيت كما هي، والسطور المكتوبة بشكل مختلف لن تُسمع. لاستخدام نص المتحدّث، احذف⟦ي|⟧ نص⟦كِ|ك⟧ في صفحة الأغنية ثم استورد⟦ي|⟧ الملف مرة أخرى.`)}
     if(lines){const old=await idbGet("lines"+sp).catch(()=>null);if(old&&old.clips)o.clips=Object.assign({},old.clips,o.clips)} /* song lines add up, song by song */
     try{await idbSet(lines?"lines"+sp:sp===1?"audio":"audio2",o)}catch(err){}
-    const n=addClips(o,lines?"lines":"local",sp);m.textContent=lines?T(`Added ${n} song and poem lines (voice ${sp}). They stay on this phone.`,`أُضيف ${n} سطرًا من الأغاني والقصائد (الصوت ${sp}). تبقى على هذا الهاتف.`):T(`Added ${n} recordings (voice ${sp}).`,`أُضيف ${n} تسجيلًا (الصوت ${sp}).`);render();return;
+    const n=addClips(o,lines?"lines":"local",sp);const msgTxt=lines?T(`Added ${n} song and poem lines (voice ${sp}). They stay on this phone.`,`أُضيف ${n} سطرًا من الأغاني والقصائد (الصوت ${sp}). تبقى على هذا الهاتف.`)+lyrNote:T(`Added ${n} recordings (voice ${sp}).`,`أُضيف ${n} تسجيلًا (الصوت ${sp}).`);render();const m3=$("#audmsg");if(m3)m3.textContent=msgTxt;return;
   }
   if(t.dataset.act==="restore"){
     const m=$("#bkmsg");if(!o||o.app!=="koren-backup"||!o.state){m.textContent=T("That isn't a Koren backup file.","هذا ليس ملف نسخة احتياطية لكورين.");return}

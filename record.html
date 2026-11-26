@@ -239,7 +239,9 @@ function bundle(lines){
   if(lines)LYRKEYS.forEach(k=>{if(CLIPS[k])clips[k]=CLIPS[k]});
   else{ALL.forEach(i=>{if(CLIPS[i.key]&&!LYRKEYS.has(i.key))clips[i.key]=CLIPS[i.key]});
     Object.keys(CLIPS).forEach(k=>{if(!clips[k]&&!LYRKEYS.has(k)&&!LINEONLY.has(k))clips[k]=CLIPS[k]})}
-  return JSON.stringify(Object.assign({app:"koren-audio",v:1,speaker:SP,made:new Date().toISOString()},lines?{kind:"lines"}:{},{clips}));
+  /* song lines also carry the pasted text of each song recorded here, so the learner's app gets the same lines */
+  const lyrics={};if(lines)SECTIONS.filter(s=>s.lyr&&s.items.some(i=>clips[i.key])).forEach(s=>{const t=ALYR[s.lyr]||RLYR[s.lyr];if(t)lyrics[s.lyr]=t});
+  return JSON.stringify(Object.assign({app:"koren-audio",v:1,speaker:SP,made:new Date().toISOString()},lines?{kind:"lines",lyrics}:{},{clips}));
 }
 /* song lines recorded earlier whose lyrics are no longer on this phone: still kept out of the main file */
 let LINEONLY=new Set();try{LINEONLY=new Set(JSON.parse(localStorage.getItem("koren-rec-linekeys")||"[]"))}catch(e){}
@@ -294,7 +296,7 @@ function lyrCard(){
   ${LYRSONGS.map(x=>`<details${x.n?"":" open"}><summary><b>${esc(x.t.replace(/^(Song|Poem) lines · /,""))}</b> <small>${x.n?x.n+" lines":"no lyrics yet"}</small></summary>
    ${ALYR[x.id]?`<p class="muted" style="font-size:13px">Lyrics come from the app on this phone.</p>`:`<textarea id="rl-${esc(x.id)}" rows="5" style="width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg);color:var(--ink)" placeholder="Paste the Russian text, one line per line">${esc(RLYR[x.id]||"")}</textarea>
    <button type="button" class="btn" data-lyrsave="${esc(x.id)}" style="margin-top:6px">Save the text</button>`}</details>`).join("")}
-  ${any?`<button type="button" class="btn primary" id="sendlines" style="align-self:flex-start">Send song lines</button><p class="muted" style="font-size:13px">A separate file, ${esc(LFILE)}, that the learner imports on her phone. Please don't upload it anywhere public.</p>`:""}`;
+  ${any?`<button type="button" class="btn primary" id="sendlines" style="align-self:flex-start">Send song lines</button><p class="muted" style="font-size:13px">A separate file, ${esc(LFILE)}, with your recordings and the song text, so the lines match on the learner's phone when she imports it. Please don't upload it anywhere public.</p>`:""}`;
 }
 lyrCard();
 (async()=>{try{CLIPS=await getAll()}catch(e){msg("bad","This browser cannot save recordings (private mode?). Please use a normal window.")}renderList()})();

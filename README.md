@@ -60,6 +60,8 @@ Songs and poems are `songs` in `course.js` (the format is described above the li
 
 To add a song, ask Claude for a lesson pack with `songs`, `words` (topic `songs`) and `phrases`, or edit `course.js` and run `node tools/check.mjs`.
 
+The song-lines file a speaker sends from `record.html` (`koren-song-lines.json`) carries their recordings and the song text they pasted. Importing it on the learner's phone fills in the lyrics for any song that has none yet, so every recorded line matches; lyrics the learner already added are kept. The file is shared privately and never goes to GitHub.
+
 ## Licenses
 
 | Part | License |
