@@ -138,6 +138,10 @@ textarea{width:100%;min-height:120px;border-radius:12px;border:1px solid var(--l
 .tile.on{background:var(--tint);border-color:var(--accent)}
 .tile:disabled{opacity:.3}
 .count{font-size:14px;color:var(--mute)}
+.hear{align-self:center;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--soft);color:var(--accent);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:600;min-height:38px}
+.hear svg{width:16px;height:16px}
+.say-it{font-size:22px;line-height:1.35;text-align:center;font-weight:500}
+.base{text-align:center;color:var(--mute);font-size:15px}
 .fbk{border:1px dashed var(--line);border-radius:12px;background:var(--surface);margin-top:12px}
 .fbk>summary{list-style:none;cursor:pointer;padding:9px 12px;font-size:14px;color:var(--mute);display:flex;align-items:center;gap:6px;min-height:40px}
 .fbk>summary::-webkit-details-marker{display:none}
@@ -364,6 +368,7 @@ function loadVoices(){try{const v=speechSynthesis.getVoices().filter(x=>/^ru/i.t
 if("speechSynthesis" in window){loadVoices();try{speechSynthesis.onvoiceschanged=loadVoices}catch(e){}}
 const hasA=k=>!!(AUD[k]&&AUD[k].length);
 const canPlay=k=>hasA(k)||ttsOK();
+const hearBtn=(k,text)=>canPlay(k)?`<button type="button" class="hear" data-play="${esc(k)}" data-text="${esc(plain(text))}">${SPK}${T("Hear it","استمع")}</button>`:"";
 const spk=(k,text,big)=>canPlay(k)?`<button type="button" class="spk${big?" big":""}" data-play="${esc(k)}" data-text="${esc(plain(text))}" aria-label="${T("Play","تشغيل")}">${SPK}</button>`:"";
 function speak(text){
   if(!ttsOK())return;
@@ -858,12 +863,12 @@ function renderQ(){
       opts=q.opts.map(o=>optBtn(o.ru,M(o))).join("")}
     else if(q.t==="pr"){head=`<p class="prompt">${T("Which one is it?","أيّها؟")}</p><div class="big">${M(q.it)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${RUw(o)}</span>`)).join("")}
     else if(q.t==="lp"){head=`<p class="prompt">${T("Listen and pick","استمع واختر")}</p><div class="center">${spk(q.it.akey||q.it.key,q.it.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${RUw(o)}</span>`)).join("")}
-    else if(q.t==="ty"||q.t==="lt"){head=q.t==="ty"?`<p class="prompt">${T("Type it in Russian","اكتبها بالروسية")}</p><div class="big">${M(q.it)}</div>`:`<p class="prompt">${T("Listen and type","استمع واكتب")}</p><div class="center">${spk(q.it.akey||q.it.key,q.it.ru,true)}</div>`}
+    else if(q.t==="ty"||q.t==="lt"){head=q.t==="ty"?`<p class="prompt">${T("Type it in Russian","اكتبها بالروسية")}</p><div class="say-it">${M(q.it)}</div>${hearBtn(q.it.akey||q.it.key,q.it.ru)}`:`<p class="prompt">${T("Listen and type","استمع واكتب")}</p><div class="center">${spk(q.it.akey||q.it.key,q.it.ru,true)}</div>`}
     else if(q.t==="form"){const x=q.x;
       head=`<p class="prompt">${T("Fill the gap","املأ الفراغ")}</p><div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?`<p class="hint ru">(${esc(x.hint)})</p>`:`<p class="hint">${meaningOf(x)}</p>`}`;
       opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
     else if(q.t==="fty"){const x=q.x;
-      head=`<p class="prompt">${T("Type the missing words","اكتب الكلمات الناقصة")}</p><div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?`<p class="hint ru">(${esc(x.hint)})</p>`:`<p class="hint">${meaningOf(x)}</p>`}`}
+      head=`<p class="prompt">${/\s/.test(plain(x.ans))?T("Type the missing words","اكتب الكلمات الناقصة"):T("Type the missing word","اكتب الكلمة الناقصة")}</p>${x.gen?"":`<div class="say-it">${meaningOf(x)}</div>`}<div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?`<p class="base">${T("Use","استخدم")}: <span class="ru">${esc(x.hint)}</span>${x.gen?` · ${esc(S.lang==="ar"?x.ar.split(" — ").pop():x.en.split(" — ").pop())}`:""}</p>`:""}${hearBtn(x.akey,x.full)}`}
     else if(q.t==="gap"){head=`<p class="prompt">${T("Fill the gap","املأ الفراغ")}</p><div class="frame ru">${esc(q.frame).replace("…",'<span class="blank">…</span>')}</div><p class="hint">${meaningOf(q.it)}</p>`;
       opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
     else if(q.t==="build"){const used=new Set(q.built);
@@ -873,7 +878,7 @@ function renderQ(){
        <button type="button" class="btn primary wide" data-act="bcheck" ${q.built.length?"":"disabled"}>${T("Check","تحقّق")}</button>`}
     else if(q.t==="pat"){head=`<p class="prompt">${T("Which is the Russian word?","ما الكلمة الروسية؟")}</p><div class="big latin" dir="ltr">${esc(q.x.en)}</div>${S.lang==="ar"?`<p class="hint ar">${esc(q.x.ar)}</p>`:""}`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${esc(o.ru)}</span>`)).join("")}
     else if(q.t==="pmean"){head=`<p class="prompt">${T("What does it mean?","ما معناها؟")}</p><div class="big ru">${esc(q.x.ru)}</div><div class="center">${spk(q.x.akey,q.x.ru)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,meaningOf(o))).join("")}
-    else if(q.t==="pty"){head=`<p class="prompt">${T("Use the rule: type it in Russian","طبّق القاعدة: اكتبها بالروسية")}</p><div class="big latin" dir="ltr">${esc(q.x.en)}</div>${S.lang==="ar"?`<p class="hint ar">${esc(q.x.ar)}</p>`:""}`}
+    else if(q.t==="pty"){head=`<p class="prompt">${T("Use the rule: type it in Russian","طبّق القاعدة: اكتبها بالروسية")}</p><div class="big latin" dir="ltr">${esc(q.x.en)}</div>${S.lang==="ar"?`<p class="hint ar">${esc(q.x.ar)}</p>`:""}`+hearBtn(q.x.akey,q.x.ru)}
     else if(q.t==="stress"){head=`<p class="prompt">${T("Where is the stress?","أين النبر؟")}</p><div class="center">${spk(q.x.akey,q.x.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
     else if(q.t==="read"){head=`<p class="prompt">${T("You see this sign. What is it?","ترى هذه اللافتة. ما هي؟")}</p><div class="sign">${esc(q.x.ru)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,meaningOf(o))).join("")}
     const typing=q.t==="ty"||q.t==="lt"||q.t==="pty"||q.t==="fty";
@@ -886,9 +891,11 @@ function autoPlay(){
   if(!Q||Q.finished)return;const q=Q.list[Q.i];if(!q)return;
   /* listening drills always play; otherwise only where the Russian is already on screen, so sound never gives the answer away */
   if(q.t==="lp"||q.t==="lt")play(q.it.akey||q.it.key,q.it.ru);
+  else if(q.t==="stress")play(q.x.akey,q.x.ru); /* stress drills are listening drills */
   else if(!autoOn())return;
   else if(q.t==="intro"||q.t==="pm")play(q.it.akey||q.it.key,q.it.ru);
   else if(q.t==="pmean")play(q.x.akey,q.x.ru);
+  else if(q.t==="stress")play(q.x.akey,q.x.ru);
 }
 function answer(given){
   if(Q.answered)return;Q.answered=true;
@@ -917,7 +924,9 @@ function answer(given){
   $("#fb").innerHTML=html;
   const nb=$('#fb [data-act="next"]');if(nb)setTimeout(()=>{try{nb.focus({preventScroll:false});nb.scrollIntoView({block:"nearest",behavior:"smooth"})}catch(e){}},30);
 }
+function stopAudio(){try{player.pause();player.removeAttribute("src")}catch(e){}try{speechSynthesis.cancel()}catch(e){}if(playingBtn){playingBtn.classList.remove("playing");playingBtn=null}}
 function nextQ(){
+  stopAudio();
   if(Q.i+1>=Q.list.length){Q.finished=true;renderQ();return}
   Q.i++;Q.answered=false;renderQ();autoPlay();
 }
@@ -958,7 +967,7 @@ document.addEventListener("click",e=>{
   if(a==="rpractice"){const r=READS.find(x=>x.id===t.dataset.id);return startQ(readingQs(t.dataset.id),"reading",`Reading practice “${r?r.en:""}” (id ${t.dataset.id})`)}
   if(a==="check"){const v=($("#typein")||{}).value||"";if(!v.trim())return;answer(v);return}
   if(a==="next"){nextQ();return}
-  if(a==="quit"){const back=Q&&Q.title==="practice"?"#practice":Q&&Q.title==="step"?"#path":null;Q=null;location.hash=back||"#path";return}
+  if(a==="quit"){stopAudio();const back=Q&&Q.title==="practice"?"#practice":Q&&Q.title==="step"?"#path":null;Q=null;location.hash=back||"#path";return}
   if(a==="again"){const f=Q&&Q.filter;const l=practiceQs(f,15);if(l.length){startQ(l,"practice",Q.src);Q.filter=f}return}
   if(a==="markread"){S.read[t.dataset.id]=S.read[t.dataset.id]?0:1;save();render();return}
   if(a==="stress"){S.stressAll=t.dataset.v==="1";save();render();return}
