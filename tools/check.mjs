@@ -49,7 +49,8 @@ const keys = new Map();
 for (const [kind, list] of [["word", C.words], ["phrase", C.phrases]]) {
   list.forEach((w, i) => {
     const where = `${kind} ${i + 1} (${w[0]})`;
-    if (w.length !== 5) err(where, "should have 5 fields");
+    if (w.length !== 5 && !(kind === "word" && w.length === 6 && w[3] === "songs")) err(where, "should have 5 fields (a song word may add its topic as a 6th)");
+    if (w.length === 6 && (!topics.has(w[5]) || w[5] === "songs")) err(where, `unknown topic “${w[5]}” in the 6th field`);
     if (!topics.has(w[3])) err(where, `unknown topic “${w[3]}”`);
     for (const p of (w[4] || "").split(/\s+/).filter(Boolean)) if (!validTag(p)) err(where, `unknown principle or part “${p}”`);
     if (!w[1] || !w[2]) err(where, "missing English or Arabic");

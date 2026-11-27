@@ -100,6 +100,7 @@ html[dir=rtl] .chev{transform:scaleX(-1)}
 .pill.good{background:var(--good-tint);color:var(--good)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .word{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.wlink{display:flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;color:var(--mute);text-decoration:none;margin-inline-start:auto}
 .word:first-child{border-top:0}
 .word .reveal{flex:1;min-width:0;text-align:start;background:none;border:0;padding:4px 0;display:flex;flex-direction:column;gap:2px}
 .word .w{font-size:21px;line-height:1.3}
@@ -267,7 +268,7 @@ function build(){
   TOP.forEach(t=>TOPm[t.id]=t);PR.forEach(p=>PRm[p.id]=p);
   const mk=(a,kind)=>{const key=kind==="w"?wkey(a[0]):pkey(a[0]);
     if(ITEMS[key]){const o=ITEMS[key];(a[4]||"").split(/\s+/).filter(x=>x&&PRm[x.split(":")[0]]).forEach(x=>{if(!o.ps.includes(x))o.ps.push(x)});return null}
-    const o={key,akey:key,kind,ru:a[0],en:a[1],ar:a[2],topic:a[3],ps:(a[4]||"").split(/\s+/).filter(x=>x&&PRm[x.split(":")[0]])};ITEMS[key]=o;return o};
+    const o={key,akey:key,kind,ru:a[0],en:a[1],ar:a[2],topic:a[3],theme:a[5]||"",ps:(a[4]||"").split(/\s+/).filter(x=>x&&PRm[x.split(":")[0]])};ITEMS[key]=o;return o};
   WORDS=c.words.map(a=>mk(a,"w")).filter(Boolean);
   PHRASES=c.phrases.map(a=>mk(a,"p")).filter(Boolean);
   PR.forEach(p=>{p.list=(p.items||[]).map((x,i)=>{
@@ -463,7 +464,7 @@ function generate(c){
       const o={pid:"stress",part:"",tag:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
 }
 build();
-const APP_VERSION="1.8";
+const APP_VERSION="1.9";
 
 /* ================= feedback notes (localStorage "koren-feedback") =================
    A note box under each drill question, drill result, topic, principle and reading.
@@ -493,6 +494,7 @@ document.addEventListener("input",e=>{
   const s=ta.parentNode.querySelector(".fbk-s");if(s)s.textContent=ok?T("Saved on this phone","حُفظت على هذا الهاتف"):T("Could not save: storage is full or blocked","تعذّر الحفظ: التخزين ممتلئ أو محظور");
 });
 const wordsOf=t=>WORDS.filter(w=>w.topic===t);
+const themeOf=t=>WORDS.filter(w=>w.theme===t); /* song words that belong to this topic too */
 const phrasesOf=t=>PHRASES.filter(w=>w.topic===t);
 const taggedWith=pid=>[...WORDS,...PHRASES].filter(w=>w.ps.includes(pid));
 
@@ -667,7 +669,7 @@ function poolOf(f){
   let pr=PR.filter(x=>unlocked(x.id)).flatMap(x=>x.list.filter(y=>met(y)&&unlocked(y.tag||x.id)&&!songLocked(y)&&itemFits(y,KL)));
   if(f.pid){items=items.filter(x=>x.ps.includes(f.pid));lines=[];pr=pr.filter(x=>x.pid===f.pid)}
   if(f.song){const ks=new Set(SONGm[f.song]?songItems(SONGm[f.song]).map(x=>x.key):[]);items=items.filter(x=>ks.has(x.key));lines=[];pr=pr.filter(x=>x.base&&ks.has(wkey(x.base)))}
-  if(f.topic){items=items.filter(x=>x.topic===f.topic);lines=lines.filter(x=>x.topic===f.topic);pr=pr.filter(x=>x.base&&ITEMS[wkey(x.base)]&&ITEMS[wkey(x.base)].topic===f.topic)}
+  if(f.topic){const inT=x=>x&&(x.topic===f.topic||x.theme===f.topic);items=items.filter(inT);lines=lines.filter(x=>x.topic===f.topic);pr=pr.filter(x=>x.base&&inT(ITEMS[wkey(x.base)]))}
   return {items,lines,pr,size:items.length+lines.length+pr.length};
 }
 function practiceQs(f,n){
@@ -694,7 +696,46 @@ const kindName=k=>k==="grammar"?T("Grammar","القواعد"):k==="words"?T("Wor
 const CHEV=`<svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const pchips=ps=>ps.length?`<div class="chips">${ps.map(p=>`<a class="pill root" href="#p/${esc(p.split(":")[0])}">${esc(pname(p))}</a>`).join("")}</div>`:"";
 function wordRow(it){
-  return `<div class="word">${spk(it.key,it.ru)}<button type="button" class="reveal" data-reveal><span class="w ru">${RUw(it)}</span><span class="m" hidden>${M(it)}</span></button></div>`;
+  return `<div class="word">${spk(it.key,it.ru)}<button type="button" class="reveal" data-reveal><span class="w ru">${RUw(it)}</span><span class="m" hidden>${M(it)}</span></button>${it.kind==="w"?`<a class="wlink" href="#w/${encodeURIComponent(it.key)}" aria-label="${T("Word page","صفحة الكلمة")}">${CHEV}</a>`:""}</div>`;
+}
+/* ================= word pages: the wiki =================
+   Everything about one word, with links both ways: its forms and the card for each ending, its topic,
+   its root family, the principles it shows, and where it is used: sentences, phrases, readings, songs.
+   Sentences are shown only when every word and ending in them is known. */
+function usesWord(text,key){return tk(text).some(t=>{const n=tn(t);return (FWD.get(n)&&FWD.get(n).has(key))||(FWT.get(n)&&FWT.get(n).has(key))})}
+function vWord(key){
+  const it=ITEMS[key],pl=tn(plain(it.ru)),status=rightOnce(key)?"known":S.seen[key]?"seen":"later";
+  const st=STEPS.find(x=>x.k==="t"&&x.words.some(w=>w.key===key));
+  const card=tag=>tag?`<a class="pill${unlocked(tag)?" root":""}" href="#p/${esc(tag.split(":")[0])}">${esc(pname(tag))}</a>`:"";
+  const row=(lab,f,tag)=>f?`<div class="word">${spk(wkey(f),f)}<span class="w ru" style="flex:1">${esc(f)}</span><span class="count" style="margin:0 8px">${esc(lab)}</span>${card(tag)}</div>`:"";
+  let forms="";
+  const n=N.find(x=>wkey(x.nom)===key),a=ADJ.find(x=>wkey(x.f.m)===key),v=VERBS.find(x=>wkey(x.inf)===key||wkey(x.forms[0])===key);
+  if(n){const fem=n.g==="f"||(n.g==="m"&&/[ая]$/.test(plain(n.nom))),wn=n.where?nounOf(n.where):"",same=f=>!f||tn(plain(f))===tn(plain(n.nom));
+    forms=[row(T("one","مفرد"),n.nom,""),same(n.pl)?"":row(T("many","جمع"),n.pl,"moy-tvoy:pl"),same(wn)?"":row(T("where","أين"),n.where,n.cat==="D"?"acc-fem:days":"v-prep"),
+      same(n.acc)?"":row(T("object","مفعول به"),n.acc,fem?"acc-fem":"acc-masc"),same(n.gen)?"":row(T("of, none","من، لا يوجد"),n.gen,"u-menya"),
+      same(n.dat)?"":row(T("to whom","لِمَن"),n.dat,"nravitsya"),row(T("after 5","بعد 5"),n.gpl,"numbers")].join("")}
+  else if(a)forms=[["m",T("he","مذكر")],["f",T("she","مؤنث")],["n",T("it","محايد")],["pl",T("many","جمع")]].map(([g,l])=>row(l,a.f[g],g==="m"?"":"moy-tvoy:adj")).join("");
+  else if(v)forms=[row(T("to …","المصدر"),v.inf,""),...["я","ты","она́ / он","мы","вы","они́"].map((pn,i)=>row(pn,v.forms[i],"ya-form"))].join("");
+  const pids=[...new Set([...(it.ps||[]),...(v?["ya-form"]:[]),...(a?["moy-tvoy:adj"]:[])])].filter(x=>PRm[x.split(":")[0]]);
+  const all=BASEIDX[key]||[],sents=all.filter(x=>itemFits(x,KL)),later=all.length-sents.length;
+  const phr=PHRASES.filter(x=>usesWord(x.ru,key));
+  const reads=READS.filter(r=>r.lines.some(l=>usesWord(l[0],key)));
+  const songs=SONGS.filter(sg=>(sg.lessons||[]).some(l=>(l.words||[]).some(w=>wkey(w)===key)));
+  const patList=PR.filter(p=>p.drill==="pattern").flatMap(p=>p.list);
+  const pat=patList.find(x=>x.root&&tn(plain(x.ru))===pl),fam=pat?patList.filter(x=>x.root===pat.root&&x!==pat):[];
+  const topics=[it.topic,it.theme].filter(t=>t&&TOPm[t]);
+  const home=it.theme||it.topic;
+  return `<a class="back" href="#topic/${esc(home)}">← ${esc(tname(home))}</a>
+  <div class="card"><div class="word" style="border-top:0">${spk(key,it.ru)}<button type="button" class="reveal" data-reveal><span class="w ru" style="font-size:30px">${RUw(it)}</span><span class="m" hidden>${M(it)}</span></button></div>
+   <span class="tap-hint">${T("Tap the word to see its meaning.","اضغط⟦ي|⟧ على الكلمة لتر⟦ي|ى⟧ معناها.")}</span>
+   <p class="count">${status==="known"?T("You know this word.","تعرف⟦ين|⟧ هذه الكلمة."):status==="seen"?T("You've met this word: one right answer and it's yours.","قابلت هذه الكلمة: إجابة صحيحة واحدة وتصبح لك."):st?T(`It comes on the path at step ${st.i+1}.`,`تأتي في المسار في الخطوة ${st.i+1}.`):songs.length?T("It's taught in a song or poem.","تُعلَّم في أغنية أو قصيدة."):""}</p>
+   <div class="chips">${topics.map(t=>`<a class="pill" href="#topic/${esc(t)}">${esc(tname(t))}</a>`).join("")}${songs.map(sg=>`<a class="pill" href="#song/${esc(sg.id)}">${esc(sg.ru)}</a>`).join("")}</div></div>
+  ${forms?`<div class="card"><span class="label">${T("Its forms","صيغها")}</span><span class="tap-hint">${T("Each ending links to the card that explains it.","كل نهاية مرتبطة بالبطاقة التي تشرحها.")}</span>${forms}</div>`:""}
+  ${fam.length?`<div class="card"><span class="label">${T(`Same root: ${pat.root}`,`الجذر نفسه: ${pat.root}`)}</span>${fam.map(x=>`<div class="word">${spk(x.akey,x.ru)}<button type="button" class="reveal" data-reveal><span class="w ru">${esc(x.ru)}</span><span class="m" hidden>${esc(S.lang==="ar"?x.ar:x.en)}</span></button></div>`).join("")}</div>`:""}
+  ${pids.length?`<div class="card"><span class="label">${T("Principles it shows","مبادئ تظهر فيها")}</span>${pchips(pids)}</div>`:""}
+  ${sents.length||later?`<div class="card"><span class="label">${T("In sentences","في جمل")}</span>${sents.slice(0,8).map(x=>`<div class="word">${spk(x.akey,x.full)}<span class="w ru">${esc(x.full)}</span></div>`).join("")}${later?`<p class="count">${T(`${later} more sentences open up as you learn more.`,`${later} جملة أخرى تنفتح كلما تعلّمت أكثر.`)}</p>`:""}</div>`:""}
+  ${phr.length?`<div class="card"><span class="label">${T("In phrases","في عبارات")}</span>${phr.slice(0,10).map(wordRow).join("")}</div>`:""}
+  ${reads.length?`<div class="card"><span class="label">${T("In readings","في القراءات")}</span><div class="list">${reads.map(r=>`<a class="li" href="#r/${esc(r.id)}"><div class="grow"><div class="t">${esc(L(r))}</div></div>${CHEV}</a>`).join("")}</div></div>`:""}`;
 }
 
 /* ================= tabs ================= */
@@ -722,12 +763,13 @@ function render(){
   if(v==="drill"&&Q){
     if(Q.answered&&!Q.finished){Q.answered=false;Q.i++;if(Q.i>=Q.list.length)Q.finished=true} /* back from a card: carry on with the next one */
     apUI();return renderQ()}
-  const tab={topic:"topics",p:"principles",r:"topics",read:"topics",today:"path",song:"songs",listen:"practice"}[v]||v;renderTabs(tab);
+  const tab={w:"topics",topic:"topics",p:"principles",r:"topics",read:"topics",today:"path",song:"songs",listen:"practice"}[v]||v;renderTabs(tab);
   const view=$("#view");
   const back=Q&&!Q.finished?`<button type="button" class="back" data-go="#drill">← ${T("Back to practice","العودة إلى التدريب")}</button>`:"";
   let html="";
   if(v==="topics")html=vTopics();
   else if(v==="topic"&&TOPm[arg])html=vTopic(arg);
+  else if(v==="w"&&ITEMS[decodeURIComponent(arg||"")])html=vWord(decodeURIComponent(arg));
   else if(v==="principles")html=vPrinciples();
   else if(v==="p"&&PRm[arg])html=vPrinciple(arg);
   else if(v==="read")html=vTopics();
@@ -787,7 +829,8 @@ function vTopic(id){
   <div class="card"><div class="row">
    ${poolOf({topic:id}).size?`<button type="button" class="btn primary" data-act="practice" data-topic="${esc(id)}">${T("Practise what you've learned here","تدرّب⟦ي|⟧ على ما تعلّمته هنا")}</button>`:t.song?`<span class="lead">${T("These words are taught in Songs.","تُعلَّم هذه الكلمات في الأغاني.")}</span><a class="btn small" href="#songs">${T("Open Songs","افتح⟦ي|⟧ الأغاني")}</a>`:`<span class="lead">${T("Words here are taught on the path.","تُعلَّم كلمات هذا الموضوع في المسار.")}</span>`}</div>
    ${ps.length?`<span class="label">${T("Principles you'll meet here","مبادئ ستجد⟦ين|⟧ها هنا")}</span>${pchips(ps)}`:""}</div>
-  <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning.","اضغط⟦ي|⟧ على الكلمة لتسمع⟦ي|⟧ها وتر⟦ي|ى⟧ معناها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
+  <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning; › opens its page.","اضغط⟦ي|⟧ على الكلمة لتسمع⟦ي|⟧ها وتر⟦ي|ى⟧ معناها؛ › تفتح صفحتها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
+  ${themeOf(id).length?`<div class="card"><span class="label">${T("From songs and poems","من الأغاني والقصائد")}</span><span class="tap-hint">${T("Taught in Culture; they count here once learned.","تُعلَّم في قسم الثقافة، وتُحتسب هنا بعد تعلّمها.")}</span><div>${themeOf(id).map(wordRow).join("")}</div></div>`:""}
   ${ph.length?`<div class="card"><span class="label">${T("Phrases","العبارات")}</span><div>${ph.map(x=>{const need=x.ps.filter(p=>!unlocked(p));
     return wordRow(x)+(need.length?`<div class="chips" style="margin:-4px 0 6px">${need.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Taught on the path after:","يُعلَّم في المسار بعد:")} ${esc(pname(p))}</a>`).join("")}</div>`:"")}).join("")}</div></div>`:""}
   ${READS.some(r=>r.topic===id)?`<div class="card"><span class="label">${T("Readings","القراءات")}</span><div class="list">${READS.filter(r=>r.topic===id).map(r=>`<a class="li" href="#r/${esc(r.id)}"><div class="grow"><div class="t">${esc(L(r))}</div></div>${CHEV}</a>`).join("")}</div></div>`:""}
@@ -1578,6 +1621,65 @@ function factFor(q){
 }
 
 /* ================= practice: drawing a question ================= */
+/* ================= typed answers: right by ear =================
+   A typed answer that sounds exactly like the answer counts as right, and the spelling is shown with the
+   reason: unstressed о/а and е/и, б/п-type pairs at the end of a word, silent letters, double letters,
+   -тся/-ться, one slipped key in a longer word. It is still wrong when it spells a different real word or
+   form (кни́ги for кни́ге), and short words (в, на, не) must be exact. */
+const VOICED={б:"п",в:"ф",г:"к",д:"т",ж:"ш",з:"с"},UNVOICED={п:"б",ф:"в",к:"г",т:"д",ш:"ж",с:"з"},VOW="аеёиоуыэюя";
+function earForm(w,st){
+  let s=w;
+  if(st.has("tsya"))s=s.replace(/ться$/,"тся");
+  if(st.has("silent"))s=s.replace(/вств/g,"ств").replace(/лнц/g,"нц").replace(/здн/g,"зн").replace(/стн/g,"сн").replace(/рдц/g,"рц").replace(/дц/g,"ц").replace(/^что/,"што").replace(/([ое])го$/,"$1во");
+  if(st.has("double"))s=s.replace(/([бвгджзйклмнпрстфхцчшщ])\1/g,"$1");
+  if(st.has("voice")){const a=[...s];for(let i=a.length-1;i>=0;i--){const nx=a[i+1];
+    if(VOICED[a[i]]&&(nx===undefined||"пфктшсхцчщ".includes(nx)))a[i]=VOICED[a[i]];else if(UNVOICED[a[i]]&&nx&&"бгджз".includes(nx))a[i]=UNVOICED[a[i]]}s=a.join("")}
+  return s;
+}
+const vcls=(c,prev)=>"ао".includes(c)?"A":"еёиэя".includes(c)||(c==="ы"&&prev&&"жшц".includes(prev))?"I":c;
+function stressAt(marked){ /* which vowel (0-based) is stressed; a one-vowel word is stressed; -1 if unknown */
+  const a=[...String(marked).toLowerCase()];let n=-1,at=-1,count=0;
+  a.forEach((c,i)=>{if(VOW.includes(c)){n++;count++;if(a[i+1]==="\u0301"||c==="ё")at=n}});
+  return at>=0?at:count===1?0:-1;
+}
+function sameByEar(g,r,st,stress){
+  if(g.length!==r.length)return false;let v=-1;
+  for(let i=0;i<r.length;i++){const isV=VOW.includes(r[i]);if(isV)v++;
+    if(g[i]===r[i]||(("её".includes(g[i]))&&("её".includes(r[i]))))continue;
+    if(!isV||!VOW.includes(g[i]))return false;
+    if(v===stress){if(("оё".includes(g[i])&&"оё".includes(r[i])))continue;return false}
+    if(st.has("vowel")&&stress>=0&&vcls(g[i],g[i-1])===vcls(r[i],r[i-1]))continue;
+    return false}
+  return true;
+}
+function oneSlip(a,b){ /* one letter changed, added, dropped or two swapped */
+  if(Math.abs(a.length-b.length)>1)return false;let i=0;while(i<a.length&&a[i]===b[i])i++;
+  if(a.length===b.length)return (a.slice(i+1)===b.slice(i+1)&&!(VOW.includes(a[i])&&VOW.includes(b[i])))||(a[i]===b[i+1]&&a[i+1]===b[i]&&a.slice(i+2)===b.slice(i+2)); /* a vowel for a vowel is judged by ear, not as a slip */
+  return a.length>b.length?a.slice(i+1)===b.slice(i):a.slice(i)===b.slice(i+1);
+}
+function closeMatch(given,right){
+  const words=x=>String(x).toLowerCase().replace(/[.,!?¿¡—–«»"“”:;…()]/g," ").split(/\s+/).filter(Boolean);
+  const gw=words(given),rw=words(right);if(!gw.length||gw.length!==rw.length)return null;
+  const reasons=[];
+  for(let k=0;k<rw.length;k++){
+    const g=plain(gw[k]).replace(/ё/g,"е"),rm=rw[k],r=plain(rm).toLowerCase(),r0=r.replace(/ё/g,"е");
+    if(g===r0)continue;
+    if(r.length<=2)return null;
+    if(FWD.has(tn(g))||FWT.has(tn(g)))return null; /* a real word or form of its own */
+    const stress=stressAt(rm),st=new Set();let hit="";
+    for(const step of ["yo","tsya","double","silent","voice","vowel","typo"]){
+      st.add(step);const eg=earForm(plain(gw[k]),st),er=earForm(r,st);
+      if(step==="typo"?r.length>=6&&oneSlip(eg,er):sameByEar(eg,er,st,stress)){hit=step;break}}
+    if(!hit)return null;reasons.push(hit);
+  }
+  return reasons.length?{why:reasons[0]}:null;
+}
+const EARWHY={yo:["Stressed ё sounds like о.","حرف ё المنبور يُنطق مثل о."],vowel:["Unstressed о sounds like а, and е or я like и.","حرف о غير المنبور يُنطق مثل а، وе أو я مثل и."],
+  voice:["At the end of a word, or before п, т, к, с…, б д г з в ж sound like п т к с ф ш.","في آخر الكلمة، أو قبل п وт وк وс…، تُنطق б д г з в ж مثل п т к с ф ш."],
+  silent:["Some letters are written but not heard.","بعض الحروف تُكتب ولا تُنطق."],
+  double:["It's written with a double letter.","تُكتب بحرف مضاعف."],
+  tsya:["-тся and -ться sound the same.","-тся و-ться تُنطقان بالطريقة نفسها."],
+  typo:["Looks like a slipped key.","يبدو أنه خطأ في الكتابة."]};
 const ansOf=q=>q.t==="form"||q.t==="fty"||q.t==="lform"?q.x.ans:q.t==="stress"?q.x.ru:q.t==="gap"?q.ans:q.t==="build"?q.target.join(" "):q.t==="lt"?q.it.ru:(q.x||q.it).ru;
 const TYPED=["ty","lt","pty","fty","build"];
 function renderQ(){
@@ -1660,7 +1762,9 @@ function autoPlay(){
 function answer(given){
   if(Q.answered)return;Q.answered=true;
   const q=Q.list[Q.i],right=ansOf(q);
-  const ok=TYPED.includes(q.t)?(norm(given)===norm(right)||ALTS.get(norm(right))===norm(given)):given===right;
+  let ok=TYPED.includes(q.t)?(norm(given)===norm(right)||ALTS.get(norm(right))===norm(given)):given===right;
+  /* right by ear: counts as right, with the spelling shown */
+  const close=!ok&&["ty","lt","pty","fty"].includes(q.t)?closeMatch(given,right):null;if(close)ok=true;
   const item=q.it||q.x,key=item.key;
   grade(key,ok);if(q.x){pstat(q.x.pid,ok);if(q.x.part)pstat(q.x.pid+":"+q.x.part,ok)}if(ok)Q.right++;Q.touched.add(key);Q.res[Q.i]=ok;save();fbRefresh("q:"+Q.qid+":"+Q.i);
   document.querySelectorAll("[data-ans]").forEach(b=>{b.disabled=true;if(b.dataset.ans===right)b.classList.add("ok");else if(b.dataset.ans===given)b.classList.add("dim")});
@@ -1673,11 +1777,14 @@ function answer(given){
   let html="";
   if(ok){
     html=`<div class="fb"><div class="row"><span class="yes">✓ ${["form","fty","gap","build","lform"].includes(q.t)?`<span class="ru">${esc(fullText)}</span>`:T("Yes","نعم")}</span>${spk(audioKey,audioText)}</div>`;
+    if(close){const w=EARWHY[close.why]||["",""];html+=`<p class="lead">${T("Spelled","تُكتب")} <span class="ru">${esc(right)}</span> · ${T(w[0],w[1])}${close.why==="vowel"&&PRm.stress?` <a href="#p/stress">${T("Stress card","بطاقة النبر")}</a>`:""}</p>`}
+    /* where the meaning wasn't on screen, show it now that she has answered */
+    if(["lt","lp","lform","stress","spos","lsign"].includes(q.t)&&meaning)html+=`<p class="lead">${meaning}</p>`;
     const f=factFor(q);if(f){Q.factShown++;Q.facts.add(f);html+=`<p class="fact">${esc(L(f))}</p>`}
     html+=`</div>`;
   }else{
     html=`<div class="fb"><div class="row" style="justify-content:space-between"><div><div class="label">${T("The answer","الإجابة")}</div><div style="font-size:22px" class="ru">${esc(fullText)}</div>${q.t==="fty"||q.t==="build"?`<div class="lead">${T("You wrote","كتبت")}: <span class="ru">${esc(given)}</span></div>`:""}<div class="lead">${meaning}</div></div>${spk(audioKey,audioText)}</div>
-     ${links.length?`<div class="chips">${links.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Open the card:","افتح⟦ي|⟧ البطاقة:")} ${esc(pname(p))}</a>`).join("")}</div>`:""}</div>`;
+     ${links.length||item.kind==="w"?`<div class="chips">${links.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Open the card:","افتح⟦ي|⟧ البطاقة:")} ${esc(pname(p))}</a>`).join("")}${item.kind==="w"?`<a class="pill" href="#w/${encodeURIComponent(item.key)}">${T("The word's page","صفحة الكلمة")}</a>`:""}</div>`:""}</div>`;
   }
   if(autoOn()||!ok)play(audioKey,audioText); /* hear the right answer, whole sentence where there is one */
   html+=`<button type="button" class="btn primary wide" data-act="next">${Q.i+1<Q.list.length?T("Next","التالي"):T("Finish","إنهاء")}</button>`;
