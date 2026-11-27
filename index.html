@@ -536,7 +536,7 @@ function generate(c){
       const o={pid:"stress",part:"",tag:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
 }
 build();
-const APP_VERSION="1.12";
+const APP_VERSION="1.13";
 
 /* ================= feedback notes (localStorage "koren-feedback") =================
    A note box under each drill question, drill result, topic, principle and reading.
@@ -1861,11 +1861,14 @@ function renderQ(){
     else if(q.t==="pr"){head=`<p class="prompt">${T("Which one is it?","أيّها؟")}</p><div class="big">${M(q.it)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${RUw(o)}</span>`)).join("")}
     else if(q.t==="lp"){head=`<p class="prompt">${T("Listen and pick","استمع⟦ي|⟧ و⟦اختاري|اختر⟧")}</p><div class="center">${spk(q.it.akey||q.it.key,q.it.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${RUw(o)}</span>`)).join("")}
     else if(q.t==="ty"||q.t==="lt"){head=q.t==="ty"?`<p class="prompt">${T("Type it in Russian","اكتب⟦ي|⟧ها بالروسية")}</p><div class="say-it">${M(q.it)}</div>${hearBtn(q.it.akey||q.it.key,q.it.ru)}`:`<p class="prompt">${T("Listen and type","استمع⟦ي|⟧ واكتب⟦ي|⟧")}</p><div class="center">${spk(q.it.akey||q.it.key,q.it.ru,true)}</div>`}
+    else if(q.t==="form"&&q.x.frame==="…"){const x=q.x; /* a whole sentence: which one says this? */
+      head=`<p class="prompt">${T("Which one says this?","أيّها تقول هذا؟")}</p><div class="say-it">${meaningOf(x)}</div>`;
+      opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
     else if(q.t==="form"){const x=q.x;
       head=`<p class="prompt">${T("Fill the gap","⟦املئي|املأ⟧ الفراغ")}</p><div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?"":`<p class="hint">${meaningOf(x)}</p>`}`;
       opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
     else if(q.t==="fty"){const x=q.x;
-      head=`<p class="prompt">${/\s/.test(plain(x.ans))?T("Type the missing words","اكتب⟦ي|⟧ الكلمات الناقصة"):T("Type the missing word","اكتب⟦ي|⟧ الكلمة الناقصة")}</p>${x.gen&&!x.sen?"":`<div class="say-it">${meaningOf(x)}</div>`}<div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?`<p class="base">${T("Use","استخدم⟦ي|⟧")}: <span class="ru">${esc(x.hint)}</span>${x.gen&&!x.sen?` · ${esc(L(x.gl))}`:""}</p>`:""}${hearBtn(x.akey,x.full)}`}
+      head=`<p class="prompt">${x.frame==="…"?T("Write it in Russian","اكتب⟦ي|⟧ه بالروسية"):/\s/.test(plain(x.ans))?T("Type the missing words","اكتب⟦ي|⟧ الكلمات الناقصة"):T("Type the missing word","اكتب⟦ي|⟧ الكلمة الناقصة")}</p>${x.gen&&!x.sen?"":`<div class="say-it">${meaningOf(x)}</div>`}<div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>${x.hint?`<p class="base">${T("Use","استخدم⟦ي|⟧")}: <span class="ru">${esc(x.hint)}</span>${x.gen&&!x.sen?` · ${esc(L(x.gl))}`:""}</p>`:""}${hearBtn(x.akey,x.full)}`}
     else if(q.t==="gap"){head=`<p class="prompt">${T("Fill the gap","⟦املئي|املأ⟧ الفراغ")}</p><div class="frame ru">${esc(q.frame).replace("…",'<span class="blank">…</span>')}</div><p class="hint">${meaningOf(q.it)}</p>`;
       opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
     else if(q.t==="build"){const used=new Set(q.built);
@@ -1880,7 +1883,8 @@ function renderQ(){
     else if(q.t==="spos"){const lab=q.label==="last"?T("on the last syllable","على المقطع الأخير"):T(["","on the first syllable","on the second syllable","on the third syllable","on the fourth syllable"][q.label]||"",["","على المقطع الأول","على المقطع الثاني","على المقطع الثالث","على المقطع الرابع"][q.label]||"");
       head=`<p class="prompt">${T("Which one is stressed","أيّها منبورة")} ${lab}?</p>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${esc(plain(o.ru))}</span>`)).join("")}
     else if(q.t==="lform"){const x=q.x;
-      head=`<p class="prompt">${T("Listen and fill the gap","استمع⟦ي|⟧ و⟦املئي|املأ⟧ الفراغ")}</p><div class="center">${spk(x.akey,x.full,true)}</div><div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>`;
+      head=x.frame==="…"?`<p class="prompt">${T("Listen: which one did you hear?","استمع⟦ي|⟧: أيّها سمعت⟦ِ|⟧؟")}</p><div class="center">${spk(x.akey,x.full,true)}</div>`
+        :`<p class="prompt">${T("Listen and fill the gap","استمع⟦ي|⟧ و⟦املئي|املأ⟧ الفراغ")}</p><div class="center">${spk(x.akey,x.full,true)}</div><div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>`;
       opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
     else if(q.t==="match"){
       const lab=(it,emo)=>emo?`<span aria-label="${M(it)}">${emoOf(it)}</span>`:M(it);
