@@ -421,7 +421,7 @@ function generate(c){
   const who=(n,poss)=>FAM.has(nb(n))?(poss||"my")+" "+nb(n):"the "+nb(n);
   const WHEREX={house:"in the house",flat:"in the flat",room:"in the room",kitchen:"in the kitchen",window:"on the windowsill",fridge:"in the fridge",bag:"in the bag",
     city:"in the city",street:"outside",centre:"in the centre",park:"in the park",bridge:"on the bridge",work:"at work",school:"at school",university:"at university",
-    lesson:"in class",hospital:"in hospital",face:"on the face",car:"in the car",bicycle:"on a bike",bus:"on the bus",tram:"on the tram",train:"on the train",plane:"on the plane"};
+    lesson:"in class",hospital:"in hospital",face:"on the face",car:"in the car",bicycle:"on a bike",bus:"on the bus",tram:"on the tram",train:"on the train",plane:"on the plane",prison:"in jail"};
   const whereE=n=>WHEREX[nb(n)]||(n.cat==="C"||n.cat==="M"?"in "+nb(n):n.cat==="D"?"on "+nb(n):prepOf(n.where)==="на"&&n.cat!=="L"?"on the "+nb(n):n.cat==="T"?"in the "+nb(n):"at the "+nb(n));
   const toE=n=>{const w=whereE(n);return w==="outside"?w:w.replace(/^(in|at|on) /,"to ")};
   const fillE=(t,v)=>capE(t.replace("{}",v));
@@ -438,12 +438,12 @@ function generate(c){
   const numE=x=>x.split(" ").map(w=>w==="два́дцать"?"twenty":NUMX[w]).join("-");
   /* verbs: present simple, or -ing for what is going on now */
   const VE={"знать":"know","понима́ть":"understand","говори́ть":"speak","жить":"live","рабо́тать":"work","чита́ть":"read*","писа́ть":"write*","учи́ть":"learn","идти́":"go*","е́хать":"go*","есть":"eat",
-    "пить":"drink","ждать":"wait*","спать":"sleep","мочь":"can","ви́деть":"see","ду́мать":"think","люби́ть":"love","хоте́ть":"want","обе́дать":"have lunch","отдыха́ть":"rest"};
+    "пить":"drink","ждать":"wait*","спать":"sleep","мочь":"can","ви́деть":"see","ду́мать":"think","люби́ть":"love","хоте́ть":"want","обе́дать":"have lunch","отдыха́ть":"rest","игра́ть":"play","покупа́ть":"buy","плати́ть":"pay"};
   const CE={"отве́т":"the answer","Москву́":"Moscow","учи́теля":"the teacher","вопро́с":"the question","по-ру́сски":"Russian","по-ара́бски":"Arabic","по-англи́йски":"English",
     "в Москве́":"in Moscow","в Бо́стоне":"in Boston","в Эр-Рия́де":"in Riyadh","в о́фисе":"in an office","до́ма":"at home","в больни́це":"in a hospital","кни́гу":"a book","письмо́":"a letter",
     "ру́сский язы́к":"Russian","домо́й":"home","в парк":"to the park","на рабо́ту":"to work","на метро́":"by metro","в Москву́":"to Moscow","суп":"soup","ры́бу":"fish","хлеб":"bread",
     "чай":"tea","ко́фе":"coffee","во́ду":"water","авто́бус":"the bus","дру́га":"{p} friend","ма́му":"{p} mum","дом":"the house","го́род":"the city","ста́нцию":"the station",
-    "но́чью":"at night","чита́ть":"read","рабо́тать":"work","спать":"sleep","му́зыку":"music","пи́ццу":"pizza","в кафе́":"in a cafe","в па́рке":"in the park"};
+    "но́чью":"at night","чита́ть":"read","рабо́тать":"work","спать":"sleep","му́зыку":"music","пи́ццу":"pizza","в кафе́":"in a cafe","в па́рке":"in the park","в «Монопо́лию»":"Monopoly","у́лицу":"the street","биле́т":"a ticket","аре́нду":"the rent"};
   const SUBJ={"Я":["I","my",1],"Ты":["you","your",2],"Она́":["she","her",3],"Он":["he","his",3],"Мы":["we","our",2],"Вы":["you","your",2],"Они́":["they","their",2]};
   const ing=v=>v.replace(/^(\w+)/,w=>w==="have"?"having":/e$/.test(w)&&!/ee$/.test(w)?w.slice(0,-1)+"ing":w+"ing");
   const s3=v=>v.replace(/^(\w+)/,w=>w==="have"?"has":w==="can"?"can":/(s|x|ch|sh|o)$/.test(w)?w+"es":w+"s");
@@ -461,7 +461,7 @@ function generate(c){
     return capE(s);
   }
   const things=N.filter(n=>(n.cat==="F"||n.cat==="C")&&n.g!=="pl"&&!n.song).map(n=>n.nom); /* never put a song word into someone else's sentence */
-  const WF={L:["Я сейча́с …","Мы …","Ма́ма …","Брат …"],C:["Я живу́ …","Сестра́ живёт …","Мы сейча́с …"],V:["Я сейча́с …","Мы …"],T:["Ключ …","Кот …","Телефо́н …","Кни́га …"],M:["Мой день рожде́ния …","Мы отдыха́ем …","… хо́лодно."]};
+  const WF={G:["Я сейча́с …","Мы сейча́с …"],L:["Я сейча́с …","Мы …","Ма́ма …","Брат …"],C:["Я живу́ …","Сестра́ живёт …","Мы сейча́с …"],V:["Я сейча́с …","Мы …"],T:["Ключ …","Кот …","Телефо́н …","Кни́га …"],M:["Мой день рожде́ния …","Мы отдыха́ем …","… хо́лодно."]};
   const AF={I:["Я люблю́ …","Я учу́ …","Ты лю́бишь …?","Она́ у́чит …"],P:["Я ви́жу …","Я люблю́ …","Я жду …","Я зна́ю …","Ты ви́дишь …?","Она́ лю́бит …","Мы ждём …","Они́ зна́ют …"],
     T:["Я ви́жу …","Я хочу́ …","Ты хо́чешь …?","Она́ ви́дит …"],F:["Я люблю́ …","Ты лю́бишь …?","Мы хоти́м …"],L:["Я ви́жу …","Я люблю́ …","Ты лю́бишь …?","Мы ви́дим …"],
     C:["Я люблю́ …","Я зна́ю …","Ты лю́бишь …?","Они́ зна́ют …"],V:["Я ви́жу …","Я жду …","Ты ви́дишь …?","Мы ждём …"]};
@@ -473,7 +473,7 @@ function generate(c){
   N.forEach(n=>{
     const pr=n.where?prepOf(n.where):"",other=pr==="в"?"на":"в",wn=n.where?nounOf(n.where):"";
     /* my, your, this, and describing words: every noun, plural ones too */
-    if(n.cat!=="C"&&n.cat!=="M"&&n.cat!=="D"&&n.cat!=="I"){
+    if(n.cat!=="C"&&n.cat!=="M"&&n.cat!=="D"&&n.cat!=="I"&&n.cat!=="G"){
       const odd=n.g==="pl"||/ь$/.test(n.nom)||(n.g==="m"&&/[ая]$/.test(plain(n.nom)))||(n.g==="n"&&/мя$/.test(plain(n.nom)));
       if(n.cat!=="W")[POSS,TPOSS].forEach(P2=>gi("moy-tvoy","Э́то … "+n.nom+".",P2.m,P2[n.g],Object.values(P2),n,null,odd&&n.g!=="pl"?"tricky":"",
         (plN(n)?"These are ":"This is ")+(P2===POSS?"my ":"your ")+nb(n)+"."));
@@ -567,6 +567,7 @@ document.addEventListener("input",e=>{
 });
 const wordsOf=t=>WORDS.filter(w=>w.topic===t);
 const themeOf=t=>WORDS.filter(w=>w.theme===t); /* song words that belong to this topic too */
+const alsoOf=t=>{const a=String((TOPm[t]||{}).also||"").split(/\s+/).filter(Boolean);return a.map(r=>ITEMS[wkey(r)]).filter(Boolean)}; /* words from other topics this topic reuses */
 const phrasesOf=t=>PHRASES.filter(w=>w.topic===t);
 const taggedWith=pid=>[...WORDS,...PHRASES].filter(w=>w.ps.includes(pid));
 
@@ -742,7 +743,7 @@ function poolOf(f){
   let pr=PR.filter(x=>unlocked(x.id)).flatMap(x=>x.list.filter(y=>met(y)&&unlocked(y.tag||x.id)&&!songLocked(y)&&itemFits(y,KL)));
   if(f.pid){items=items.filter(x=>x.ps.includes(f.pid));lines=[];pr=pr.filter(x=>x.pid===f.pid)}
   if(f.song){const ks=new Set(SONGm[f.song]?songItems(SONGm[f.song]).map(x=>x.key):[]);items=items.filter(x=>ks.has(x.key));lines=[];pr=pr.filter(x=>x.base&&ks.has(wkey(x.base)))}
-  if(f.topic){const inT=x=>x&&(x.topic===f.topic||x.theme===f.topic);items=items.filter(inT);lines=lines.filter(x=>x.topic===f.topic);pr=pr.filter(x=>x.base&&inT(ITEMS[wkey(x.base)]))}
+  if(f.topic){const al=new Set(alsoOf(f.topic).map(x=>x.key)),inT=x=>x&&(x.topic===f.topic||x.theme===f.topic||al.has(x.key));items=items.filter(inT);lines=lines.filter(x=>x.topic===f.topic);pr=pr.filter(x=>x.base&&inT(ITEMS[wkey(x.base)]))}
   return {items,lines,pr,size:items.length+lines.length+pr.length};
 }
 function practiceQs(f,n){
@@ -905,6 +906,7 @@ function vTopic(id){
    ${poolOf({topic:id}).size?`<button type="button" class="btn primary" data-act="practice" data-topic="${esc(id)}">${T("Practise what you've learned here","تدرّب⟦ي|⟧ على ما تعلّمته هنا")}</button>`:t.song?`<span class="lead">${T("These words are taught in Songs.","تُعلَّم هذه الكلمات في الأغاني.")}</span><a class="btn small" href="#songs">${T("Open Songs","افتح⟦ي|⟧ الأغاني")}</a>`:`<span class="lead">${T("Words here are taught on the path.","تُعلَّم كلمات هذا الموضوع في المسار.")}</span>`}</div>
    ${ps.length?`<span class="label">${T("Principles you'll meet here","مبادئ ستجد⟦ين|⟧ها هنا")}</span>${pchips(ps)}`:""}</div>
   <div class="card"><span class="label">${T("Words","الكلمات")}</span><span class="tap-hint">${T("Tap a word to hear it and see its meaning; › opens its page.","اضغط⟦ي|⟧ على الكلمة لتسمع⟦ي|⟧ها وتر⟦ي|ى⟧ معناها؛ › تفتح صفحتها.")}</span><div>${ws.map(wordRow).join("")}</div></div>
+  ${alsoOf(id).length?`<div class="card"><span class="label">${T("You'll use these here too","ستستخدم⟦ين|⟧ هذه هنا أيضًا")}</span><span class="tap-hint">${T("Taught in other topics.","تُعلَّم في مواضيع أخرى.")}</span><div>${alsoOf(id).map(wordRow).join("")}</div></div>`:""}
   ${themeOf(id).length?`<div class="card"><span class="label">${T("From songs and poems","من الأغاني والقصائد")}</span><span class="tap-hint">${T("Taught in Culture; they count here once learned.","تُعلَّم في قسم الثقافة، وتُحتسب هنا بعد تعلّمها.")}</span><div>${themeOf(id).map(wordRow).join("")}</div></div>`:""}
   ${ph.length?`<div class="card"><span class="label">${T("Phrases","العبارات")}</span><div>${ph.map(x=>{const need=x.ps.filter(p=>!unlocked(p));
     return wordRow(x)+(need.length?`<div class="chips" style="margin:-4px 0 6px">${need.map(p=>`<a class="pill root" href="#p/${esc(p)}">${T("Taught on the path after:","يُعلَّم في المسار بعد:")} ${esc(pname(p))}</a>`).join("")}</div>`:"")}).join("")}</div></div>`:""}

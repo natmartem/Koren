@@ -41,13 +41,14 @@ path: [
  "p:v-prep:tricky","t:transport","r:metro","p:chunks:more",
  "p:nravitsya","r:flat","p:nravitsya:state",
  "t:work","t:days:2","p:u-menya","r:family","r:grandma","p:u-menya:net","r:commute","r:neighbour","t:body","r:doctor",
- "t:numbers","p:numbers","p:numbers:age","r:bodyread","t:shop","r:keys","r:cafe","r:market","r:taxi","r:airport",
+ "t:numbers","p:numbers","p:numbers:age","r:bodyread","t:shop","r:keys","r:cafe","r:market","p:ya-form:imp","t:monopoly","r:monopoly","r:taxi","r:airport",
  "t:days","p:acc-fem:days","r:week","r:day","t:months","r:seasons","r:year","r:birthdays","p:acc-fem:tricky",
  "p:tion","p:ism-ist","p:logy","t:ideas","p:tion:sion","r:brat","r:tourist","r:discussion","r:optimist",
  "p:roots","p:doer","p:roots:more","r:office","p:moy-tvoy:tricky","r:teacher","r:writer",
  "p:hod","p:lookalike"
 ],
 
+/* also: words from other topics that this topic reuses; they show on its page and join its Practice */
 topics: [
  {id:"hello",   en:"Hello and basics",     ar:"التحية والأساسيات"},
  {id:"people",  en:"People and family",    ar:"الناس والعائلة"},
@@ -64,6 +65,7 @@ topics: [
  {id:"shop",    en:"Shopping and money",   ar:"التسوّق والمال"},
  {id:"work",    en:"Work and study",       ar:"العمل والدراسة"},
  {id:"ideas",   en:"International words",  ar:"كلمات عالمية"},
+ {id:"monopoly",en:"Playing Monopoly",     ar:"لعب المونوبولي", also:"у́лица дом банк де́ньги рубль"},
  {id:"songs",   en:"Words from songs",     ar:"كلمات من الأغاني", song:true}
 ],
 
@@ -119,6 +121,19 @@ principles: [
          ar:`<p>أفعال كثيرة تستخدم и في نهاياتها: {я говорю́}، {ты говори́шь}، {он говори́т}، {мы говори́м}، {вы говори́те}، {они́ говоря́т}.</p>
 <p>و{ви́жу} و{люблю́} من هذه العائلة: {ты ви́дишь}، {ты лю́бишь}.</p>
 <p>بعض الأفعال يتغيّر جذعها وتبقى النهايات نفسها: {жить → живу́, живёшь}؛ {писа́ть → пишу́, пи́шешь}؛ {мочь → могу́, мо́жешь}؛ {идти́ → иду́, идёшь}. وفعلان شاذّان: {хочу́, хо́чешь, хоти́м} و{ем, ешь, еди́м}.</p>`}},
+  {id:"imp", en:"Telling a friend: чита́й, иди́", ar:"الأمر لصديقة أو صديق: чита́й، иди́",
+   body:{en:`<p>To tell a friend to do something, take the ты form and drop {-ешь} or {-ишь}:</p>
+<ul><li>A vowel is left? Add {-й}: {чита́ешь → чита́й}, {покупа́ешь → покупа́й}, {отдыха́ешь → отдыха́й}, {ду́маешь → ду́май}.</li>
+<li>A consonant is left? Add {-и}: {говори́шь → говори́}, {пи́шешь → пиши́}, {идёшь → иди́}, {ждёшь → жди}, {спишь → спи}, {у́чишь → учи́}.</li></ul>
+<p>The stress usually sits where the я form has it: {пишу́ → пиши́}, {плачу́ → плати́}. To {вы}, add {-те}: {Чита́йте!} {Иди́те!}</p>
+<p>In a game you'll hear it all the time: {Твой ход, ходи́!} {Покупа́й!} {Плати́!}</p>
+<p>Arabic builds the command from the present too: <ar>تقرئين ← اقرئي</ar>, <ar>تدفعين ← ادفعي</ar>.</p>`,
+         ar:`<p>لتطلب⟦ي|⟧ من صديقة أو صديق أن يفعل شيئًا، ⟦خذي|خذ⟧ صيغة ты واحذف⟦ي|⟧ {-ешь} أو {-ишь}:</p>
+<ul><li>بقي حرف علّة؟ ⟦أضيفي|أضف⟧ {-й}: {чита́ешь → чита́й}، {покупа́ешь → покупа́й}، {отдыха́ешь → отдыха́й}، {ду́маешь → ду́май}.</li>
+<li>بقي حرف صامت؟ ⟦أضيفي|أضف⟧ {-и}: {говори́шь → говори́}، {пи́шешь → пиши́}، {идёшь → иди́}، {ждёшь → жди}، {спишь → спи}، {у́чишь → учи́}.</li></ul>
+<p>النبر عادةً في مكانه في صيغة я: {пишу́ → пиши́}، {плачу́ → плати́}. ومع {вы} ⟦أضيفي|أضف⟧ {-те}: {Чита́йте!} {Иди́те!}</p>
+<p>في اللعب ستسمع⟦ين|⟧ه طوال الوقت: {Твой ход, ходи́!} دورك، العب⟦ي|⟧! {Покупа́й!} اشتر⟦ي|⟧! {Плати́!} ادفع⟦ي|⟧!</p>
+<p>العربية أيضًا تبني الأمر من المضارع: <ar>تقرئين ← اقرئي</ar>، <ar>تدفعين ← ادفعي</ar>.</p>`}},
   {id:"inf", en:"Verb + verb: хочу́ спать", ar:"فعل + فعل: хочу́ спать",
    body:{en:`<p>After {хочу́}, {могу́}, {люблю́} and {на́до}, the second verb stays in its dictionary form, ending in {-ть}: {Я хочу́ спать.} {Мы мо́жем чита́ть.}</p>`,
          ar:`<p>بعد {хочу́} و{могу́} و{люблю́} و{на́до} يبقى الفعل الثاني في صيغة المصدر المنتهية بـ {-ть}: {Я хочу́ спать.} أريد أن أنام. {Мы мо́жем чита́ть.} نستطيع أن نقرأ.</p>`}}
@@ -148,7 +163,19 @@ principles: [
   ["Вы … ко́фе?","хоте́ть","хоти́те","хочу́","хо́чет","хотя́т","Would you like coffee?","هل تريدين قهوة؟","i"],
   ["Я хочу́ … .","спать","спать","сплю","спит","спят","I want to sleep.","أريد أن أنام.","inf"],
   ["Я могу́ … по-ру́сски.","чита́ть","чита́ть","чита́ю","чита́ет","чита́ют","I can read Russian.","أستطيع القراءة بالروسية.","inf"],
-  ["Мне на́до … .","рабо́тать","рабо́тать","рабо́таю","рабо́тает","рабо́тают","I need to work.","يجب أن أعمل.","inf"]
+  ["Мне на́до … .","рабо́тать","рабо́тать","рабо́таю","рабо́тает","рабо́тают","I need to work.","يجب أن أعمل.","inf"],
+  ["Ами́ра, … кни́гу!","чита́ть","чита́й","чита́ешь","чита́ет","чита́ть","Amira, read the book!","أميرة، اقرئي الكتاب!","imp"],
+  ["Андре́й, … домо́й!","идти́","иди́","идёшь","идёт","идти́","Andrey, go home!","أندريه، اذهب إلى البيت!","imp"],
+  ["Ма́ма, … по-ру́сски!","говори́ть","говори́","говори́шь","говори́т","говори́ть","Mum, speak Russian!","أمي، تكلّمي بالروسية!","imp"],
+  ["Ами́ра, … письмо́!","писа́ть","пиши́","пи́шешь","пи́шет","писа́ть","Amira, write a letter!","أميرة، اكتبي رسالة!","imp"],
+  ["Андре́й, … , пожа́луйста!","ждать","жди","ждёшь","ждёт","ждать","Andrey, wait, please!","أندريه، انتظر من فضلك!","imp"],
+  ["Ма́ма, … до́ма!","отдыха́ть","отдыха́й","отдыха́ешь","отдыха́ет","отдыха́ть","Mum, rest at home!","أمي، ارتاحي في البيت!","imp"],
+  ["Ты хо́чешь спать? … !","спать","Спи","Спишь","Спит","Спать","Do you want to sleep? Then sleep!","هل تريدين النوم؟ نامي!","imp"],
+  ["Ами́ра, … ру́сский язы́к!","учи́ть","учи́","у́чишь","у́чит","учи́ть","Amira, learn Russian!","أميرة، تعلّمي الروسية!","imp"],
+  ["Андре́й, … ! Где ключ?","ду́мать","ду́май","ду́маешь","ду́мает","ду́мать","Andrey, think! Where is the key?","أندريه، فكّر! أين المفتاح؟","imp"],
+  ["Здра́вствуйте! … , пожа́луйста!","чита́ть","Чита́йте","Чита́й","Чита́ете","Чита́ть","Hello! Read, please!","مرحبًا! اقرئي من فضلك!","imp"],
+  ["Ты хо́чешь дом? … !","покупа́ть","Покупа́й","Покупа́ешь","Покупа́ет","Покупа́ть","You want the house? Buy it!","تريدين البيت؟ اشتريه!","imp"],
+  ["Э́то моя́ у́лица. … аре́нду!","плати́ть","Плати́","Пла́тишь","Пла́тит","Плати́ть","This is my street. Pay the rent!","هذا شارعي. ادفعي الإيجار!","imp"]
  ]},
 
 {id:"v-prep", kind:"grammar", drill:"form",
@@ -695,7 +722,7 @@ principles: [
 
 /* ============ combination tables: the app mixes these with the principles ============
    Noun:      [nominative, English, Arabic, gender m/f/n/pl, kind, where (with в/на, "" = none), object form, "of" form, "to whom" form, "of" plural after 5+, many (optional)]
-              kind: P person or animal · L place · C city · T thing · F food and drink · V vehicle · W time · B body · M month · D weekday · I school subject or field
+              kind: P person or animal · L place · C city · T thing · F food and drink · V vehicle · W time · B body · M month · D weekday · I school subject or field · G game word (only “I'm in jail”-type sentences, no other combinations)
               For M, "where" is “in which month” (в январе́); for D it is “on which day” (в сре́ду, во вто́рник).
               Leave a form "" when it isn't used; the app skips combinations that need it.
    Adjective: [he, she, it, many, English, Arabic, kinds of noun it goes with]
@@ -852,6 +879,12 @@ nouns: [
 ["ча́шка","cup","فنجان","f","T","","ча́шку","ча́шки","ча́шке","ча́шек","ча́шки"],
 ["ло́жка","spoon","ملعقة","f","T","","ло́жку","ло́жки","ло́жке","ло́жек","ло́жки"],
 ["вино́","wine","نبيذ","n","F","","вино́","вина́","вину́",""],
+["ку́бик","die (dice)","حجر النرد","m","T","","ку́бик","ку́бика","ку́бику","ку́биков","ку́бики"],
+["фи́шка","playing piece","قطعة اللعب","f","T","","фи́шку","фи́шки","фи́шке","фи́шек","фи́шки"],
+["оте́ль","hotel","فندق","m","L","в оте́ле","оте́ль","оте́ля","оте́лю","оте́лей","оте́ли"],
+["тюрьма́","prison, jail","سجن","f","G","в тюрьме́","тюрьму́","тюрьмы́","тюрьме́","",""],
+["аре́нда","rent","إيجار","f","G","","аре́нду","аре́нды","аре́нде","",""],
+["игра́","game","لعبة","f","G","","игру́","игры́","игре́","",""],
 /* words from songs (topic "songs"): their sentences only show up once the word is learned in the song */
 ["океа́н","ocean","محيط","m","L","","океа́н","океа́на","океа́ну",""],
 ["Ки́ев","Kyiv","كييف","m","C","в Ки́еве","Ки́ев","Ки́ева","Ки́еву",""]
@@ -890,7 +923,10 @@ verbs: [
 ["люби́ть","love","يحبّ","люблю́","лю́бишь","лю́бит","лю́бим","лю́бите","лю́бят","ма́му|му́зыку|ко́фе"],
 ["хоте́ть","want","يريد","хочу́","хо́чешь","хо́чет","хоти́м","хоти́те","хотя́т","ко́фе|спать|пи́ццу"],
 ["обе́дать","have lunch","يتغدّى","обе́даю","обе́даешь","обе́дает","обе́даем","обе́даете","обе́дают","в кафе́|до́ма"],
-["отдыха́ть","rest","يرتاح","отдыха́ю","отдыха́ешь","отдыха́ет","отдыха́ем","отдыха́ете","отдыха́ют","до́ма|в па́рке"]
+["отдыха́ть","rest","يرتاح","отдыха́ю","отдыха́ешь","отдыха́ет","отдыха́ем","отдыха́ете","отдыха́ют","до́ма|в па́рке"],
+["игра́ть","play","يلعب","игра́ю","игра́ешь","игра́ет","игра́ем","игра́ете","игра́ют","в «Монопо́лию»|до́ма"],
+["покупа́ть","buy","يشتري","покупа́ю","покупа́ешь","покупа́ет","покупа́ем","покупа́ете","покупа́ют","дом|у́лицу|хлеб|биле́т"],
+["плати́ть","pay","يدفع","плачу́","пла́тишь","пла́тит","пла́тим","пла́тите","пла́тят","аре́нду"]
 ],
 
 /* ============ words: [russian, English, Arabic, topic, principles] ============ */
@@ -1237,6 +1273,22 @@ words: [
 ["жизнь","life","حياة","ideas","roots"],
 ["разгово́р","conversation","محادثة","ideas","roots"],
 
+/* monopoly: playing the board game (у́лица, дом, банк, де́ньги and рубль come from other topics) */
+["игра́","game","لعبة","monopoly","roots"],
+["игра́ю","I play","ألعب","monopoly","ya-form roots"],
+["ход","move, turn (in a game)","دور، نقلة (في اللعب)","monopoly","hod"],
+["ходи́","your move! go! (to a friend)","العبي / العبْ دورك (لصديقة أو صديق)","monopoly","ya-form:imp hod"],
+["ку́бик","die (dice)","حجر النرد","monopoly",""],
+["фи́шка","playing piece","قطعة اللعب","monopoly",""],
+["счёт","score; the bill; account","النتيجة؛ الحساب","monopoly",""],
+["покупа́ю","I buy, I'm buying","أشتري","monopoly","ya-form"],
+["покупа́й","buy! (to a friend)","اشتري / اشترِ (أمر لصديقة أو صديق)","monopoly","ya-form:imp"],
+["плачу́","I pay","أدفع","monopoly","ya-form"],
+["плати́","pay! (to a friend)","ادفعي / ادفعْ (أمر لصديقة أو صديق)","monopoly","ya-form:imp"],
+["тюрьма́","prison, jail","سجن","monopoly",""],
+["аре́нда","rent","إيجار","monopoly",""],
+["оте́ль","hotel","فندق","monopoly",""],
+
 /* songs: taught in the Songs tab, not on the path. Learned there, they count as known everywhere. */
 ["жить","to live","أن يعيش / يسكن","songs","","verbs"],
 ["люби́ть","to love","أن يحبّ","songs","","verbs"],
@@ -1302,7 +1354,15 @@ words: [
 ["пе́сня","song","أغنية","songs","","ideas"],
 ["звезда́","star","نجمة","songs",""],
 ["по и́мени","called, by the name of","اسمه، يُدعى","songs","","hello"],
-["война́","war","حرب","songs","","ideas"]
+["война́","war","حرب","songs","","ideas"],
+["монопо́лия","monopoly (also the game)","احتكار (واسم اللعبة)","songs","","monopoly"],
+["ме́тод","method","طريقة، منهج","songs","","ideas"],
+["ко́сти","dice (in a game)","زهر النرد","songs","","monopoly"],
+["дубль","doubles (two dice the same)","رقمان متشابهان في النرد","songs","","monopoly"],
+["ка́рточка","card (small)","بطاقة","songs","","monopoly"],
+["депута́т","member of parliament","نائب في البرلمان","songs","","work"],
+["взя́тка","bribe","رشوة","songs","","shop"],
+["рэ́кет","racket (extortion)","ابتزاز، إتاوة","songs","","ideas"]
 ],
 
 /* ============ phrases: same shape ============ */
@@ -1393,7 +1453,25 @@ phrases: [
 ["Я люблю́ му́зыку.","I love music.","أحب الموسيقى.","ideas","acc-fem ya-form"],
 ["Кака́я ситуа́ция!","What a situation!","يا له من موقف!","ideas","tion chunks:more"],
 
+/* monopoly */
+["Твой ход!","Your move!","دورك!","monopoly","moy-tvoy"],
+["Мой ход?","Is it my move?","هل هو دوري؟","monopoly","moy-tvoy"],
+["Мы игра́ем в «Монопо́лию».","We're playing Monopoly.","نلعب المونوبولي.","monopoly","ya-form"],
+["Ты покупа́ешь у́лицу?","Are you buying the street?","هل تشترين الشارع؟","monopoly","ya-form acc-fem"],
+["Да, покупа́ю!","Yes, I'm buying it!","نعم، أشتريه!","monopoly","ya-form"],
+["Покупа́й дом!","Buy a house!","اشتري بيتًا!","monopoly","ya-form:imp"],
+["Плати́ аре́нду!","Pay the rent!","ادفعي الإيجار!","monopoly","ya-form:imp acc-fem"],
+["Иди́ в тюрьму́!","Go to jail!","اذهبي إلى السجن!","monopoly","ya-form:imp v-prep:to"],
+["Я в тюрьме́.","I'm in jail.","أنا في السجن.","monopoly","v-prep no-is"],
+["У меня́ два ку́бика.","I have two dice.","عندي حجرا نرد.","monopoly","u-menya numbers"],
+["Где моя́ фи́шка?","Where's my piece?","أين قطعتي؟","monopoly","moy-tvoy"],
+["Счёт, пожа́луйста!","The bill, please!","الحساب من فضلك!","monopoly","chunks"],
+
 /* songs */
+["Э́то мой ме́тод.","This is my method.","هذه طريقتي.","songs","moy-tvoy no-is"],
+["У меня́ дубль!","I rolled doubles!","رميت رقمين متشابهين!","songs","u-menya"],
+["Депута́т в тюрьме́.","The MP is in jail.","النائب في السجن.","songs","v-prep no-is"],
+["Монопо́лия — э́то игра́.","Monopoly is a game.","المونوبولي لعبة.","songs","no-is"],
 ["Жить в твое́й голове́.","To live in your head.","أن أعيش في رأسك.","songs","v-prep chunks"],
 ["Я люблю́ тебя́.","I love you.","أحبّك.","songs","ya-form acc-masc:pron"],
 ["Я хочу́ жить в Бо́стоне.","I want to live in Boston.","أريد أن أسكن في بوسطن.","songs","ya-form:inf v-prep"],
@@ -1692,7 +1770,20 @@ readings: [
  ["У него́ нет рабо́ты, но он говори́т: «Всё хорошо́!»","He has no job, but he says: “Everything's fine!”","ليس عنده عمل، لكنه يقول: «كل شيء بخير!»"],
  ["А я ⟦пессими́стка|пессими́ст⟧. Я говорю́: «Всё пло́хо!»","And I'm a pessimist. I say: “Everything's bad!”","وأنا ⟦متشائمة|متشائم⟧. أقول: «كل شيء سيئ!»"],
  ["Брат — журнали́ст, а я — ⟦студе́нтка|студе́нт⟧.","My brother is a journalist, and I'm a student.","أخي صحفي، وأنا ⟦طالبة|طالب⟧."],
- ["Ма́ма говори́т: «А я реали́стка!»","Mum says: “And I'm a realist!”","أمي تقول: «وأنا واقعية!»"]]}
+ ["Ма́ма говори́т: «А я реали́стка!»","Mum says: “And I'm a realist!”","أمي تقول: «وأنا واقعية!»"]]},
+{id:"monopoly", en:"A game of Monopoly", ar:"دور في المونوبولي", topic:"monopoly", lines:[
+ ["Мы игра́ем в «Монопо́лию».","We're playing Monopoly.","نلعب المونوبولي."],
+ ["— Ами́ра, твой ход! Ходи́!","— Amira, your move! Go!","— أميرة، دورك! العبي!"],
+ ["— Шесть! Вот у́лица Арба́т.","— Six! Here's Arbat Street.","— ستة! هذا شارع أربات."],
+ ["— Ты покупа́ешь у́лицу?","— Are you buying the street?","— هل تشترين الشارع؟"],
+ ["— Да, покупа́ю. Вот де́ньги.","— Yes, I'm buying it. Here's the money.","— نعم، أشتريه. تفضّل المال."],
+ ["— Андре́й, твой ход.","— Andrey, your move.","— أندريه، دورك."],
+ ["— Три… Арба́т! Э́то твоя́ у́лица?","— Three… Arbat! Is that your street?","— ثلاثة… أربات! هل هذا شارعك؟"],
+ ["— Моя́! Плати́ аре́нду: сто рубле́й.","— Mine! Pay the rent: a hundred roubles.","— شارعي! ادفع الإيجار: مئة روبل."],
+ ["— У меня́ нет де́нег!","— I have no money!","— ليس عندي مال!"],
+ ["— Иди́ в банк!","— Go to the bank!","— اذهب إلى البنك!"],
+ ["— Мой ход? Пять… «Иди́ в тюрьму́»!","— My move? Five… “Go to jail”!","— دوري؟ خمسة… «اذهبي إلى السجن»!"],
+ ["— Ами́ра в тюрьме́, а у меня́ оте́ль!","— Amira's in jail, and I have a hotel!","— أميرة في السجن، وعندي فندق!"]]}
 ],
 
 /* ============ fun facts ============
@@ -1783,6 +1874,19 @@ facts: [
  {p:"lookalike", t:"", w:"",
   en:"Cyrillic grew out of the Greek alphabet in the 9th–10th centuries, named after Saint Cyril. Greek is also where Latin letters come from, which is why so many letters look familiar.",
   ar:"نشأت الأبجدية الكيريلية من الأبجدية اليونانية في القرنين التاسع والعاشر، وسُمّيت باسم القديس كيريل. ومن اليونانية جاءت الحروف اللاتينية أيضًا، لذلك تبدو حروف كثيرة مألوفة."},
+/* playing Monopoly */
+ {p:"", t:"monopoly", w:"счёт",
+  en:"счёт comes from счита́ть, “to count”: the score, the bill in a café and a bank account are all one word. Arabic does the same with حساب, from حسب “to count”.",
+  ar:"счёт من счита́ть أي «يعدّ»: النتيجة والحساب في المقهى والحساب في البنك كلها كلمة واحدة. والعربية تفعل الشيء نفسه بكلمة «حساب» من «حسب»."},
+ {p:"", t:"monopoly", w:"ход ходи́",
+  en:"ход is the root ход, “going”, on its own. In a game it's your move: Твой ход! is دورك!, or English “your go”. The same root gives вход and вы́ход.",
+  ar:"ход هو الجذر ход («المشي») وحده. في اللعب هو دورك: Твой ход! أي «دورك!». ومن الجذر نفسه вход (مدخل) وвы́ход (مخرج)."},
+ {p:"", t:"monopoly", w:"банк",
+  en:"банк, بنك and bank are one word: Italian banco, the bench where money-changers sat.",
+  ar:"банк و«بنك» وbank كلمة واحدة: من الإيطالية banco، أي المقعد الذي كان يجلس عليه الصرّافون."},
+ {p:"", t:"monopoly", w:"ку́бик ко́сти",
+  en:"ку́бик is a “little cube” (куб + -ик). Dice are also called ко́сти, “bones”: the first dice were made of bone.",
+  ar:"ку́бик تعني «مكعّب صغير» (куб + -ик). ويُسمّى النرد أيضًا ко́сти أي «عظام»، لأن أول أحجار النرد صُنعت من العظم."},
 /* proverbs with Arabic twins */
  {p:"no-is", t:"", w:"",
   en:"Сло́во — серебро́, молча́ние — зо́лото: “speech is silver, silence is gold”. Not a single verb, and word for word the Arabic إذا كان الكلام من فضة فالسكوت من ذهب.",
@@ -1824,7 +1928,7 @@ facts: [
 /* Songs and poems, from easiest to hardest, judged on the whole text, not just the chorus:
    «Пусть всегда будет солнце», «Кофевино», «Пять минут», «Голубой вагон», «Телефон», «Песенка о медведях»,
    «Хочешь?», «Милая моя», «Что такое осень» (poetic verses), «Звезда по имени Солнце», «Мне нравится»,
-   «Муха», «Ночь, улица, фонарь, аптека» (short but rare words), «Жить в твоей голове», «Выше крыш»,
+   «Муха», «Ночь, улица, фонарь, аптека» (short but rare words), «Жить в твоей голове», «Монополия», «Выше крыш»,
    «Что такое хорошо и что такое плохо?» (long, old-fashioned words). */
 songs: [
 {id:"solntse", ru:"Пусть всегда́ бу́дет со́лнце", by:"Тама́ра Миансаро́ва", en:"May there always be sunshine", ar:"لتكن الشمس دائمًا", year:1962,
@@ -2303,6 +2407,49 @@ songs: [
 <li>{не́бо} كلمة محايدة، لذلك «واحدة» هي {одно́}: {Не́бо одно́.} السماء واحدة.</li></ul>`},
    words:["океа́н","го́род","города́","любо́вь","ко́мната","не́бо","ого́нь","огни́","вино́"],
    phrases:["Ме́жду на́ми океа́н.","Я живу́ в го́роде Бо́стон, а ты в Эр-Рия́де.","Моя́ любо́вь живёт в Эр-Рия́де.","В мое́й ко́мнате ко́фе и вино́.","Не́бо в Бо́стоне и в Эр-Рия́де одно́.","Огни́ в го́роде, а я в ко́мнате."]}
+ ]},
+{id:"monopoliya", ru:"Монопо́лия", by:"Моне́точка", en:"Monopoly", ar:"مونوبولي", year:2024,
+ video:"vwsSW-xXikw",
+ ps:["ya-form:imp","v-prep","u-menya:net","no-is"],
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>From the same 2024 album as «Вы́ше крыш», «Моли́твы. Анекдо́ты. То́сты.» A friendly board game slowly turns into “wild capitalism”, the name Russians give the 1990s: deals, bribes and friends in high places, sung with a wink.</p>
+<p>The verses are fast. The chorus keeps returning to two words, {монопо́лия} and {ме́тод}. On the first listen, catch the game words you know: {банк}, {у́лица}, {тюрьма́}, {счёт}.</p>`,
+         ar:`<p>من ألبوم 2024 نفسه الذي فيه «Вы́ше крыш»، «Моли́твы. Анекдо́ты. То́сты.». لعبة لوحية ودّية تتحوّل شيئًا فشيئًا إلى «الرأسمالية المتوحّشة»، وهو الاسم الذي يطلقه الروس على التسعينيات: صفقات ورشاوى وأصدقاء في المناصب العليا، بنبرة ساخرة.</p>
+<p>المقاطع سريعة. واللازمة تعود دائمًا إلى كلمتين: {монопо́лия} و{ме́тод}. في الاستماع الأول التقط⟦ي|⟧ كلمات اللعبة التي تعرف⟦ين|⟧ها: {банк}، {у́лица}، {тюрьма́}، {счёт}.</p>`}},
+  {id:"film", en:"In a Spider-Man film", ar:"في فيلم «الرجل العنكبوت»",
+   body:{en:`<p>In 2026 the song played in the Marvel film «Челове́к-пау́к. Но́вый день» (Spider-Man: New Day), a rare Russian-language song in a Hollywood blockbuster. In Ukrainian cinemas the scene was cut by the distributor.</p>
+<p>Monetochka also put out a video made with AI image tools, styled like a 1990s VHS clip. Many fans criticised the use of AI; she hid it for a while, then brought it back, saying the idea still came from people.</p>`,
+         ar:`<p>في عام 2026 ظهرت الأغنية في فيلم مارفل «Челове́к-пау́к. Но́вый день» (الرجل العنكبوت: يوم جديد)، وهي حالة نادرة لأغنية بالروسية في فيلم هوليوودي ضخم. وفي دور السينما الأوكرانية حذف الموزّع هذا المشهد.</p>
+<p>وأصدرت مونيتوتشكا أيضًا فيديو صُنع بأدوات الصور بالذكاء الاصطناعي على طراز مقاطع الفيديو في التسعينيات. انتقد كثير من المعجبين استخدام الذكاء الاصطناعي، فأخفته فترة ثم أعادته، وقالت إن الفكرة ما زالت من صنع البشر.</p>`}}
+ ],
+ lessons:[
+  {en:"Around the board", ar:"حول اللوحة",
+   body:{en:`<ul><li>{банк}, {у́лица}, {тюрьма́}: the board in three words. {в тюрьме́} = in jail.</li>
+<li>One die is a {ку́бик}, a “little cube”. Dice are also {ко́сти}, “bones”. Two the same is a {дубль}.</li>
+<li>{ка́рточка} is a small card: {ка́рта} with the small, friendly ending {-очка}.</li>
+<li>{счёт} is the score, a bank account and the bill in a café.</li></ul>`,
+         ar:`<ul><li>{банк}، {у́лица}، {тюрьма́}: اللوحة في ثلاث كلمات. {в тюрьме́} = في السجن.</li>
+<li>حجر النرد الواحد {ку́бик}، أي «مكعّب صغير». ويُسمّى النرد أيضًا {ко́сти}، أي «عظام». ورقمان متشابهان {дубль}.</li>
+<li>{ка́рточка} بطاقة صغيرة: {ка́рта} مع نهاية التصغير والتحبّب {-очка}.</li>
+<li>{счёт} هو النتيجة والحساب في البنك والحساب في المقهى.</li></ul>`},
+   bridge:{en:`{счёт} is <ar>حساب</ar> exactly: both come from “to count”, and both mean the score, the account and the bill.`,
+           ar:`{счёт} هي <ar>حساب</ar> تمامًا: كلتاهما من «العدّ»، وكلتاهما تعني النتيجة والحساب في البنك وفاتورة المقهى.`},
+   words:["банк","у́лица","тюрьма́","ку́бик","ко́сти","дубль","ка́рточка","счёт"],
+   phrases:["У меня́ дубль!","Я в тюрьме́.","Твой ход!"]},
+  {en:"The method", ar:"الطريقة",
+   body:{en:`<ul><li>{монопо́лия} ends in {-ия}, so it's a “she” word, like {информа́ция}.</li>
+<li>{ме́тод} = method, stressed on the first syllable.</li>
+<li>{депута́т} = a member of parliament.</li>
+<li>{взя́тка} = a bribe. {рэ́кет} = a protection racket, a word every Russian links with the 1990s.</li></ul>`,
+         ar:`<ul><li>{монопо́лия} تنتهي بـ {-ия}، فهي كلمة مؤنثة مثل {информа́ция}.</li>
+<li>{ме́тод} = طريقة، والنبر على المقطع الأول.</li>
+<li>{депута́т} = نائب في البرلمان.</li>
+<li>{взя́тка} = رشوة. {рэ́кет} = ابتزاز وإتاوة، كلمة يربطها كل روسي بالتسعينيات.</li></ul>`},
+   bridge:{en:`Arabic borrowed the game's name (<ar>مونوبولي</ar>), but for the idea it has its own word: <ar>احتكار</ar>, from <ar>حكر</ar>, “to hoard”.`,
+           ar:`استعارت العربية اسم اللعبة (<ar>مونوبولي</ar>)، لكن للفكرة كلمتها الخاصة: <ar>احتكار</ar> من <ar>حكر</ar>.`},
+   words:["монопо́лия","ме́тод","депута́т","взя́тка","рэ́кет","игра́"],
+   phrases:["Монопо́лия — э́то игра́.","Э́то мой ме́тод.","Депута́т в тюрьме́."]}
  ]},
 {id:"vyshe", ru:"Вы́ше крыш", by:"Моне́точка", en:"Higher than the roofs", ar:"أعلى من السطوح", year:2024,
  video:"FypH_UrpMSU",

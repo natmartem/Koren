@@ -41,6 +41,9 @@ function checkStress(text, where) {
 }
 
 const topics = new Set(C.topics.map(t => t.id));
+// a topic may list words from other topics it reuses: also:"у́лица дом"
+const wordSet = new Set(C.words.map(w => w[0]));
+C.topics.forEach(t => String(t.also || "").split(/\s+/).filter(Boolean).forEach(r => { if (!wordSet.has(r)) err(`topic ${t.id}`, `“${r}” in also is not a word`); }));
 const prins = new Set(C.principles.map(p => p.id));
 const partsOf = new Map(C.principles.map(p => [p.id, new Set((p.parts || []).map(x => x.id))]));
 const validTag = t => { const [pid, part] = t.split(":"); return prins.has(pid) && (!part || partsOf.get(pid).has(part)); };
@@ -146,7 +149,7 @@ const songIds = new Set();
   const w = `noun ${i + 1} (${n[0]})`;
   if (n.length !== 10 && n.length !== 11) err(w, "needs 10 fields (11 with the plural)");
   if (!["m", "f", "n", "pl"].includes(n[3])) err(w, `gender “${n[3]}”`);
-  if (!"PLCTFVWBMDI".includes(n[4]) || n[4].length !== 1) err(w, `kind “${n[4]}”`);
+  if (!"PLCTFVWBMDIG".includes(n[4]) || n[4].length !== 1) err(w, `kind “${n[4]}”`);
   if (n[5] && !/^(в|во|на) /.test(n[5])) err(w, "where must start with в, во or на");
   [0, 5, 6, 7, 8, 9, 10].forEach(k => n[k] && checkStress(n[k], w));
 });
