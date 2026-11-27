@@ -198,6 +198,7 @@ textarea{width:100%;min-height:120px;border-radius:12px;border:1px solid var(--l
 <audio id="aplayer" preload="auto" playsinline></audio>
 <div class="mini" id="mini" hidden></div>
 <script src="course.js"></script>
+<script src="lyrics.js"></script>
 <script>
 /* Koren · Copyright © 2026 natmartem · SPDX-License-Identifier: AGPL-3.0-or-later
    localStorage "koren-state": progress and settings. "koren-packs": lessons added in the app.
@@ -841,53 +842,6 @@ function vSongs(){
   <div class="card">${SONGS.length?`<div class="list">${SONGS.map(s=>{const ws=songWords(s),n=recognised(ws),d=s.lessons.filter((_,i)=>S.done[sdKey(s.id,i)]).length;
     return `<a class="li" href="#song/${esc(s.id)}"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s">${isPoem(s)?T("Poem","قصيدة"):T("Song","أغنية")} · <span class="ru">${esc(s.by)}</span> · ${T(`${d} of ${s.lessons.length} lessons`,`${d} من ${s.lessons.length} دروس`)}${n?` · ${T(`you recognise ${n} of ${ws.length} words`,`تعرف⟦ين|⟧ ${n} من ${ws.length} كلمة`)}`:""}</div>${d?`<div class="meter"><i style="width:${Math.round(d/s.lessons.length*100)}%"></i></div>`:""}</div>${d===s.lessons.length?`<span class="pill good">✓</span>`:""}${CHEV}</a>`}).join("")}</div>`
    :`<p class="lead">${T("Nothing here yet.","لا شيء هنا بعد.")}</p>`}</div>`;
-}
-/* ---- lyrics: pasted by the learner, any common format ----
-   Accepted: Russian only; "Russian | translation" or tab-separated; Russian and translation on alternating lines;
-   all Russian then all translation; LyricsTranslate's side-by-side copy ("…головеTo live…").
-   Section labels like [Припев] are kept; bits that lyrics sites add (links, "You might also like", "Embed") are dropped. */
-const CYR=/[А-Яа-яЁё]/,OTHER=/[A-Za-z؀-ۿ]/;
-const LYRHEAD=/^(припев|куплет|бридж|аутро|интро|chorus|verse|bridge|outro|intro|pre-chorus)[\s\d:.]*$/i;
-function lyrJunk(l){
-  return /\]\(https?:/i.test(l)||/^you might also like$/i.test(l)||/^\d*\s*contributors?\b/i.test(l)||/\d*\s*embed$/i.test(l)&&!CYR.test(l)
-   ||/\blyrics$/i.test(l)||/^(translations?|english|русский|українська|español|deutsch|français|العربية|read more|see .* live|get tickets.*)$/i.test(l)
-   ||/^(submitted by|last edited by|thanks!|thanks? \d|source:|translation:|\d+ thanks? received|\d+ times? favorited)/i.test(l)||/^\[?текст песни/i.test(l);
-}
-function lyrRaw(text){
-  return String(text||"").replace(/\r/g,"").replace(/ /g," ")
-    .replace(/([^\n\s])\[(?=[^\]\n]{1,40}\])/g,"$1\n[").replace(/\](?=[^\s\n(\]])/g,"]\n") /* "…Lyrics[Куплет 1]Жить…" → separate lines */
-    .split("\n").map(l=>l.replace(/[ \u00a0]+/g," ").replace(/^[ \t]+|[ \t]+$/g,""));
-}
-function lyrParse(text){
-  const raw=lyrRaw(text).filter(l=>!l||!lyrJunk(l)),out=[];
-  const isHead=l=>/^\[[^\]]*\]$/.test(l)||LYRHEAD.test(l);
-  const content=raw.filter(l=>l&&!isHead(l));
-  const C=content.filter(l=>CYR.test(l)),N=content.filter(l=>!CYR.test(l)&&OTHER.test(l));
-  const RUN=/^([^A-Za-z؀-ۿ]*[А-Яа-яЁё][^A-Za-z؀-ۿ]*?)\s*([A-Z؀-ۿ].*)$/;
-  let mode="ru";
-  if(content.some(l=>/\||\t/.test(l)))mode="sep";
-  else if(C.length&&C.filter(l=>RUN.test(l)).length>=C.length*.6)mode="run";
-  else if(C.length>=2&&N.length>=C.length*.7){
-    let alt=0;for(let i=0;i+1<content.length;i++)if(CYR.test(content[i])&&!CYR.test(content[i+1]))alt++;
-    mode=alt>=C.length*.7?"alt":"blocks";
-  }
-  const push=(ru,tr)=>{ru=ru.trim();if(ru)out.push({ru,tr:(tr||"").trim()})};
-  const gap=()=>{if(out.length&&!out[out.length-1].gap)out.push({gap:1})};
-  if(mode==="blocks"){ /* all Russian first, then all translation: pair them by position */
-    let k=0;raw.forEach(l=>{if(!l)return gap();if(isHead(l)){if(CYR.test(l)||!out.some(x=>x.ru))out.push({head:l.replace(/^\[|\]$/g,"")});return}if(CYR.test(l))push(l,N[k++]||"")});
-  }else{
-    for(let i=0;i<raw.length;i++){const l=raw[i];
-      if(!l){gap();continue}
-      if(isHead(l)){out.push({head:l.replace(/^\[|\]$/g,"")});continue}
-      if(mode==="sep"){const m=l.split(/\s*\|\s*|\t+/);if(CYR.test(m[0])||m.length===1)push(m[0],m.slice(1).join(" "));continue}
-      if(mode==="run"){const m=RUN.exec(l);if(m)push(m[1],m[2]);else if(CYR.test(l))push(l);continue}
-      if(mode==="alt"){if(CYR.test(l)){const nx=raw[i+1];if(nx&&!CYR.test(nx)&&OTHER.test(nx)&&!isHead(nx)){push(l,nx);i++}else push(l)}continue}
-      if(CYR.test(l))push(l); /* Russian only: lines without Russian are dropped */
-    }
-  }
-  while(out.length&&(out[0].gap))out.shift();
-  while(out.length&&(out[out.length-1].gap||out[out.length-1].head))out.pop();
-  return out;
 }
 /* a public-domain poem can ship its text in course.js (text:); the learner's own pasted text wins */
 const lyrOf=id=>LYR[id]||(SONGm[id]&&SONGm[id].text)||"";

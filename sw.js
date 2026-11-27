@@ -1,13 +1,14 @@
 /* Koren · Copyright © 2026 natmartem · SPDX-License-Identifier: AGPL-3.0-or-later */
 /* Koren service worker.
-   - index.html, course.js, koren-audio*.json: network first (a new upload shows up the next time you open the app online),
+   - index.html, record.html, course.js, lyrics.js, koren-audio*.json: network first (a new upload shows up the next time you open the app online),
      falling back to the saved copy when offline or the network is slow.
    - everything else (icons, fonts, manifest): saved on first install, served from the phone.
    If you ever change an icon, a font or the manifest, bump CACHE so phones fetch the new files. */
-const CACHE = "koren-static-v1";
+const CACHE = "koren-static-v2";
 const ASSETS = [
   "index.html",
   "course.js",
+  "lyrics.js",
   "manifest.webmanifest",
   "icons/icon-192.png",
   "icons/icon-512.png",
@@ -42,7 +43,7 @@ self.addEventListener("fetch", e => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  const fresh = req.mode === "navigate" || /\/(course\.js|koren-audio(-\d)?\.json)$/.test(url.pathname);
+  const fresh = req.mode === "navigate" || /\/(course\.js|lyrics\.js|record\.html|koren-audio(-\d)?\.json)$/.test(url.pathname);
   if (fresh) {
     const keyName = url.pathname.split("/").pop() || "index.html";
     const network = fetch(req, { cache: "no-cache" }).then(res => {
