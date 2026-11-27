@@ -122,6 +122,9 @@ const songIds = new Set();
   if (sg.video && !/^[\w-]{11}$/.test(sg.video)) err(where, "video must be a YouTube id (11 characters)");
   if (sg.lyrics && !/^https:\/\//.test(sg.lyrics)) err(where, "lyrics must be an https link to a licensed lyrics page");
   (sg.ps || []).forEach(t => { if (!validTag(t)) err(where, `unknown principle or part “${t}”`); });
+  // only public-domain texts may ship (text:), and they must say why they are free (pd:) and carry stress marks
+  if (sg.text) { if (!sg.pd) err(where, "text is only for public-domain works: add pd with the reason (e.g. the author's death year)");
+    sg.text.split("\n").filter(l => l.trim()).forEach((l, k) => checkStress(l, `${where} text line ${k + 1}`)); }
   const checkBody = (o, w2) => { for (const f of ["en", "ar"]) { const b = o?.[f] || "";
     for (const m of b.matchAll(/\{([^}]+)\}/g)) checkStress(m[1], `${w2} ${f}`);
     if ((b.match(/<ar>/g) || []).length !== (b.match(/<\/ar>/g) || []).length) err(w2, `unbalanced <ar> in ${f}`); } };
