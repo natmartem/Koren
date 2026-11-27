@@ -1815,12 +1815,11 @@ facts: [
    which is not on the path; once learned in a song, a word counts as known everywhere (path, practice, readings).
    Phrases are drilled only after their principle cards are done on the path, like everywhere else.
    notes and lesson bodies: {…} marks Russian, <ar>…</ar> marks Arabic, as in principles. */
-/* Songs and poems, from easiest to hardest: «Пусть всегда будет солнце» (four words), «Кофевино» (almost two words),
-   «Телефон» (у меня, tiny dialogue lines), «Что такое осень» (Это… with no verb), «Что такое хорошо и что такое плохо?»,
-   «Пять минут» (the title is the numbers lesson), «Муха» (a 12-line poem, a dialogue),
-   «Ночь, улица, фонарь, аптека» (four nouns), «Голубой вагон», «Хочешь?» (one verb, questions),
-   «Песенка о медведях», «Милая моя», «Мне нравится», «Звезда по имени Солнце»,
-   «Жить в твоей голове» (a grammar-packed title, long words), «Выше крыш» (fast verses, many words). */
+/* Songs and poems, from easiest to hardest, judged on the whole text, not just the chorus:
+   «Пусть всегда будет солнце», «Кофевино», «Пять минут», «Голубой вагон», «Телефон», «Песенка о медведях»,
+   «Хочешь?», «Милая моя», «Что такое осень» (poetic verses), «Звезда по имени Солнце», «Мне нравится»,
+   «Муха», «Ночь, улица, фонарь, аптека» (short but rare words), «Жить в твоей голове», «Выше крыш»,
+   «Что такое хорошо и что такое плохо?» (long, old-fashioned words). */
 songs: [
 {id:"solntse", ru:"Пусть всегда́ бу́дет со́лнце", by:"Тама́ра Миансаро́ва", en:"May there always be sunshine", ar:"لتكن الشمس دائمًا", year:1962,
  video:"paxlqGUxffw",
@@ -1896,6 +1895,60 @@ songs: [
    words:["меня́","отпусти́","обними́","всё равно́","ду́маю","что","пожа́луйста"],
    phrases:["Мне всё равно́.","Мне не всё равно́.","Что ты ду́маешь?","Обними́ меня́."]}
  ]},
+{id:"pyat-minut", ru:"Пять мину́т", by:"Людми́ла Гу́рченко", en:"Five minutes", ar:"خمس دقائق", year:1956,
+ video:"jH8HCdDcRjI",
+ ps:["numbers","chunks"],
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>From the New Year comedy «Карнава́льная ночь» (1956). Five minutes before midnight, the heroine sings that a lot can happen in five minutes. Russians still play it every 31 December.</p>
+<p>The title comes back again and again: listen for {пять мину́т}.</p>`,
+         ar:`<p>من الكوميديا الخاصة برأس السنة «Карнава́льная ночь» (1956). قبل منتصف الليل بخمس دقائق تغنّي البطلة أن أشياء كثيرة يمكن أن تحدث في خمس دقائق. وما زال الروس يشغّلونها كل 31 ديسمبر.</p>
+<p>العنوان يعود مرة بعد مرة: استمع⟦ي|⟧ لـ {пять мину́т}.</p>`}},
+  {id:"who", en:"Gurchenko and the New Year", ar:"غورتشينكو ورأس السنة",
+   body:{en:`<p>Lyudmila Gurchenko (1935–2011) became a star overnight with this film, at 21. New Year, not Christmas, is the biggest holiday in Russia: the tree, the presents and the family dinner all belong to the night of 31 December.</p>`,
+         ar:`<p>صارت ليودميلا غورتشينكو (1935–2011) نجمة بين ليلة وضحاها بهذا الفيلم، في الحادية والعشرين. رأس السنة، لا عيد الميلاد، هو أكبر عيد في روسيا: الشجرة والهدايا وعشاء العائلة كلها لليلة 31 ديسمبر.</p>`}}
+ ],
+ lessons:[
+  {en:"Five minutes", ar:"خمس دقائق",
+   body:{en:`<ul><li>After {пять} and higher, the counted word takes its “many of” form: {мину́та → пять мину́т}, {рубль → пять рубле́й}.</li>
+<li>{С Но́вым го́дом!} = Happy New Year! Learn it whole.</li>
+<li>{час} = hour, {мину́та} = minute.</li></ul>`,
+         ar:`<ul><li>بعد {пять} وما فوقها يأخذ المعدود صيغة «الكثير من»: {мину́та → пять мину́т}، {рубль → пять рубле́й}.</li>
+<li>{С Но́вым го́дом!} = سنة سعيدة! احفظ⟦ي|⟧ها كاملة.</li>
+<li>{час} = ساعة، {мину́та} = دقيقة.</li></ul>`},
+   bridge:{en:`Arabic also changes the counted word after numbers: <ar>ثلاث دقائق</ar> but <ar>عشرون دقيقة</ar>. Russian switches at five, Arabic at eleven.`,
+           ar:`العربية أيضًا تغيّر المعدود بعد الأعداد: <ar>ثلاث دقائق</ar> لكن <ar>عشرون دقيقة</ar>. الروسية تتغيّر عند الخمسة، والعربية عند الحادي عشر.`},
+   words:["пять","мину́та","час","но́вый","год"],
+   phrases:["Пять мину́т, пожа́луйста.","Я жду пять мину́т.","С Но́вым го́дом!"]}
+ ]},
+{id:"vagon", ru:"Голубо́й ваго́н", by:"Влади́мир Шаи́нский", en:"The light-blue carriage", ar:"العربة الزرقاء", year:1974,
+ video:"gCTFXHJ0ro8",
+ ps:["ya-form","no-is"],
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>Crocodile Gena sings this at the end of the cartoon «Шапокля́к» (1974), riding a train with his friends. A light-blue carriage rolls on, and the days roll away behind it. Russians sing it at goodbyes and graduations.</p>
+<p>Listen for {голубо́й ваго́н} and for {ме́дленно}: slowly.</p>`,
+         ar:`<p>يغنّيها التمساح غينا في نهاية فيلم الرسوم المتحركة «Шапокля́к» (1974)، وهو يركب القطار مع أصدقائه. عربة زرقاء فاتحة تمضي، والأيام تمضي خلفها. يغنّيها الروس في الوداع وحفلات التخرّج.</p>
+<p>استمع⟦ي|⟧ لـ {голубо́й ваго́н} ولـ {ме́дленно}: ببطء.</p>`}},
+  {id:"blues", en:"Two blues", ar:"لونان أزرقان",
+   body:{en:`<p>Russian has two basic blues: {голубо́й}, the light blue of the sky, and {си́ний}, dark blue. For Russians they are two different colours, like red and pink in English, and studies found Russian speakers tell them apart faster than English speakers.</p>
+<p>Arabic has <ar>أزرق</ar> and <ar>سماوي</ar> too, but treats them as shades of one colour.</p>`,
+         ar:`<p>في الروسية لونان أزرقان أساسيان: {голубо́й} الأزرق الفاتح لون السماء، و{си́ний} الأزرق الغامق. هما عند الروس لونان مختلفان، مثل الأحمر والوردي، ووجدت دراسات أن الناطقين بالروسية يميّزون بينهما أسرع من الناطقين بالإنجليزية.</p>
+<p>في العربية أيضًا <ar>أزرق</ar> و<ar>سماوي</ar>، لكنهما درجتان للون واحد.</p>`}}
+ ],
+ lessons:[
+  {en:"The carriage rolls on", ar:"العربة تمضي",
+   body:{en:`<ul><li>{ваго́н} = a train carriage; {по́езд} = the whole train.</li>
+<li>{голубо́й} and {си́ний}: light blue and dark blue.</li>
+<li>{ме́дленно} = slowly: {-о} turns a describing word into “how”, like {отча́янно} in Zemfira's song.</li>
+<li>{е́дет} = is going (by transport): {По́езд е́дет.}</li></ul>`,
+         ar:`<ul><li>{ваго́н} = عربة القطار؛ {по́езд} = القطار كله.</li>
+<li>{голубо́й} و{си́ний}: الأزرق الفاتح والأزرق الغامق.</li>
+<li>{ме́дленно} = ببطء: {-о} تجعل الصفة حالًا، مثل {отча́янно} في أغنية زيمفيرا.</li>
+<li>{е́дет} = يسير (بمركبة): {По́езд е́дет.}</li></ul>`},
+   words:["ваго́н","по́езд","голубо́й","си́ний","ме́дленно"],
+   phrases:["Мой ваго́н голубо́й.","По́езд е́дет ме́дленно.","Э́то голубо́й и́ли си́ний?"]}
+ ]},
 {id:"telefon", kind:"poem", ru:"Телефо́н", by:"Корне́й Чуко́вский", en:"The telephone", ar:"الهاتف", year:1926,
  ps:["u-menya","no-is"],
  notes:[
@@ -1918,6 +1971,87 @@ songs: [
 <li>{слон} = فيل، {шокола́д} = شوكولاتة: الفيل يطلب منها الكثير.</li></ul>`},
    words:["телефо́н","кто","слон","алло́","шокола́д"],
    phrases:["Алло́, кто э́то?","Кто говори́т?","Слон хо́чет шокола́д.","У меня́ есть шокола́д."]}
+ ]},
+{id:"medvedi", ru:"Пе́сенка о медве́дях", by:"А́ида Веди́щева", en:"The song about bears", ar:"أغنية الدببة", year:1967,
+ video:"eqhH-kbhbfE",
+ ps:["no-is","chunks:more"],
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>A gentle waltz from the comedy «Кавка́зская пле́нница» (1967). Somewhere at the end of the world, where it's always frosty, bears rub their backs against the Earth's axis, and that is why the Earth turns.</p>
+<p>Listen for {где́-то}, {всегда́} and {медве́ди}.</p>`,
+         ar:`<p>فالس رقيق من الكوميديا «Кавка́зская пле́нница» (1967). في مكانٍ ما في آخر الدنيا، حيث الصقيع دائمًا، تحكّ الدببة ظهورها بمحور الأرض، ولهذا تدور الأرض.</p>
+<p>استمع⟦ي|⟧ لـ {где́-то} و{всегда́} و{медве́ди}.</p>`}},
+  {id:"voice", en:"The voice behind the actress", ar:"الصوت خلف الممثلة",
+   body:{en:`<p>On screen the song is sung by the actress Natalya Varley, but the voice is Aida Vedishcheva's. The film's title nods to Pushkin's and Tolstoy's stories «Кавка́зский пле́нник», about a Russian officer held captive in the Caucasus; Tolstoy's is still read in Russian schools.</p>`,
+         ar:`<p>على الشاشة تغنّي الممثلة ناتاليا فارلي، لكن الصوت صوت آيدا فيديشيفا. وعنوان الفيلم يحيل إلى قصّتَي بوشكين وتولستوي «Кавка́зский пле́нник» عن ضابط روسي أسير في القوقاز، وقصة تولستوي ما زالت تُقرأ في المدارس الروسية.</p>`}}
+ ],
+ lessons:[
+  {en:"Somewhere it's always cold", ar:"في مكانٍ ما برد دائم",
+   body:{en:`<ul><li>{где́-то} = somewhere, {всегда́} = always: {Где́-то всегда́ хо́лодно.}</li>
+<li>{медве́дь → медве́ди} = bear, bears.</li>
+<li>{моро́з} = hard frost: {Сего́дня моро́з.} New Year presents come from {Дед Моро́з}, Grandfather Frost.</li></ul>`,
+         ar:`<ul><li>{где́-то} = في مكانٍ ما، {всегда́} = دائمًا: {Где́-то всегда́ хо́лодно.}</li>
+<li>{медве́дь → медве́ди} = دبّ، دببة.</li>
+<li>{моро́з} = صقيع شديد: {Сего́дня моро́з.} وهدايا رأس السنة يأتي بها {Дед Моро́з}، «جدّ الصقيع».</li></ul>`},
+   words:["медве́дь","медве́ди","где́-то","всегда́","моро́з"],
+   phrases:["Где́-то всегда́ хо́лодно.","Медве́ди спят.","Сего́дня моро́з."]}
+ ]},
+{id:"khochesh", ru:"Хо́чешь?", by:"Земфи́ра", en:"Do you want…?", ar:"هل تريدين…؟", year:2000,
+ video:"xpJ_fYyAeYk",
+ lyrics:"https://lyricstranslate.com/en/%D1%85%D0%BE%D1%87%D0%B5%D1%88%D1%8C-khochesh-do-you-want.html-0",
+ ps:["ya-form","ya-form:inf","no-is"],
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>One of Zemfira's best-known songs, from 2000. Almost every line is an offer that starts with the same word, {хо́чешь}: do you want…? Some offers are tender, some are wild.</p>
+<p>On the first listen, catch {хо́чешь} each time, and two things: {со́лнце} (the sun) and {ла́мпа} (a lamp).</p>`,
+         ar:`<p>من أشهر أغاني زيمفيرا، من عام 2000. كل سطر تقريبًا عرض يبدأ بالكلمة نفسها، {хо́чешь}: هل تريدين…؟ بعض العروض رقيق وبعضها جامح.</p>
+<p>في الاستماع الأول التقط⟦ي|⟧ {хо́чешь} كل مرة، وشيئين: {со́лнце} (الشمس) و{ла́мпа} (المصباح).</p>`}},
+  {id:"who", en:"Who is Zemfira", ar:"من هي زيمفيرا",
+   body:{en:`<p>Zemfira Ramazanova comes from Ufa and broke through in the late 1990s. She writes, arranges and produces her own music, and she is one of the most influential voices in Russian-language rock.</p>`,
+         ar:`<p>زيمفيرا رامازانوفا من مدينة أوفا، واشتهرت في أواخر التسعينيات. تكتب موسيقاها وتوزّعها وتنتجها بنفسها، وهي من أكثر الأصوات تأثيرًا في موسيقى الروك باللغة الروسية.</p>`}}
+ ],
+ lessons:[
+  {en:"Do you want…?", ar:"هل تريدين…؟",
+   body:{en:`<ul><li>{хочу́ → хо́чешь}: “want” is irregular, worth knowing by heart: {хочу́, хо́чешь, хо́чет, хоти́м, хоти́те, хотя́т}.</li>
+<li>A question needs no extra word, only a rising voice on the key word: {Хо́чешь ко́фе?}</li>
+<li>{вме́сто} = instead of: {чай вме́сто ко́фе}.</li>
+<li>{око́шко} is a small, dear {окно́}: {-шко} makes things small and warm.</li>
+<li>{живи́} = live! Asking a friend ends in {-и}, like {обними́} in «Кофеви́но».</li></ul>`,
+         ar:`<ul><li>{хочу́ ← хо́чешь}: فعل «يريد» شاذّ، يستحق الحفظ: {хочу́, хо́чешь, хо́чет, хоти́м, хоти́те, хотя́т}.</li>
+<li>السؤال لا يحتاج إلى كلمة إضافية، فقط رفع الصوت على الكلمة المهمّة: {Хо́чешь ко́фе?} هل تريدين قهوة؟</li>
+<li>{вме́сто} = بدلًا من: {чай вме́сто ко́фе} شاي بدل القهوة.</li>
+<li>{око́шко} نافذة صغيرة عزيزة من {окно́}: {-шко} تصغّر الشيء وتحبّبه.</li>
+<li>{живи́} = عيشي! الطلب من صديق ينتهي بـ {-и}، مثل {обними́} في «Кофеви́но».</li></ul>`},
+   bridge:{en:`{око́шко} works like the Arabic diminutive: <ar>كتاب ← كُتيّب</ar>, <ar>بيت ← بُيَيت</ar>. Arabic changes the inside of the word; Russian adds an ending.`,
+           ar:`{око́шко} مثل التصغير في العربية: <ar>كتاب ← كُتيّب</ar>، <ar>بيت ← بُيَيت</ar>. العربية تغيّر داخل الكلمة، والروسية تضيف نهاية.`},
+   words:["хо́чешь","хочу́","со́лнце","ла́мпа","вме́сто","око́шко","живи́","сосе́д"],
+   phrases:["Хо́чешь ко́фе?","Ты хо́чешь спать?","Хо́чешь чай вме́сто ко́фе?","Я ви́жу со́лнце.","Где ла́мпа?","Сосе́ди спят."]}
+ ]},
+{id:"milaya", ru:"Ми́лая моя́", by:"Ю́рий Ви́збор", en:"My dear", ar:"يا عزيزتي",
+ video:"jlvrx6PZSXw",
+ ps:["moy-tvoy","moy-tvoy:adj"],
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>The campfire song: many Russians can sing it with a guitar. It's slow, and every word is clear. The chorus calls a beloved woman {ми́лая моя́} and {со́лнышко лесно́е}, my little forest sun.</p>
+<p>Listen for {ми́лая}, {моя́} and {со́лнышко}.</p>`,
+         ar:`<p>أغنية نار المخيّم: كثير من الروس يستطيعون غناءها مع الغيتار. بطيئة، وكل كلمة فيها واضحة. اللازمة تنادي امرأة حبيبة {ми́лая моя́} و{со́лнышко лесно́е}: شُمَيستي في الغابة.</p>
+<p>استمع⟦ي|⟧ لـ {ми́лая} و{моя́} و{со́лнышко}.</p>`}},
+  {id:"who", en:"Who is Vizbor", ar:"من هو فيزبور",
+   body:{en:`<p>Yuri Vizbor (1934–1984) was a journalist, mountaineer and bard: one of the poets who sang their own poems with a guitar in the 1960s and 70s. Their songs spread on home tape recordings, outside the official radio.</p>`,
+         ar:`<p>يوري فيزبور (1934–1984) صحفي ومتسلّق جبال وشاعر مغنٍّ: من الشعراء الذين غنّوا قصائدهم مع الغيتار في الستينيات والسبعينيات. انتشرت أغانيهم على تسجيلات منزلية، بعيدًا عن الإذاعة الرسمية.</p>`}}
+ ],
+ lessons:[
+  {en:"My dear, my little sun", ar:"يا عزيزتي، يا شُمَيستي",
+   body:{en:`<ul><li>{ми́лый → ми́лая}: a describing word follows the word it describes: {ми́лый друг}, {ми́лая подру́га}.</li>
+<li>{со́лнышко} is a small, dear {со́лнце}: {-ышко}, like {-шко} in {око́шко}. Russians call someone they love {со́лнышко}.</li>
+<li>{лес} = forest; {лесно́й} = of the forest.</li></ul>`,
+         ar:`<ul><li>{ми́лый → ми́лая}: الصفة تتبع الموصوف: {ми́лый друг}، {ми́лая подру́га}.</li>
+<li>{со́лнышко} شمس صغيرة عزيزة من {со́лнце}: {-ышко} مثل {-шко} في {око́шко}. ينادي الروس من يحبّون {со́лнышко}.</li>
+<li>{лес} = غابة؛ {лесно́й} = من الغابة.</li></ul>`},
+   bridge:{en:`Arabic calls a loved one the moon, <ar>يا قمر</ar>; Russian calls her the sun, {со́лнышко}. And <ar>يا عمري</ar> sits close to {ми́лая моя́}.`,
+           ar:`العربية تنادي الحبيبة بالقمر: <ar>يا قمر</ar>؛ والروسية تناديها بالشمس: {со́лнышко}. و<ar>يا عمري</ar> قريبة من {ми́лая моя́}.`},
+   words:["ми́лая","ми́лый","со́лнышко","со́лнце","лес","подру́га"],
+   phrases:["Ты моя́ ми́лая подру́га.","Где ты, моё со́лнышко?","Я люблю́ лес."]}
  ]},
 {id:"osen", ru:"Что тако́е о́сень", by:"ДДТ", en:"What is autumn", ar:"ما الخريف", year:1991,
  video:"7VtUM8jsFSQ",
@@ -1947,134 +2081,82 @@ songs: [
    words:["что тако́е","о́сень","о́сенью","не́бо","дождь","э́то"],
    phrases:["Что тако́е о́сень?","О́сень — э́то дождь.","О́сенью хо́лодно."]}
  ]},
-{id:"khorosho", kind:"poem", ru:"Что тако́е хорошо́ и что тако́е пло́хо?", by:"Влади́мир Маяко́вский", en:"What is good and what is bad?", ar:"ما الجيّد وما السيّئ؟", year:1925,
- ps:["no-is"],
- pd:"Mayakovsky died in 1930; written in 1925",
- text:`Кро́шка сын к отцу́ пришёл,
-и спроси́ла кро́ха:
-— Что тако́е хорошо́
-и что тако́е пло́хо? —
-
-У меня́ секре́тов нет, —
-слу́шайте, дети́шки, —
-па́пы э́того отве́т
-помеща́ю в кни́жке.
-
-— Е́сли ве́тер кры́ши рвёт,
-е́сли град загро́хал, —
-ка́ждый зна́ет — э́то вот
-для прогу́лок пло́хо.
-
-Дождь пока́пал и прошёл.
-Со́лнце в це́лом све́те.
-Э́то — о́чень хорошо́
-и больши́м и де́тям.
-
-Е́сли сын черне́е но́чи,
-грязь лежи́т на ро́жице, —
-я́сно, э́то пло́хо о́чень
-для ребя́чьей ко́жицы.
-
-Е́сли ма́льчик лю́бит мы́ло
-и зубно́й порошо́к,
-э́тот ма́льчик о́чень ми́лый,
-поступа́ет хорошо́.
-
-Е́сли бьёт дрянно́й драчу́н
-сла́бого мальчи́шку,
-я тако́го не хочу́
-да́же вста́вить в кни́жку.
-
-Э́тот вот кричи́т: — Не тро́жь
-тех, кто ме́ньше ро́стом! —
-Э́тот ма́льчик так хоро́ш,
-загляде́нье про́сто!
-
-Е́сли ты порва́л подря́д
-кни́жицу и мя́чик,
-октября́та говоря́т:
-плохова́тый ма́льчик.
-
-Е́сли ма́льчик лю́бит труд,
-ты́чет в кни́жку па́льчик,
-про тако́го пи́шут тут:
-он хоро́ший ма́льчик.
-
-От воро́ны карапу́з
-убежа́л, зао́хав.
-Ма́льчик э́тот про́сто трус.
-Э́то о́чень пло́хо.
-
-Э́тот, хоть и сам с вершо́к,
-спо́рит с гро́зной пти́цей.
-Хра́брый ма́льчик, хорошо́,
-в жи́зни пригоди́тся.
-
-Э́тот в грязь поле́з и рад,
-что грязна́ руба́ха.
-Про тако́го говоря́т:
-он плохо́й, неря́ха.
-
-Э́тот чи́стит ва́ленки,
-мо́ет сам гало́ши.
-Он хотя́ и ма́ленький,
-но вполне́ хоро́ший.
-
-По́мни э́то ка́ждый сын.
-Знай любо́й ребёнок:
-вы́растет из сы́на свин,
-е́сли сын — свинёнок.
-
-Ма́льчик ра́достный пошёл,
-и реши́ла кро́ха:
-«Бу́ду де́лать хорошо́,
-и не бу́ду — пло́хо».`,
- notes:[
-  {id:"before", en:"Before you read", ar:"قبل أن تقرأ",
-   body:{en:`<p>A rhymed dialogue for children: a little son comes to his father and asks what is good and what is bad. The father answers with small scenes: a storm, a dirty boy and a clean one, a bully and a brave boy. The lines are short and full of everyday words.</p>
-<p>Listen for {хорошо́} and {пло́хо}.</p>`,
-         ar:`<p>حوار مقفّى للأطفال: ابن صغير يأتي إلى أبيه ويسأله ما الجيّد وما السيّئ. يجيب الأب بمشاهد صغيرة: عاصفة، وولد متّسخ وآخر نظيف، وولد يتنمّر وآخر شجاع. الأسطر قصيرة ومليئة بالكلمات اليومية.</p>
-<p>انتبه⟦ي|⟧ لـ {хорошо́} و{пло́хо}.</p>`}},
-  {id:"who", en:"Who is Mayakovsky", ar:"من هو ماياكوفسكي",
-   body:{en:`<p>Vladimir Mayakovsky (1893–1930) was the loud, bold poet of the Russian avant-garde and the revolution. He also wrote gentle books for children, and lines from this one became sayings.</p>`,
-         ar:`<p>فلاديمير ماياكوفسكي (1893–1930) شاعر الطليعة الروسية والثورة، بصوته العالي وجرأته. وكتب أيضًا كتبًا رقيقة للأطفال، وصارت أسطر من هذه القصيدة أقوالًا مأثورة.</p>`}}
- ],
- lessons:[
-  {en:"Good and bad", ar:"الجيّد والسيّئ",
-   body:{en:`<ul><li>{хорошо́} = good, well; {пло́хо} = bad, badly. Both answer “how?”: {Э́то хорошо́.}</li>
-<li>{Что тако́е хорошо́?} = What does “good” mean? The same {что тако́е} as in «Что тако́е о́сень».</li>
-<li>{сын} = son, {па́па} = dad: the poem is a talk between them.</li></ul>`,
-         ar:`<ul><li>{хорошо́} = جيّد، جيّدًا؛ {пло́хо} = سيّئ، سيّئًا. كلتاهما تجيب عن «كيف؟»: {Э́то хорошо́.} هذا جيّد.</li>
-<li>{Что тако́е хорошо́?} = ما معنى «جيّد»؟ وهي {что тако́е} نفسها في «Что тако́е о́сень».</li>
-<li>{сын} = ابن، {па́па} = بابا: القصيدة حديث بينهما.</li></ul>`},
-   words:["хорошо́","пло́хо","что тако́е","сын","па́па"],
-   phrases:["Э́то хорошо́.","Э́то пло́хо.","Па́па, что тако́е хорошо́?"]}
- ]},
-{id:"pyat-minut", ru:"Пять мину́т", by:"Людми́ла Гу́рченко", en:"Five minutes", ar:"خمس دقائق", year:1956,
- video:"jH8HCdDcRjI",
- ps:["numbers","chunks"],
+{id:"zvezda", ru:"Звезда́ по и́мени Со́лнце", by:"Кино́", en:"A star called the Sun", ar:"نجمة اسمها الشمس", year:1989,
+ video:"NfM9eg7OAcw",
+ ps:["no-is","chunks"],
  notes:[
   {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
-   body:{en:`<p>From the New Year comedy «Карнава́льная ночь» (1956). Five minutes before midnight, the heroine sings that a lot can happen in five minutes. Russians still play it every 31 December.</p>
-<p>The title comes back again and again: listen for {пять мину́т}.</p>`,
-         ar:`<p>من الكوميديا الخاصة برأس السنة «Карнава́льная ночь» (1956). قبل منتصف الليل بخمس دقائق تغنّي البطلة أن أشياء كثيرة يمكن أن تحدث في خمس دقائق. وما زال الروس يشغّلونها كل 31 ديسمبر.</p>
-<p>العنوان يعود مرة بعد مرة: استمع⟦ي|⟧ لـ {пять мину́т}.</p>`}},
-  {id:"who", en:"Gurchenko and the New Year", ar:"غورتشينكو ورأس السنة",
-   body:{en:`<p>Lyudmila Gurchenko (1935–2011) became a star overnight with this film, at 21. New Year, not Christmas, is the biggest holiday in Russia: the tree, the presents and the family dinner all belong to the night of 31 December.</p>`,
-         ar:`<p>صارت ليودميلا غورتشينكو (1935–2011) نجمة بين ليلة وضحاها بهذا الفيلم، في الحادية والعشرين. رأس السنة، لا عيد الميلاد، هو أكبر عيد في روسيا: الشجرة والهدايا وعشاء العائلة كلها لليلة 31 ديسمبر.</p>`}}
+   body:{en:`<p>The title song of Kino's 1989 album. Viktor Tsoi sings slowly and very clearly, which makes Kino a favourite of Russian learners. The song looks down on a city and on a war that has gone on for two thousand years with no real reason: an antiwar picture.</p>
+<p>Listen for {звезда́}, {со́лнце} and {го́род}.</p>`,
+         ar:`<p>أغنية العنوان في ألبوم «كينو» لعام 1989. يغنّي فيكتور تسوي ببطء وبوضوح شديد، ولهذا يحبّ متعلّمو الروسية فرقة «كينو». الأغنية تنظر من فوق إلى مدينة وإلى حرب مستمرة منذ ألفي عام بلا سبب حقيقي: صورة ضد الحرب.</p>
+<p>استمع⟦ي|⟧ لـ {звезда́} و{со́лнце} و{го́род}.</p>`}},
+  {id:"who", en:"Who was Viktor Tsoi", ar:"من كان فيكتور تسوي",
+   body:{en:`<p>Viktor Tsoi (1962–1990), Korean-Russian, was the voice of the last Soviet generation. He died in a car crash at 28. In Moscow a wall on the Arbat is still covered with fans' messages: {Цой жив}, Tsoi lives. You already met the band's name in «Кофеви́но».</p>`,
+         ar:`<p>فيكتور تسوي (1962–1990)، روسي من أصل كوري، كان صوت آخر جيل سوفيتي. مات في حادث سيارة في الثامنة والعشرين. وفي موسكو ما زال جدار في شارع أربات مغطّى برسائل المعجبين: {Цой жив}، أي «تسوي حيّ». وقد ⟦صادفتِ|صادفتَ⟧ اسم الفرقة في «Кофеви́но».</p>`}}
  ],
  lessons:[
-  {en:"Five minutes", ar:"خمس دقائق",
-   body:{en:`<ul><li>After {пять} and higher, the counted word takes its “many of” form: {мину́та → пять мину́т}, {рубль → пять рубле́й}.</li>
-<li>{С Но́вым го́дом!} = Happy New Year! Learn it whole.</li>
-<li>{час} = hour, {мину́та} = minute.</li></ul>`,
-         ar:`<ul><li>بعد {пять} وما فوقها يأخذ المعدود صيغة «الكثير من»: {мину́та → пять мину́т}، {рубль → пять рубле́й}.</li>
-<li>{С Но́вым го́дом!} = سنة سعيدة! احفظ⟦ي|⟧ها كاملة.</li>
-<li>{час} = ساعة، {мину́та} = دقيقة.</li></ul>`},
-   bridge:{en:`Arabic also changes the counted word after numbers: <ar>ثلاث دقائق</ar> but <ar>عشرون دقيقة</ar>. Russian switches at five, Arabic at eleven.`,
-           ar:`العربية أيضًا تغيّر المعدود بعد الأعداد: <ar>ثلاث دقائق</ar> لكن <ar>عشرون دقيقة</ar>. الروسية تتغيّر عند الخمسة، والعربية عند الحادي عشر.`},
-   words:["пять","мину́та","час","но́вый","год"],
-   phrases:["Пять мину́т, пожа́луйста.","Я жду пять мину́т.","С Но́вым го́дом!"]}
+  {en:"A star, a name, a war", ar:"نجمة، واسم، وحرب",
+   body:{en:`<ul><li>{звезда́} = star: {Со́лнце — э́то звезда́.}</li>
+<li>{по и́мени} = called, by the name of: {Кот по и́мени Ба́рсик.}</li>
+<li>{война́} = war, {мир} = peace: {Война́ — э́то пло́хо.}</li></ul>`,
+         ar:`<ul><li>{звезда́} = نجمة: {Со́лнце — э́то звезда́.}</li>
+<li>{по и́мени} = اسمه، يُدعى: {Кот по и́мени Ба́рсик.} قطّ اسمه بارسيك.</li>
+<li>{война́} = حرب، {мир} = سلام: {Война́ — э́то пло́хо.}</li></ul>`},
+   words:["звезда́","со́лнце","по и́мени","война́","мир","го́род"],
+   phrases:["Со́лнце — э́то звезда́.","Кот по и́мени Ба́рсик.","Война́ — э́то пло́хо."]}
+ ]},
+{id:"mne-nravitsya", ru:"Мне нра́вится", by:"А́лла Пугачёва", en:"I like it", ar:"يعجبني", year:1975,
+ video:"NHhFjFkJeYE",
+ ps:["nravitsya","nravitsya:state"],
+ pd:"Tsvetaeva died in 1941; written in 1915. The film sings most of the poem",
+ text:`Мне нра́вится, что вы больны́ не мной,
+Мне нра́вится, что я больна́ не ва́ми,
+Что никогда́ тяжёлый шар земно́й
+Не уплывёт под на́шими нога́ми.
+Мне нра́вится, что мо́жно быть смешно́й —
+Распу́щенной — и не игра́ть слова́ми,
+И не красне́ть уду́шливой волно́й,
+Слегка́ соприкосну́вшись рукава́ми.
+
+Мне нра́вится ещё, что вы при мне
+Споко́йно обнима́ете другу́ю,
+Не про́чите мне в а́довом огне́
+Горе́ть за то, что я не вас целу́ю.
+Что и́мя не́жное моё, мой не́жный, не
+Упомина́ете ни днём, ни но́чью — всу́е…
+Что никогда́ в церко́вной тишине́
+Не пропою́т над на́ми: аллилу́йя!
+
+Спаси́бо вам и се́рдцем и руко́й
+За то, что вы меня́ — не зна́я са́ми! —
+Так лю́бите: за мой ночно́й поко́й,
+За ре́дкость встреч зака́тными часа́ми,
+За на́ши не-гуля́нья под луно́й,
+За со́лнце, не у нас над голова́ми, —
+За то, что вы больны́ — увы́! — не мной,
+За то, что я больна́ — увы́! — не ва́ми!`,
+ notes:[
+  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
+   body:{en:`<p>From the New Year film «Иро́ния судьбы́» (1975), which Russian TV still shows every 31 December. The words are a poem Marina Tsvetaeva wrote in 1915, and almost every line starts with {мне нра́вится}: I like (it that)…</p>
+<p>The poem speaks to someone as {вы}, at a respectful distance. Listen for {мне нра́вится} and {вы}.</p>`,
+         ar:`<p>من فيلم رأس السنة «Иро́ния судьбы́» (1975)، الذي ما زال التلفزيون الروسي يعرضه كل 31 ديسمبر. الكلمات قصيدة كتبتها مارينا تسفيتايفا عام 1915، وكل سطر تقريبًا يبدأ بـ {мне нра́вится}: يعجبني (أنّ)…</p>
+<p>القصيدة تخاطب الشخص بـ {вы}، بمسافة من الاحترام. استمع⟦ي|⟧ لـ {мне нра́вится} و{вы}.</p>`}},
+  {id:"who", en:"Tsvetaeva and Pugacheva", ar:"تسفيتايفا وبوغاتشيفا",
+   body:{en:`<p>Marina Tsvetaeva (1892–1941) is one of the great Russian poets. She left Russia after the revolution and came back in 1939; her husband and daughter were arrested soon after. Alla Pugacheva, who sings the heroine's songs in the film, became the biggest pop star of the Soviet Union. In 2022 she asked to be named a “foreign agent” too, in solidarity with her husband, who had been labelled one for speaking against the war.</p>`,
+         ar:`<p>مارينا تسفيتايفا (1892–1941) من كبار الشعراء الروس. غادرت روسيا بعد الثورة وعادت عام 1939، واعتُقل زوجها وابنتها بعد عودتها بقليل. أمّا آلا بوغاتشيفا، التي تغنّي أغاني البطلة في الفيلم، فصارت أكبر نجمة بوب في الاتحاد السوفيتي. وفي 2022 طلبت أن تُصنَّف «عميلة أجنبية» هي أيضًا، تضامنًا مع زوجها الذي صُنّف كذلك لأنه عارض الحرب.</p>`}}
+ ],
+ lessons:[
+  {en:"I like that…", ar:"يعجبني أنّ…",
+   body:{en:`<ul><li>{мне нра́вится, что…} = I like (it) that…: {Мне нра́вится, что вы здесь.}</li>
+<li>To someone you call {вы}: {Вам нра́вится чай?}</li>
+<li>{пе́сня} = song: {Мне нра́вится э́та пе́сня.}</li></ul>`,
+         ar:`<ul><li>{мне нра́вится, что…} = يعجبني أنّ…: {Мне нра́вится, что вы здесь.}</li>
+<li>لمن ⟦تخاطبينه|تخاطبه⟧ بـ {вы}: {Вам нра́вится чай?}</li>
+<li>{пе́сня} = أغنية: {Мне нра́вится э́та пе́сня.}</li></ul>`},
+   bridge:{en:`Exactly <ar>يعجبني أنّ…</ar>: the thing does the pleasing, and the person who likes it is “to me”.`,
+           ar:`تمامًا مثل <ar>يعجبني أنّ…</ar>: الشيء هو الذي يُعجب، ومن يحبّه في صيغة «لي».`},
+   words:["нра́вится","вы","что","пе́сня","о́чень"],
+   phrases:["Мне нра́вится, что вы здесь.","Вам нра́вится чай?","Мне о́чень нра́вится э́та пе́сня."]}
  ]},
 {id:"mukha", kind:"poem", ru:"Му́ха", by:"О́сип Мандельшта́м", en:"The fly", ar:"الذبابة",
  lyrics:"https://www.culture.ru/poems/41716/mukha",
@@ -2149,192 +2231,6 @@ songs: [
            ar:`أربعة أسماء بلا فعل هي الأسلوب الاسمي في أبسط صوره: <ar>ليلٌ، شارعٌ، فانوسٌ، صيدليةٌ</ar> تبدو طبيعية بالعربية أيضًا.`},
    words:["ночь","но́чью","у́лица","фона́рь","апте́ка","свет"],
    phrases:["Но́чью на у́лице темно́.","Фона́рь на у́лице.","В апте́ке свет."]}
- ]},
-{id:"vagon", ru:"Голубо́й ваго́н", by:"Влади́мир Шаи́нский", en:"The light-blue carriage", ar:"العربة الزرقاء", year:1974,
- video:"gCTFXHJ0ro8",
- ps:["ya-form","no-is"],
- notes:[
-  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
-   body:{en:`<p>Crocodile Gena sings this at the end of the cartoon «Шапокля́к» (1974), riding a train with his friends. A light-blue carriage rolls on, and the days roll away behind it. Russians sing it at goodbyes and graduations.</p>
-<p>Listen for {голубо́й ваго́н} and for {ме́дленно}: slowly.</p>`,
-         ar:`<p>يغنّيها التمساح غينا في نهاية فيلم الرسوم المتحركة «Шапокля́к» (1974)، وهو يركب القطار مع أصدقائه. عربة زرقاء فاتحة تمضي، والأيام تمضي خلفها. يغنّيها الروس في الوداع وحفلات التخرّج.</p>
-<p>استمع⟦ي|⟧ لـ {голубо́й ваго́н} ولـ {ме́дленно}: ببطء.</p>`}},
-  {id:"blues", en:"Two blues", ar:"لونان أزرقان",
-   body:{en:`<p>Russian has two basic blues: {голубо́й}, the light blue of the sky, and {си́ний}, dark blue. For Russians they are two different colours, like red and pink in English, and studies found Russian speakers tell them apart faster than English speakers.</p>
-<p>Arabic has <ar>أزرق</ar> and <ar>سماوي</ar> too, but treats them as shades of one colour.</p>`,
-         ar:`<p>في الروسية لونان أزرقان أساسيان: {голубо́й} الأزرق الفاتح لون السماء، و{си́ний} الأزرق الغامق. هما عند الروس لونان مختلفان، مثل الأحمر والوردي، ووجدت دراسات أن الناطقين بالروسية يميّزون بينهما أسرع من الناطقين بالإنجليزية.</p>
-<p>في العربية أيضًا <ar>أزرق</ar> و<ar>سماوي</ar>، لكنهما درجتان للون واحد.</p>`}}
- ],
- lessons:[
-  {en:"The carriage rolls on", ar:"العربة تمضي",
-   body:{en:`<ul><li>{ваго́н} = a train carriage; {по́езд} = the whole train.</li>
-<li>{голубо́й} and {си́ний}: light blue and dark blue.</li>
-<li>{ме́дленно} = slowly: {-о} turns a describing word into “how”, like {отча́янно} in Zemfira's song.</li>
-<li>{е́дет} = is going (by transport): {По́езд е́дет.}</li></ul>`,
-         ar:`<ul><li>{ваго́н} = عربة القطار؛ {по́езд} = القطار كله.</li>
-<li>{голубо́й} و{си́ний}: الأزرق الفاتح والأزرق الغامق.</li>
-<li>{ме́дленно} = ببطء: {-о} تجعل الصفة حالًا، مثل {отча́янно} في أغنية زيمفيرا.</li>
-<li>{е́дет} = يسير (بمركبة): {По́езд е́дет.}</li></ul>`},
-   words:["ваго́н","по́езд","голубо́й","си́ний","ме́дленно"],
-   phrases:["Мой ваго́н голубо́й.","По́езд е́дет ме́дленно.","Э́то голубо́й и́ли си́ний?"]}
- ]},
-{id:"khochesh", ru:"Хо́чешь?", by:"Земфи́ра", en:"Do you want…?", ar:"هل تريدين…؟", year:2000,
- video:"xpJ_fYyAeYk",
- lyrics:"https://lyricstranslate.com/en/%D1%85%D0%BE%D1%87%D0%B5%D1%88%D1%8C-khochesh-do-you-want.html-0",
- ps:["ya-form","ya-form:inf","no-is"],
- notes:[
-  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
-   body:{en:`<p>One of Zemfira's best-known songs, from 2000. Almost every line is an offer that starts with the same word, {хо́чешь}: do you want…? Some offers are tender, some are wild.</p>
-<p>On the first listen, catch {хо́чешь} each time, and two things: {со́лнце} (the sun) and {ла́мпа} (a lamp).</p>`,
-         ar:`<p>من أشهر أغاني زيمفيرا، من عام 2000. كل سطر تقريبًا عرض يبدأ بالكلمة نفسها، {хо́чешь}: هل تريدين…؟ بعض العروض رقيق وبعضها جامح.</p>
-<p>في الاستماع الأول التقط⟦ي|⟧ {хо́чешь} كل مرة، وشيئين: {со́лнце} (الشمس) و{ла́мпа} (المصباح).</p>`}},
-  {id:"who", en:"Who is Zemfira", ar:"من هي زيمفيرا",
-   body:{en:`<p>Zemfira Ramazanova comes from Ufa and broke through in the late 1990s. She writes, arranges and produces her own music, and she is one of the most influential voices in Russian-language rock.</p>`,
-         ar:`<p>زيمفيرا رامازانوفا من مدينة أوفا، واشتهرت في أواخر التسعينيات. تكتب موسيقاها وتوزّعها وتنتجها بنفسها، وهي من أكثر الأصوات تأثيرًا في موسيقى الروك باللغة الروسية.</p>`}}
- ],
- lessons:[
-  {en:"Do you want…?", ar:"هل تريدين…؟",
-   body:{en:`<ul><li>{хочу́ → хо́чешь}: “want” is irregular, worth knowing by heart: {хочу́, хо́чешь, хо́чет, хоти́м, хоти́те, хотя́т}.</li>
-<li>A question needs no extra word, only a rising voice on the key word: {Хо́чешь ко́фе?}</li>
-<li>{вме́сто} = instead of: {чай вме́сто ко́фе}.</li>
-<li>{око́шко} is a small, dear {окно́}: {-шко} makes things small and warm.</li>
-<li>{живи́} = live! Asking a friend ends in {-и}, like {обними́} in «Кофеви́но».</li></ul>`,
-         ar:`<ul><li>{хочу́ ← хо́чешь}: فعل «يريد» شاذّ، يستحق الحفظ: {хочу́, хо́чешь, хо́чет, хоти́м, хоти́те, хотя́т}.</li>
-<li>السؤال لا يحتاج إلى كلمة إضافية، فقط رفع الصوت على الكلمة المهمّة: {Хо́чешь ко́фе?} هل تريدين قهوة؟</li>
-<li>{вме́сто} = بدلًا من: {чай вме́сто ко́фе} شاي بدل القهوة.</li>
-<li>{око́шко} نافذة صغيرة عزيزة من {окно́}: {-шко} تصغّر الشيء وتحبّبه.</li>
-<li>{живи́} = عيشي! الطلب من صديق ينتهي بـ {-и}، مثل {обними́} في «Кофеви́но».</li></ul>`},
-   bridge:{en:`{око́шко} works like the Arabic diminutive: <ar>كتاب ← كُتيّب</ar>, <ar>بيت ← بُيَيت</ar>. Arabic changes the inside of the word; Russian adds an ending.`,
-           ar:`{око́шко} مثل التصغير في العربية: <ar>كتاب ← كُتيّب</ar>، <ar>بيت ← بُيَيت</ar>. العربية تغيّر داخل الكلمة، والروسية تضيف نهاية.`},
-   words:["хо́чешь","хочу́","со́лнце","ла́мпа","вме́сто","око́шко","живи́","сосе́д"],
-   phrases:["Хо́чешь ко́фе?","Ты хо́чешь спать?","Хо́чешь чай вме́сто ко́фе?","Я ви́жу со́лнце.","Где ла́мпа?","Сосе́ди спят."]}
- ]},
-{id:"medvedi", ru:"Пе́сенка о медве́дях", by:"А́ида Веди́щева", en:"The song about bears", ar:"أغنية الدببة", year:1967,
- video:"eqhH-kbhbfE",
- ps:["no-is","chunks:more"],
- notes:[
-  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
-   body:{en:`<p>A gentle waltz from the comedy «Кавка́зская пле́нница» (1967). Somewhere at the end of the world, where it's always frosty, bears rub their backs against the Earth's axis, and that is why the Earth turns.</p>
-<p>Listen for {где́-то}, {всегда́} and {медве́ди}.</p>`,
-         ar:`<p>فالس رقيق من الكوميديا «Кавка́зская пле́нница» (1967). في مكانٍ ما في آخر الدنيا، حيث الصقيع دائمًا، تحكّ الدببة ظهورها بمحور الأرض، ولهذا تدور الأرض.</p>
-<p>استمع⟦ي|⟧ لـ {где́-то} و{всегда́} و{медве́ди}.</p>`}},
-  {id:"voice", en:"The voice behind the actress", ar:"الصوت خلف الممثلة",
-   body:{en:`<p>On screen the song is sung by the actress Natalya Varley, but the voice is Aida Vedishcheva's. The film's title nods to Pushkin's and Tolstoy's stories «Кавка́зский пле́нник», about a Russian officer held captive in the Caucasus; Tolstoy's is still read in Russian schools.</p>`,
-         ar:`<p>على الشاشة تغنّي الممثلة ناتاليا فارلي، لكن الصوت صوت آيدا فيديشيفا. وعنوان الفيلم يحيل إلى قصّتَي بوشكين وتولستوي «Кавка́зский пле́нник» عن ضابط روسي أسير في القوقاز، وقصة تولستوي ما زالت تُقرأ في المدارس الروسية.</p>`}}
- ],
- lessons:[
-  {en:"Somewhere it's always cold", ar:"في مكانٍ ما برد دائم",
-   body:{en:`<ul><li>{где́-то} = somewhere, {всегда́} = always: {Где́-то всегда́ хо́лодно.}</li>
-<li>{медве́дь → медве́ди} = bear, bears.</li>
-<li>{моро́з} = hard frost: {Сего́дня моро́з.} New Year presents come from {Дед Моро́з}, Grandfather Frost.</li></ul>`,
-         ar:`<ul><li>{где́-то} = في مكانٍ ما، {всегда́} = دائمًا: {Где́-то всегда́ хо́лодно.}</li>
-<li>{медве́дь → медве́ди} = دبّ، دببة.</li>
-<li>{моро́з} = صقيع شديد: {Сего́дня моро́з.} وهدايا رأس السنة يأتي بها {Дед Моро́з}، «جدّ الصقيع».</li></ul>`},
-   words:["медве́дь","медве́ди","где́-то","всегда́","моро́з"],
-   phrases:["Где́-то всегда́ хо́лодно.","Медве́ди спят.","Сего́дня моро́з."]}
- ]},
-{id:"milaya", ru:"Ми́лая моя́", by:"Ю́рий Ви́збор", en:"My dear", ar:"يا عزيزتي",
- video:"jlvrx6PZSXw",
- ps:["moy-tvoy","moy-tvoy:adj"],
- notes:[
-  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
-   body:{en:`<p>The campfire song: many Russians can sing it with a guitar. It's slow, and every word is clear. The chorus calls a beloved woman {ми́лая моя́} and {со́лнышко лесно́е}, my little forest sun.</p>
-<p>Listen for {ми́лая}, {моя́} and {со́лнышко}.</p>`,
-         ar:`<p>أغنية نار المخيّم: كثير من الروس يستطيعون غناءها مع الغيتار. بطيئة، وكل كلمة فيها واضحة. اللازمة تنادي امرأة حبيبة {ми́лая моя́} و{со́лнышко лесно́е}: شُمَيستي في الغابة.</p>
-<p>استمع⟦ي|⟧ لـ {ми́лая} و{моя́} و{со́лнышко}.</p>`}},
-  {id:"who", en:"Who is Vizbor", ar:"من هو فيزبور",
-   body:{en:`<p>Yuri Vizbor (1934–1984) was a journalist, mountaineer and bard: one of the poets who sang their own poems with a guitar in the 1960s and 70s. Their songs spread on home tape recordings, outside the official radio.</p>`,
-         ar:`<p>يوري فيزبور (1934–1984) صحفي ومتسلّق جبال وشاعر مغنٍّ: من الشعراء الذين غنّوا قصائدهم مع الغيتار في الستينيات والسبعينيات. انتشرت أغانيهم على تسجيلات منزلية، بعيدًا عن الإذاعة الرسمية.</p>`}}
- ],
- lessons:[
-  {en:"My dear, my little sun", ar:"يا عزيزتي، يا شُمَيستي",
-   body:{en:`<ul><li>{ми́лый → ми́лая}: a describing word follows the word it describes: {ми́лый друг}, {ми́лая подру́га}.</li>
-<li>{со́лнышко} is a small, dear {со́лнце}: {-ышко}, like {-шко} in {око́шко}. Russians call someone they love {со́лнышко}.</li>
-<li>{лес} = forest; {лесно́й} = of the forest.</li></ul>`,
-         ar:`<ul><li>{ми́лый → ми́лая}: الصفة تتبع الموصوف: {ми́лый друг}، {ми́лая подру́га}.</li>
-<li>{со́лнышко} شمس صغيرة عزيزة من {со́лнце}: {-ышко} مثل {-шко} في {око́шко}. ينادي الروس من يحبّون {со́лнышко}.</li>
-<li>{лес} = غابة؛ {лесно́й} = من الغابة.</li></ul>`},
-   bridge:{en:`Arabic calls a loved one the moon, <ar>يا قمر</ar>; Russian calls her the sun, {со́лнышко}. And <ar>يا عمري</ar> sits close to {ми́лая моя́}.`,
-           ar:`العربية تنادي الحبيبة بالقمر: <ar>يا قمر</ar>؛ والروسية تناديها بالشمس: {со́лнышко}. و<ar>يا عمري</ar> قريبة من {ми́лая моя́}.`},
-   words:["ми́лая","ми́лый","со́лнышко","со́лнце","лес","подру́га"],
-   phrases:["Ты моя́ ми́лая подру́га.","Где ты, моё со́лнышко?","Я люблю́ лес."]}
- ]},
-{id:"mne-nravitsya", ru:"Мне нра́вится", by:"А́лла Пугачёва", en:"I like it", ar:"يعجبني", year:1975,
- video:"NHhFjFkJeYE",
- ps:["nravitsya","nravitsya:state"],
- pd:"Tsvetaeva died in 1941; written in 1915. The film sings most of the poem",
- text:`Мне нра́вится, что вы больны́ не мной,
-Мне нра́вится, что я больна́ не ва́ми,
-Что никогда́ тяжёлый шар земно́й
-Не уплывёт под на́шими нога́ми.
-Мне нра́вится, что мо́жно быть смешно́й —
-Распу́щенной — и не игра́ть слова́ми,
-И не красне́ть уду́шливой волно́й,
-Слегка́ соприкосну́вшись рукава́ми.
-
-Мне нра́вится ещё, что вы при мне
-Споко́йно обнима́ете другу́ю,
-Не про́чите мне в а́довом огне́
-Горе́ть за то, что я не вас целу́ю.
-Что и́мя не́жное моё, мой не́жный, не
-Упомина́ете ни днём, ни но́чью — всу́е…
-Что никогда́ в церко́вной тишине́
-Не пропою́т над на́ми: аллилу́йя!
-
-Спаси́бо вам и се́рдцем и руко́й
-За то, что вы меня́ — не зна́я са́ми! —
-Так лю́бите: за мой ночно́й поко́й,
-За ре́дкость встреч зака́тными часа́ми,
-За на́ши не-гуля́нья под луно́й,
-За со́лнце, не у нас над голова́ми, —
-За то, что вы больны́ — увы́! — не мной,
-За то, что я больна́ — увы́! — не ва́ми!`,
- notes:[
-  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
-   body:{en:`<p>From the New Year film «Иро́ния судьбы́» (1975), which Russian TV still shows every 31 December. The words are a poem Marina Tsvetaeva wrote in 1915, and almost every line starts with {мне нра́вится}: I like (it that)…</p>
-<p>The poem speaks to someone as {вы}, at a respectful distance. Listen for {мне нра́вится} and {вы}.</p>`,
-         ar:`<p>من فيلم رأس السنة «Иро́ния судьбы́» (1975)، الذي ما زال التلفزيون الروسي يعرضه كل 31 ديسمبر. الكلمات قصيدة كتبتها مارينا تسفيتايفا عام 1915، وكل سطر تقريبًا يبدأ بـ {мне нра́вится}: يعجبني (أنّ)…</p>
-<p>القصيدة تخاطب الشخص بـ {вы}، بمسافة من الاحترام. استمع⟦ي|⟧ لـ {мне нра́вится} و{вы}.</p>`}},
-  {id:"who", en:"Tsvetaeva and Pugacheva", ar:"تسفيتايفا وبوغاتشيفا",
-   body:{en:`<p>Marina Tsvetaeva (1892–1941) is one of the great Russian poets. She left Russia after the revolution and came back in 1939; her husband and daughter were arrested soon after. Alla Pugacheva, who sings the heroine's songs in the film, became the biggest pop star of the Soviet Union. In 2022 she asked to be named a “foreign agent” too, in solidarity with her husband, who had been labelled one for speaking against the war.</p>`,
-         ar:`<p>مارينا تسفيتايفا (1892–1941) من كبار الشعراء الروس. غادرت روسيا بعد الثورة وعادت عام 1939، واعتُقل زوجها وابنتها بعد عودتها بقليل. أمّا آلا بوغاتشيفا، التي تغنّي أغاني البطلة في الفيلم، فصارت أكبر نجمة بوب في الاتحاد السوفيتي. وفي 2022 طلبت أن تُصنَّف «عميلة أجنبية» هي أيضًا، تضامنًا مع زوجها الذي صُنّف كذلك لأنه عارض الحرب.</p>`}}
- ],
- lessons:[
-  {en:"I like that…", ar:"يعجبني أنّ…",
-   body:{en:`<ul><li>{мне нра́вится, что…} = I like (it) that…: {Мне нра́вится, что вы здесь.}</li>
-<li>To someone you call {вы}: {Вам нра́вится чай?}</li>
-<li>{пе́сня} = song: {Мне нра́вится э́та пе́сня.}</li></ul>`,
-         ar:`<ul><li>{мне нра́вится, что…} = يعجبني أنّ…: {Мне нра́вится, что вы здесь.}</li>
-<li>لمن ⟦تخاطبينه|تخاطبه⟧ بـ {вы}: {Вам нра́вится чай?}</li>
-<li>{пе́сня} = أغنية: {Мне нра́вится э́та пе́сня.}</li></ul>`},
-   bridge:{en:`Exactly <ar>يعجبني أنّ…</ar>: the thing does the pleasing, and the person who likes it is “to me”.`,
-           ar:`تمامًا مثل <ar>يعجبني أنّ…</ar>: الشيء هو الذي يُعجب، ومن يحبّه في صيغة «لي».`},
-   words:["нра́вится","вы","что","пе́сня","о́чень"],
-   phrases:["Мне нра́вится, что вы здесь.","Вам нра́вится чай?","Мне о́чень нра́вится э́та пе́сня."]}
- ]},
-{id:"zvezda", ru:"Звезда́ по и́мени Со́лнце", by:"Кино́", en:"A star called the Sun", ar:"نجمة اسمها الشمس", year:1989,
- video:"NfM9eg7OAcw",
- ps:["no-is","chunks"],
- notes:[
-  {id:"before", en:"Before you listen", ar:"قبل أن تستمع",
-   body:{en:`<p>The title song of Kino's 1989 album. Viktor Tsoi sings slowly and very clearly, which makes Kino a favourite of Russian learners. The song looks down on a city and on a war that has gone on for two thousand years with no real reason: an antiwar picture.</p>
-<p>Listen for {звезда́}, {со́лнце} and {го́род}.</p>`,
-         ar:`<p>أغنية العنوان في ألبوم «كينو» لعام 1989. يغنّي فيكتور تسوي ببطء وبوضوح شديد، ولهذا يحبّ متعلّمو الروسية فرقة «كينو». الأغنية تنظر من فوق إلى مدينة وإلى حرب مستمرة منذ ألفي عام بلا سبب حقيقي: صورة ضد الحرب.</p>
-<p>استمع⟦ي|⟧ لـ {звезда́} و{со́лнце} و{го́род}.</p>`}},
-  {id:"who", en:"Who was Viktor Tsoi", ar:"من كان فيكتور تسوي",
-   body:{en:`<p>Viktor Tsoi (1962–1990), Korean-Russian, was the voice of the last Soviet generation. He died in a car crash at 28. In Moscow a wall on the Arbat is still covered with fans' messages: {Цой жив}, Tsoi lives. You already met the band's name in «Кофеви́но».</p>`,
-         ar:`<p>فيكتور تسوي (1962–1990)، روسي من أصل كوري، كان صوت آخر جيل سوفيتي. مات في حادث سيارة في الثامنة والعشرين. وفي موسكو ما زال جدار في شارع أربات مغطّى برسائل المعجبين: {Цой жив}، أي «تسوي حيّ». وقد ⟦صادفتِ|صادفتَ⟧ اسم الفرقة في «Кофеви́но».</p>`}}
- ],
- lessons:[
-  {en:"A star, a name, a war", ar:"نجمة، واسم، وحرب",
-   body:{en:`<ul><li>{звезда́} = star: {Со́лнце — э́то звезда́.}</li>
-<li>{по и́мени} = called, by the name of: {Кот по и́мени Ба́рсик.}</li>
-<li>{война́} = war, {мир} = peace: {Война́ — э́то пло́хо.}</li></ul>`,
-         ar:`<ul><li>{звезда́} = نجمة: {Со́лнце — э́то звезда́.}</li>
-<li>{по и́мени} = اسمه، يُدعى: {Кот по и́мени Ба́рсик.} قطّ اسمه بارسيك.</li>
-<li>{война́} = حرب، {мир} = سلام: {Война́ — э́то пло́хо.}</li></ul>`},
-   words:["звезда́","со́лнце","по и́мени","война́","мир","го́род"],
-   phrases:["Со́лнце — э́то звезда́.","Кот по и́мени Ба́рсик.","Война́ — э́то пло́хо."]}
  ]},
 {id:"golova", ru:"Жить в твое́й голове́", by:"Земфи́ра", en:"To live in your head", ar:"أن أعيش في رأسك", year:2013,
  video:"lfLBb-Q4hlc",
@@ -2447,6 +2343,109 @@ songs: [
 <li>{мой ми́лый друг} = صديقي العزيز: {ми́лый} تتبع {друг} المذكّرة.</li></ul>`},
    words:["бра́тья","ба́бушки","неве́сты","друг","ми́лый","коне́чно","ме́сто"],
    phrases:["В самолёте нет ме́ста.","Бра́тья и ба́бушки в самолёте.","Ты мой ми́лый друг."]}
+ ]},
+{id:"khorosho", kind:"poem", ru:"Что тако́е хорошо́ и что тако́е пло́хо?", by:"Влади́мир Маяко́вский", en:"What is good and what is bad?", ar:"ما الجيّد وما السيّئ؟", year:1925,
+ ps:["no-is"],
+ pd:"Mayakovsky died in 1930; written in 1925",
+ text:`Кро́шка сын к отцу́ пришёл,
+и спроси́ла кро́ха:
+— Что тако́е хорошо́
+и что тако́е пло́хо? —
+
+У меня́ секре́тов нет, —
+слу́шайте, дети́шки, —
+па́пы э́того отве́т
+помеща́ю в кни́жке.
+
+— Е́сли ве́тер кры́ши рвёт,
+е́сли град загро́хал, —
+ка́ждый зна́ет — э́то вот
+для прогу́лок пло́хо.
+
+Дождь пока́пал и прошёл.
+Со́лнце в це́лом све́те.
+Э́то — о́чень хорошо́
+и больши́м и де́тям.
+
+Е́сли сын черне́е но́чи,
+грязь лежи́т на ро́жице, —
+я́сно, э́то пло́хо о́чень
+для ребя́чьей ко́жицы.
+
+Е́сли ма́льчик лю́бит мы́ло
+и зубно́й порошо́к,
+э́тот ма́льчик о́чень ми́лый,
+поступа́ет хорошо́.
+
+Е́сли бьёт дрянно́й драчу́н
+сла́бого мальчи́шку,
+я тако́го не хочу́
+да́же вста́вить в кни́жку.
+
+Э́тот вот кричи́т: — Не тро́жь
+тех, кто ме́ньше ро́стом! —
+Э́тот ма́льчик так хоро́ш,
+загляде́нье про́сто!
+
+Е́сли ты порва́л подря́д
+кни́жицу и мя́чик,
+октября́та говоря́т:
+плохова́тый ма́льчик.
+
+Е́сли ма́льчик лю́бит труд,
+ты́чет в кни́жку па́льчик,
+про тако́го пи́шут тут:
+он хоро́ший ма́льчик.
+
+От воро́ны карапу́з
+убежа́л, зао́хав.
+Ма́льчик э́тот про́сто трус.
+Э́то о́чень пло́хо.
+
+Э́тот, хоть и сам с вершо́к,
+спо́рит с гро́зной пти́цей.
+Хра́брый ма́льчик, хорошо́,
+в жи́зни пригоди́тся.
+
+Э́тот в грязь поле́з и рад,
+что грязна́ руба́ха.
+Про тако́го говоря́т:
+он плохо́й, неря́ха.
+
+Э́тот чи́стит ва́ленки,
+мо́ет сам гало́ши.
+Он хотя́ и ма́ленький,
+но вполне́ хоро́ший.
+
+По́мни э́то ка́ждый сын.
+Знай любо́й ребёнок:
+вы́растет из сы́на свин,
+е́сли сын — свинёнок.
+
+Ма́льчик ра́достный пошёл,
+и реши́ла кро́ха:
+«Бу́ду де́лать хорошо́,
+и не бу́ду — пло́хо».`,
+ notes:[
+  {id:"before", en:"Before you read", ar:"قبل أن تقرأ",
+   body:{en:`<p>A rhymed dialogue for children: a little son comes to his father and asks what is good and what is bad. The father answers with small scenes: a storm, a dirty boy and a clean one, a bully and a brave boy. The lines are short and full of everyday words.</p>
+<p>Listen for {хорошо́} and {пло́хо}.</p>`,
+         ar:`<p>حوار مقفّى للأطفال: ابن صغير يأتي إلى أبيه ويسأله ما الجيّد وما السيّئ. يجيب الأب بمشاهد صغيرة: عاصفة، وولد متّسخ وآخر نظيف، وولد يتنمّر وآخر شجاع. الأسطر قصيرة ومليئة بالكلمات اليومية.</p>
+<p>انتبه⟦ي|⟧ لـ {хорошо́} و{пло́хо}.</p>`}},
+  {id:"who", en:"Who is Mayakovsky", ar:"من هو ماياكوفسكي",
+   body:{en:`<p>Vladimir Mayakovsky (1893–1930) was the loud, bold poet of the Russian avant-garde and the revolution. He also wrote gentle books for children, and lines from this one became sayings.</p>`,
+         ar:`<p>فلاديمير ماياكوفسكي (1893–1930) شاعر الطليعة الروسية والثورة، بصوته العالي وجرأته. وكتب أيضًا كتبًا رقيقة للأطفال، وصارت أسطر من هذه القصيدة أقوالًا مأثورة.</p>`}}
+ ],
+ lessons:[
+  {en:"Good and bad", ar:"الجيّد والسيّئ",
+   body:{en:`<ul><li>{хорошо́} = good, well; {пло́хо} = bad, badly. Both answer “how?”: {Э́то хорошо́.}</li>
+<li>{Что тако́е хорошо́?} = What does “good” mean? The same {что тако́е} as in «Что тако́е о́сень».</li>
+<li>{сын} = son, {па́па} = dad: the poem is a talk between them.</li></ul>`,
+         ar:`<ul><li>{хорошо́} = جيّد، جيّدًا؛ {пло́хо} = سيّئ، سيّئًا. كلتاهما تجيب عن «كيف؟»: {Э́то хорошо́.} هذا جيّد.</li>
+<li>{Что тако́е хорошо́?} = ما معنى «جيّد»؟ وهي {что тако́е} نفسها في «Что тако́е о́сень».</li>
+<li>{сын} = ابن، {па́па} = بابا: القصيدة حديث بينهما.</li></ul>`},
+   words:["хорошо́","пло́хо","что тако́е","сын","па́па"],
+   phrases:["Э́то хорошо́.","Э́то пло́хо.","Па́па, что тако́е хорошо́?"]}
  ]}
 ]
 };
