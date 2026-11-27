@@ -97,9 +97,17 @@ for (const p of C.principles) {
 // path
 const stepIds = new Set([...C.topics.map(t => "t:" + t.id), ...C.readings.map(r => "r:" + r.id),
   ...C.principles.flatMap(p => ["p:" + p.id, ...(p.parts || []).map(x => `p:${p.id}:${x.id}`)])]);
-(C.path || []).forEach(st => { if (!stepIds.has(st)) err("path", `unknown step “${st}”`); });
+// "t:hello:3" places one lesson of a topic (topics are cut into lessons of about seven words); "t:hello" places the rest
+const lessonsOf = id => { const n = C.words.filter(w => w[3] === id).length, k = Math.ceil(n / 7); return k; };
+const topicOf = st => { const m = /^t:([^:]+)(?::(\d+))?$/.exec(st); return m ? { id: m[1], n: m[2] ? +m[2] : 0 } : null; };
+(C.path || []).forEach(st => { const t = topicOf(st);
+  if (t && t.n) { if (!stepIds.has("t:" + t.id) || t.n > lessonsOf(t.id)) err("path", `unknown step “${st}”`); }
+  else if (!stepIds.has(st)) err("path", `unknown step “${st}”`); });
 const songTopics = new Set(C.topics.filter(t => t.song).map(t => "t:" + t.id)); // song words are taught in the Songs tab, not on the path
-[...stepIds].forEach(st => { if (C.path && !C.path.includes(st) && !songTopics.has(st)) err("path", `“${st}” is not on the path`); });
+const placed = st => C.path.includes(st) || (st.startsWith("t:") && C.path.some(x => x.startsWith(st + ":")));
+[...stepIds].forEach(st => { if (C.path && !placed(st) && !songTopics.has(st)) err("path", `“${st}” is not on the path`); });
+C.topics.forEach(t => { if (t.song || !C.path) return; const k = lessonsOf(t.id); if (C.path.includes("t:" + t.id)) return;
+  for (let i = 1; i <= k; i++) if (!C.path.includes(`t:${t.id}:${i}`)) err("path", `lesson t:${t.id}:${i} is not on the path (add it, or "t:${t.id}" for the rest)`); });
 songTopics.forEach(st => { if ((C.path || []).includes(st)) err("path", `${st} is a song topic: keep it off the path`); });
 C.principles.forEach(p => (p.parts || []).forEach(pt => { if (C.path && C.path.indexOf(`p:${p.id}:${pt.id}`) < C.path.indexOf("p:" + p.id)) err("path", `part ${p.id}:${pt.id} comes before its card`); }));
 
@@ -132,11 +140,11 @@ const songIds = new Set();
 // combination tables
 (C.nouns || []).forEach((n, i) => {
   const w = `noun ${i + 1} (${n[0]})`;
-  if (n.length !== 10) err(w, "needs 10 fields");
+  if (n.length !== 10 && n.length !== 11) err(w, "needs 10 fields (11 with the plural)");
   if (!["m", "f", "n", "pl"].includes(n[3])) err(w, `gender “${n[3]}”`);
-  if (!"PLCTFVWBMD".includes(n[4]) || n[4].length !== 1) err(w, `kind “${n[4]}”`);
+  if (!"PLCTFVWBMDI".includes(n[4]) || n[4].length !== 1) err(w, `kind “${n[4]}”`);
   if (n[5] && !/^(в|во|на) /.test(n[5])) err(w, "where must start with в, во or на");
-  [0, 5, 6, 7, 8, 9].forEach(k => n[k] && checkStress(n[k], w));
+  [0, 5, 6, 7, 8, 9, 10].forEach(k => n[k] && checkStress(n[k], w));
 });
 (C.adjs || []).forEach((a, i) => { if (a.length !== 7) err(`adjective ${i + 1}`, "needs 7 fields"); a.slice(0, 4).forEach(f => checkStress(f, `adjective ${a[0]}`)); });
 (C.verbs || []).forEach((v, i) => {
@@ -154,7 +162,7 @@ for (const r of C.readings || []) {
 const taught = new Set();
 const addT = w => w && taught.add(plain(w).toLowerCase());
 C.words.forEach(w => plain(w[0]).split(/\s+/).forEach(addT));
-(C.nouns || []).forEach(n => [n[0], n[6], n[7], n[8], n[9], n[5] && n[5].split(" ").slice(1).join(" ")].forEach(addT));
+(C.nouns || []).forEach(n => [n[0], n[6], n[7], n[8], n[9], n[10], n[5] && n[5].split(" ").slice(1).join(" ")].forEach(addT));
 (C.adjs || []).forEach(a => a.slice(0, 4).forEach(addT));
 (C.verbs || []).forEach(v => [v[0], ...v.slice(3, 9)].forEach(addT));
 C.principles.forEach(p => (p.items || []).forEach(x => (p.drill === "form" ? [x[0], x[2]] : [x[0]]).forEach(t => plain(t).split(/[\s.,!?…]+/).forEach(addT))));
@@ -173,6 +181,10 @@ for (const f of ["index.html", "record.html"]) {
   });
 }
 
+// the path in order: nothing shown before it is taught (tools/order.mjs)
+if (!errors.length) { try { const { loadApp, walkPath } = await import("./order.mjs");
+  for (const g of ["f", "m"]) { const R = walkPath(loadApp(g)); R.errors.forEach(e => err("order" + (g === "m" ? " (masculine)" : ""), e)); if (g === "f" && process.argv.includes("--warnings")) R.warnings.forEach(w => console.log("warning · " + w)); }
+} catch (e) { err("order", "could not walk the path: " + e.message); } }
 if (errors.length) { console.error(errors.join("\n")); console.error(`\n${errors.length} problem(s).`); process.exit(1); }
 const C = RAW;
 console.log(`OK · ${C.topics.length} topics · ${C.principles.length} principles · ${C.words.length} words · ${C.phrases.length} phrases · ${C.readings.length} readings · ${(C.songs || []).length} songs`);

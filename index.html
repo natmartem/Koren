@@ -219,6 +219,8 @@ let storageOK=true;
 try{const raw=localStorage.getItem("koren-state");if(raw){const o=JSON.parse(raw);if(o&&typeof o==="object")S=Object.assign(S,o)}}catch(e){}
 try{localStorage.setItem("koren-probe","1");localStorage.removeItem("koren-probe")}catch(e){storageOK=false}
 const save=()=>{try{localStorage.setItem("koren-state",JSON.stringify(S))}catch(e){storageOK=false}};
+/* state migrations: progress is never wiped, only carried forward */
+if(!(S.v>=2)){S.rd=Object.assign({},S.read||{});S.v=2;save()} /* v2: a reading counts once drilled; readings marked read before stay counted */
 /* Gendered text: ⟦feminine|masculine⟧ anywhere in course or app text. Women are the default;
    Settings → "Speak to me as" switches the Arabic address and the Russian the learner says about herself. */
 const GM=/⟦([^|⟧]*)\|([^⟧]*)⟧/g;
@@ -242,6 +244,7 @@ let TOP=[],PR=[],WORDS=[],PHRASES=[],READS=[],FACTS=[],ITEMS={},PITEMS={},TOPm={
 /* combination tables (from course.js) and lookups built from them */
 let N=[],ADJ=[],VERBS=[],FORMIDX=new Map(),BASEIDX={},STEPS=[],STEPm={};
 let SONGS=[],SONGm={},LEX=new Map();
+const PRON=[["я","меня́","мне"],["ты","тебя́","тебе́"],["он","его́","ему́"],["она́","её","ей"],["мы","нас","нам"],["вы","вас","вам"],["они́","их","им"]];
 const POSS={m:"мой",f:"моя́",n:"моё",pl:"мои́"},TPOSS={m:"твой",f:"твоя́",n:"твоё",pl:"твои́"},DEM={m:"э́тот",f:"э́та",n:"э́то",pl:"э́ти"};
 const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
 const prepOf=w=>w.split(" ")[0],nounOf=w=>w.split(" ").slice(1).join(" ");
@@ -277,7 +280,12 @@ function build(){
   /* reading lines are items too, so they come back for review */
   READS.forEach(r=>(r.lines||[]).forEach(l=>{const key="L:"+plain(l[0]);if(!ITEMS[key])ITEMS[key]={key,akey:"S:"+plain(l[0]),kind:"l",ru:l[0],en:l[1],ar:l[2],topic:r.topic,ps:[],read:r.id}}));
   generate(c);
+  /* hand-written gap drills: their own wrong options plus the answer word's other forms, so wrong options she knows can always be found */
+  PR.forEach(p=>{if(p.drill==="form")p.list.forEach(x=>{if(x.gen)return;const a=plain(x.ans).toLowerCase(),up=x.ans[0]!==x.ans[0].toLowerCase();
+    const extra=/\s/.test(a.trim())?[]:(FORMIDX.get(a)||[]).map(f=>up?cap(f):f);
+    x.cands=[...x.wrong,...extra].filter((f,i,arr)=>f&&plain(f).toLowerCase()!==a&&arr.findIndex(y=>plain(y).toLowerCase()===plain(f).toLowerCase())===i)})});
   buildLex();
+  buildNeeds();
   buildPath();
 }
 /* words from songs: their topic is off the path; they count once learned in a song */
@@ -288,17 +296,82 @@ function buildLex(){
   WORDS.forEach(w=>add(w.ru,w.key));
   new Set(FORMIDX.values()).forEach(set=>{const ks=set.map(wkey).filter(k=>ITEMS[k]);if(ks.length)set.forEach(f=>ks.forEach(k=>add(f,k)))});
 }
+/* ================= what a piece of Russian needs =================
+   Every word form is looked up: taught as it is (a word, a phrase, a card example), or a form of a
+   word in the tables, which also needs the card that explains that ending. A drill, a wrong option,
+   a sentence or a reading line is shown only when every word in it is known and every ending in it
+   is explained. K is "what she knows": K.w(item key) and K.p(principle tag). */
+let FWD=new Map(),FWT=new Map(),FP=new Map(),FREE=new Set();
+const tk=s=>plain(String(s)).replace(/[.,!?¿¡—–«»"“”:;…()[\]]/g," ").split(/\s+/).map(t=>t.replace(/^-+|-+$/g,"")).filter(t=>t&&!/^\d+$/.test(t));
+const tn=t=>t.toLowerCase().replace(/ё/g,"е");
+function buildNeeds(){
+  FWD=new Map();FWT=new Map();FP=new Map();FREE=new Set();
+  const put=(m,f,k)=>{if(!f)return;tk(f).forEach(t=>{t=tn(t);let s=m.get(t);if(!s)m.set(t,s=new Set());s.add(k)})};
+  const req=(f,tags)=>{if(!f||/\s/.test(plain(f).trim()))return;const t=tn(plain(f));let s=FP.get(t);if(!s)FP.set(t,s=new Set());tags.forEach(x=>s.add(x))};
+  /* taught as it is */
+  [...WORDS,...PHRASES].forEach(w=>put(FWD,w.ru,w.key));
+  PR.forEach(p=>{
+    const txt=o=>o&&o.body?String(o.body.en||""):"";
+    const cardToks=(o,tag)=>{for(const m of txt(o).matchAll(/\{([^}]+)\}/g))put(FWD,m[1],"C:"+tag)};
+    cardToks(p,p.id);(p.ex||[]).forEach(x=>put(FWD,x[0],"C:"+p.id));
+    (p.parts||[]).forEach(pt=>cardToks(pt,p.id+":"+pt.id));
+    if(p.drill==="pattern"||p.drill==="read")(p.items||[]).forEach(x=>put(FWD,x[0],"C:"+p.id+(x[4]?":"+x[4]:"")));
+  });
+  /* forms of table words, and the card each ending needs. A form counts through any taught form of its word
+     (живёт through живу́ or жить) or through the card that teaches the word (биоло́гия on the -logy card). */
+  const PAT=new Map();PR.forEach(p=>{if(p.drill==="pattern")(p.items||[]).forEach(x=>PAT.set(tn(plain(x[0])),"C:"+p.id+(x[4]?":"+x[4]:"")))});
+  const lemma=(...cs)=>{const ks=[];cs.forEach(c=>{if(!c)return;const k=wkey(c);if(ITEMS[k])ks.push(k);const pk=PAT.get(tn(plain(c)));if(pk)ks.push(pk)});return ks.length?ks:[wkey(cs[0])]};
+  const one=(f,ks)=>{if(f&&!/\s/.test(plain(f).trim()))ks.forEach(k=>put(FWT,f,k))};
+  N.forEach(n=>{
+    const k=lemma(n.nom),wn=n.where?nounOf(n.where):"",fem=n.g==="f"||(n.g==="m"&&/[ая]$/.test(plain(n.nom)));
+    if(/^[А-ЯЁ]/.test(n.nom))[n.nom,wn,n.acc,n.gen,n.dat,n.gpl].forEach(f=>{if(f)FREE.add(tn(plain(f)))}); /* names: no need to learn them */
+    [n.nom,wn,n.acc,n.gen,n.dat,n.gpl,n.pl].forEach(f=>one(f,k));
+    const nom=tn(plain(n.nom)),diff=f=>f&&tn(plain(f))!==nom;
+    if(diff(wn))req(wn,[n.cat==="D"?"acc-fem:days":"v-prep"]);
+    if(diff(n.acc))req(n.acc,[fem?"acc-fem":"acc-masc"]);
+    if(diff(n.gen))req(n.gen,["u-menya","numbers"]);
+    if(diff(n.dat))req(n.dat,["nravitsya"]);
+    if(diff(n.gpl))req(n.gpl,["numbers"]);
+    if(diff(n.pl))req(n.pl,["moy-tvoy:pl"]);
+  });
+  ADJ.forEach(a=>{const k=lemma(a.f.m);Object.values(a.f).forEach(f=>one(f,k));["f","n","pl"].forEach(g=>{if(tn(plain(a.f[g]))!==tn(plain(a.f.m)))req(a.f[g],["moy-tvoy:adj"])})});
+  VERBS.forEach(v=>{const k=lemma(v.inf,v.forms[0]);[v.inf,...v.forms].forEach(f=>one(f,k));v.forms.forEach(f=>req(f,["ya-form"]))});
+  /* pronouns: меня́ / мне and the rest are forms of я, ты, он… */
+  PRON.forEach(([base,acc,dat])=>{const k=lemma(base);one(acc,k);req(acc,["acc-masc:pron","u-menya","chunks"]);one(dat,k);req(dat,["nravitsya"])});
+  [[POSS,"мой"],[TPOSS,"твой"]].forEach(([P,m])=>{const k=lemma(m,"мой");Object.values(P).forEach(f=>one(f,k));["f","n","pl"].forEach(g=>req(P[g],["moy-tvoy"]))});
+  Object.values(DEM).forEach(f=>{if(f!=="э́то"){one(f,["C:moy-tvoy:this"]);req(f,["moy-tvoy:this"])}});
+  /* одна́, одно́, две: forms of оди́н and два after the numbers card */
+  [["оди́н","одна́"],["оди́н","одно́"],["два","две"]].forEach(([b,f])=>{one(f,lemma(b));req(f,["numbers"])});
+}
+/* one word form: taught as it is, or a known word whose ending is explained */
+function tokOK(t,K){
+  const n=tn(t),d=FWD.get(n);
+  if(d)for(const k of d)if(K.w(k))return true;
+  if(!FREE.has(n)){const w=FWT.get(n);if(!w)return !d&&/^[А-ЯЁ]/.test(t);let any=false;for(const k of w)if(K.w(k)){any=true;break}if(!any)return false}
+  const p=FP.get(n);if(p){for(const x of p)if(K.p(x))return true;return false}
+  return true;
+}
+const fits=(text,K)=>tk(text).every(t=>tokOK(t,K));
+const unknownToks=(text,K)=>tk(text).filter(t=>!tokOK(t,K));
+/* what the learner knows: a word counts once she has answered it right at least once; a card once its step is done */
+const rightOnce=k=>{const r=S.srs[k];return !!(r&&(r.n||0)>(r.w||0))};
+const KL={w:k=>k.startsWith("C:")?unlocked(k.slice(2)):rightOnce(k),p:t=>unlocked(t)};
+/* the same, plus what this lesson is teaching right now */
+function KT(words,tags){const w=new Set(words||[]),p=new Set();(tags||[]).forEach(t=>{p.add(t);p.add(t.split(":")[0])});
+  return {w:k=>w.has(k)||(k.startsWith("C:")?p.has(k.slice(2))||KL.w(k):KL.w(k)),p:t=>p.has(t)||KL.p(t)}}
+const itemText=x=>x.full||x.ru;
+const itemFits=(x,K)=>fits(itemText(x),K);
 /* ================= combinations: vocabulary × principles =================
    Every noun, adjective and verb in the tables is put through every principle it fits,
    so each card gets many sentences built from the learner's own topics. Wrong options are
    always the same word in other forms. */
 function generate(c){
-  N=(c.nouns||[]).map(a=>({nom:a[0],en:a[1],ar:a[2],g:a[3],cat:a[4],where:a[5]||"",acc:a[6]||"",gen:a[7]||"",dat:a[8]||"",gpl:a[9]||"",song:isSongWord(ITEMS[wkey(a[0])])}));
+  N=(c.nouns||[]).map(a=>({nom:a[0],en:a[1],ar:a[2],g:a[3],cat:a[4],where:a[5]||"",acc:a[6]||"",gen:a[7]||"",dat:a[8]||"",gpl:a[9]||"",pl:a[10]||"",song:isSongWord(ITEMS[wkey(a[0])])}));
   ADJ=(c.adjs||[]).map(a=>({f:{m:a[0],f:a[1],n:a[2],pl:a[3]},en:a[4],ar:a[5],cats:a[6]||""}));
   VERBS=(c.verbs||[]).map(a=>({inf:a[0],en:a[1],ar:a[2],forms:a.slice(3,9),compl:String(a[9]||"").split("|").filter(Boolean)}));
   FORMIDX=new Map();BASEIDX={};
   const addSet=set=>{set=[...new Set(set.filter(Boolean))];if(set.length<3)return;set.forEach(f=>{const k=plain(f).toLowerCase();if(!FORMIDX.has(k))FORMIDX.set(k,set)})};
-  N.forEach(n=>{if(n.cat!=="M"&&n.cat!=="D")addSet([n.nom,n.acc,n.gen,n.dat,n.where&&nounOf(n.where),n.gpl])});
+  N.forEach(n=>{if(n.cat!=="M"&&n.cat!=="D")addSet([n.nom,n.acc,n.gen,n.dat,n.where&&nounOf(n.where),n.gpl,n.pl])});
   VERBS.forEach(v=>{if(v.inf!=="есть")addSet([v.inf,...v.forms])});
   addSet(Object.values(POSS));addSet(Object.values(TPOSS));ADJ.forEach(a=>addSet(Object.values(a.f)));
   const ok=id=>PRm[id]&&PRm[id].drill==="form";
@@ -310,66 +383,75 @@ function generate(c){
     for(const x of cands){if(!x)continue;const k=plain(x).toLowerCase();if(seen.has(k))continue;seen.add(k);wrong.push(x);if(wrong.length===3)break}
     if(wrong.length<2)return;
     const full=frame.replace("…",ans).replace(/\s+([.?!,])/g,"$1"),key="G:"+pid+":"+plain(full);if(PITEMS[key]||FULLS.has(plain(full)))return;FULLS.add(plain(full));
-    part=part||"";const o={pid,part,tag:pid+(part?":"+part:""),frame,hint,ans,wrong,full,key,akey:"S:"+plain(full),gen:1,base:base?base.nom:"",
+    const all=[];cands.forEach(x=>{if(x&&!all.some(y=>plain(y).toLowerCase()===plain(x).toLowerCase())&&plain(x).toLowerCase()!==plain(ans).toLowerCase())all.push(x)});
+    part=part||"";const o={pid,part,tag:pid+(part?":"+part:""),frame,hint,ans,wrong,cands:all,full,key,akey:"S:"+plain(full),gen:1,base:base?base.nom:"",
       en:meaning?meaning.en:base?base.nom+" — "+base.en:"",ar:meaning?meaning.ar:base?base.nom+" — "+base.ar:""};
     PITEMS[key]=o;PRm[pid].list.push(o);if(o.base){const k=wkey(o.base);(BASEIDX[k]=BASEIDX[k]||[]).push(o)}
   };
   const things=N.filter(n=>(n.cat==="F"||n.cat==="C")&&n.g!=="pl"&&!n.song).map(n=>n.nom); /* never put a song word into someone else's sentence */
   const WF={L:["Я сейча́с …","Мы …","Ма́ма …","Брат …"],C:["Я живу́ …","Сестра́ живёт …","Мы сейча́с …"],V:["Я сейча́с …","Мы …"],T:["Ключ …","Кот …","Телефо́н …","Кни́га …"],M:["Мой день рожде́ния …","Мы отдыха́ем …","… хо́лодно."]};
-  const AF={P:["Я ви́жу …","Я люблю́ …","Я жду …","Я зна́ю …"],T:["Я ви́жу …","Я хочу́ …"],F:["Я люблю́ …"],L:["Я ви́жу …","Я люблю́ …"],C:["Я люблю́ …","Я зна́ю …"],V:["Я ви́жу …","Я жду …"]};
+  const AF={I:["Я люблю́ …","Я учу́ …"],P:["Я ви́жу …","Я люблю́ …","Я жду …","Я зна́ю …"],T:["Я ви́жу …","Я хочу́ …"],F:["Я люблю́ …"],L:["Я ви́жу …","Я люблю́ …"],C:["Я люблю́ …","Я зна́ю …"],V:["Я ви́жу …","Я жду …"]};
   const DF=["Я рабо́таю …","Мы отдыха́ем …","У меня́ уро́к …"];
   const HAVE=["У … есть маши́на.","У … есть телефо́н.","У … есть дом."],STATES=["хо́лодно","тепло́","бо́льно"];
   const end=f=>/[.?!]$/.test(f)?f:f+" .";
-  N.forEach((n,i)=>{
+  /* Every noun goes into every frame it fits, not one picked by its place in the table: the most reuse of
+     what she knows, and a sentence keeps its key (and its review history) when the tables grow. */
+  N.forEach(n=>{
     const pr=n.where?prepOf(n.where):"",other=pr==="в"?"на":"в",wn=n.where?nounOf(n.where):"";
     /* my, your, this, and describing words: every noun, plural ones too */
-    if(n.cat!=="C"&&n.cat!=="M"&&n.cat!=="D"){
-      const P2=i%2?TPOSS:POSS;const odd=n.g==="pl"||/ь$/.test(n.nom)||(n.g==="m"&&/[ая]$/.test(plain(n.nom)))||(n.g==="n"&&/мя$/.test(plain(n.nom)));
-      if(n.cat!=="W")gi("moy-tvoy","Э́то … "+n.nom+".",P2.m,P2[n.g],Object.values(P2),n,null,odd&&n.g!=="pl"?"tricky":"");
-      const fit=ADJ.filter(a=>a.cats.includes(n.cat));
-      if(fit.length){const a1=fit[i%fit.length],a2=fit[(i+3)%fit.length];
-        gi("moy-tvoy","Э́то … "+n.nom+".",a1.f.m,a1.f[n.g],Object.values(a1.f),n,null,"adj");
-        if(a2!==a1)gi("moy-tvoy",cap(n.nom)+" … .",a2.f.m,a2.f[n.g],Object.values(a2.f),n,null,"adj")}
+    if(n.cat!=="C"&&n.cat!=="M"&&n.cat!=="D"&&n.cat!=="I"){
+      const odd=n.g==="pl"||/ь$/.test(n.nom)||(n.g==="m"&&/[ая]$/.test(plain(n.nom)))||(n.g==="n"&&/мя$/.test(plain(n.nom)));
+      if(n.cat!=="W")[POSS,TPOSS].forEach(P2=>gi("moy-tvoy","Э́то … "+n.nom+".",P2.m,P2[n.g],Object.values(P2),n,null,odd&&n.g!=="pl"?"tricky":""));
+      ADJ.filter(a=>a.cats.includes(n.cat)).forEach(a=>{
+        gi("moy-tvoy","Э́то … "+n.nom+".",a.f.m,a.f[n.g],Object.values(a.f),n,null,"adj");
+        gi("moy-tvoy",cap(n.nom)+" … .",a.f.m,a.f[n.g],Object.values(a.f),n,null,"adj")});
       gi("moy-tvoy","Где … "+n.nom+"?","э́тот",DEM[n.g],Object.values(DEM),n,null,"this");
     }
+    /* many: мои́ ключи́, но́вые ключи́ */
+    if(n.pl){gi("moy-tvoy","Э́то мои́ … .",n.nom,n.pl,[n.nom,n.gen,n.gpl,n.acc],n,null,"pl");
+      ADJ.filter(a=>a.cats.includes(n.cat)).forEach(a=>gi("moy-tvoy","Э́то … "+n.pl+".",a.f.m,a.f.pl,Object.values(a.f),n,null,"adj"))}
+    /* school subjects and fields: what you love, study, like */
+    if(n.cat==="I")ADJ.filter(a=>a.cats.includes("I")).forEach(a=>{gi("moy-tvoy","Э́то … "+n.nom+".",a.f.m,a.f[n.g],Object.values(a.f),n,null,"adj");gi("moy-tvoy",cap(n.nom)+" … .",a.f.m,a.f[n.g],Object.values(a.f),n,null,"adj")});
     if(n.g==="pl")return;
     /* on which day */
-    if(n.cat==="D"){gi("acc-fem",end(DF[i%DF.length]),n.nom,n.where,[pr+" "+n.gen,pr+" "+n.dat,pr+" "+n.nom],n,null,"days");return}
+    if(n.cat==="D"){DF.forEach(f=>gi("acc-fem",end(f),n.nom,n.where,[pr+" "+n.gen,pr+" "+n.dat,pr+" "+n.nom],n,null,"days"));return}
     /* where */
-    if(n.where&&wn!==n.nom&&WF[n.cat]){const fs=WF[n.cat];let f=fs[i%fs.length];if(n.cat==="T"&&f.startsWith(cap(n.nom)))f=fs[(i+1)%fs.length];
-      gi("v-prep",end(f),n.nom,n.where,[pr+" "+n.nom,pr+" "+n.gen,pr+" "+n.dat,other+" "+wn],n,null,/(у́|ии)$/.test(wn)?"tricky":"")}
+    if(n.where&&wn!==n.nom&&WF[n.cat])WF[n.cat].forEach(f=>{if(n.cat==="T"&&f.startsWith(cap(n.nom)))return;
+      gi("v-prep",end(f),n.nom,n.where,[pr+" "+n.nom,pr+" "+n.gen,pr+" "+n.dat,other+" "+wn],n,null,/(у́|ии)$/.test(wn)?"tricky":"")});
     if(n.cat==="M")return;
     /* where to */
-    if(n.where&&n.acc&&(n.cat==="L"||n.cat==="C")&&n.nom!=="дом"){const ft=n.cat==="C"?["Мы е́дем …","Я е́ду …"]:["Я иду́ …","Мы идём …","Ма́ма идёт …"];
-      gi("v-prep",end(ft[i%ft.length]),n.nom,pr+" "+n.acc,[n.where,pr+" "+n.gen,pr+" "+n.dat,other+" "+n.acc],n,null,"to")}
+    if(n.where&&n.acc&&(n.cat==="L"||n.cat==="C")&&n.nom!=="дом")(n.cat==="C"?["Мы е́дем …","Я е́ду …"]:["Я иду́ …","Мы идём …","Ма́ма идёт …"]).forEach(f=>
+      gi("v-prep",end(f),n.nom,pr+" "+n.acc,[n.where,pr+" "+n.gen,pr+" "+n.dat,other+" "+n.acc],n,null,"to"));
     /* objects */
-    if(n.acc&&AF[n.cat]){const fs=AF[n.cat],fem=n.g==="f"||(n.g==="m"&&/[ая]$/.test(plain(n.nom)));
-      gi(fem?"acc-fem":"acc-masc",end(fs[i%fs.length]),n.nom,n.acc,[n.nom,n.gen,n.dat,wn],n,null,fem&&(n.g!=="f"||/ь$/.test(n.nom)||plain(n.acc).replace(/у$/,"")!==plain(n.nom).replace(/а$/,""))?"tricky":"")}
+    if(n.acc&&AF[n.cat]){const fem=n.g==="f"||(n.g==="m"&&/[ая]$/.test(plain(n.nom)));
+      AF[n.cat].forEach(f=>gi(fem?"acc-fem":"acc-masc",end(f),n.nom,n.acc,[n.nom,n.gen,n.dat,wn],n,null,fem&&(n.g!=="f"||/ь$/.test(n.nom)||plain(n.acc).replace(/у$/,"")!==plain(n.nom).replace(/а$/,""))?"tricky":""))}
     /* at someone's: у брата есть… / none: нет… / it hurts */
-    if(n.cat==="P"&&n.gen)gi("u-menya",HAVE[i%HAVE.length],n.nom,n.gen,[n.nom,n.acc,n.dat],n,null,"net");
+    if(n.cat==="P"&&n.gen)HAVE.forEach(f=>gi("u-menya",f,n.nom,n.gen,[n.nom,n.acc,n.dat],n,null,"net"));
     if(n.gen&&(["T","F","V"].includes(n.cat)||n.nom==="вре́мя"))gi("u-menya","У меня́ нет … .",n.nom,n.gen,[n.nom,n.acc,n.dat],n,null,"net");
     if(n.cat==="B")gi("u-menya","У меня́ боли́т … .",n.nom,n.nom,[n.acc,n.gen,n.dat],n,null,"net");
     /* to whom: нравится, state words */
     if(n.cat==="P"&&n.dat){const C3=[cap(n.nom),cap(n.acc),cap(n.gen)];
-      gi("nravitsya","… нра́вится "+things[i%things.length]+".",n.nom,cap(n.dat),C3,n);
-      gi("nravitsya","… "+STATES[i%STATES.length]+".",n.nom,cap(n.dat),C3,n,null,"state")}
-    if(["F","L","C","T"].includes(n.cat)&&n.acc)gi("nravitsya","Мне нра́вится … .",n.nom,n.nom,[n.acc,n.gen,n.dat],n);
+      things.forEach(t=>gi("nravitsya","… нра́вится "+t+".",n.nom,cap(n.dat),C3,n));
+      STATES.forEach(st=>gi("nravitsya","… "+st+".",n.nom,cap(n.dat),C3,n,null,"state"))}
+    if(["F","L","C","T","I"].includes(n.cat)&&n.acc)gi("nravitsya","Мне нра́вится … .",n.nom,n.nom,[n.acc,n.gen,n.dat],n);
     /* numbers */
     if(n.gpl&&n.gen&&n.cat!=="C"){
       const one={m:"оди́н",f:"одна́",n:"одно́"}[n.g],two={m:"два",f:"две",n:"два"}[n.g],cs=[n.nom,n.gen,n.gpl,n.dat];
-      gi("numbers",cap(i%2?one:"два́дцать "+one)+" … .",n.nom,n.nom,cs,n);
-      gi("numbers",cap([two,"три","четы́ре","два́дцать "+two][i%4])+" … .",n.nom,n.gen,cs,n);
-      gi("numbers",cap(["пять","шесть","де́сять","два́дцать пять","сто"][i%5])+" … .",n.nom,n.gpl,cs,n);
+      [one,"два́дцать "+one].forEach(x=>gi("numbers",cap(x)+" … .",n.nom,n.nom,cs,n));
+      [two,"три","четы́ре","два́дцать "+two].forEach(x=>gi("numbers",cap(x)+" … .",n.nom,n.gen,cs,n));
+      ["пять","шесть","де́сять","два́дцать пять","сто"].forEach(x=>gi("numbers",cap(x)+" … .",n.nom,n.gpl,cs,n));
     }
   });
-  /* verb endings: every verb with every person */
+  /* verb endings: every verb with every person, with and without не, with every ending sentence it has */
   const PERS=[["Я",0],["Ты",1],["Она́",2],["Он",2],["Мы",3],["Вы",4],["Они́",5]];
-  VERBS.forEach((v,vi)=>PERS.forEach(([pn,k],pi)=>{
-    if(!v.forms[k])return;const compl=v.compl.length?" "+v.compl[(vi+pi)%v.compl.length]:"",neg=(vi*7+pi)%6===0;
-    const cands=[...v.forms.filter((_,j)=>j!==k),v.inf],rot=(vi+pi)%cands.length;
+  VERBS.forEach(v=>PERS.forEach(([pn,k])=>{
+    if(!v.forms[k])return;
+    const cands=[...v.forms.filter((_,j)=>j!==k),v.inf];
     const iFam=!["знать","понима́ть","рабо́тать","чита́ть","обе́дать","отдыха́ть","ду́мать"].includes(v.inf); /* the first verb lesson drills regular -ать verbs only */
-    const inf=/^(спать|чита́ть|рабо́тать)$/.test(v.compl[(vi+pi)%Math.max(1,v.compl.length)]||"");
-    gi("ya-form",`${pn} ${neg?"не ":""}…${compl}${k===1?"?":"."}`,v.inf,v.forms[k],cands.slice(rot).concat(cands.slice(0,rot)),null,{en:v.inf+" — "+v.en,ar:v.inf+" — "+v.ar},inf?"inf":iFam?"i":"");
+    (v.compl.length?v.compl:[""]).forEach(c=>[false,true].forEach(neg=>{
+      const inf=/^(спать|чита́ть|рабо́тать)$/.test(c);
+      gi("ya-form",`${pn} ${neg?"не ":""}…${c?" "+c:""}${k===1?"?":"."}`,v.inf,v.forms[k],cands,null,{en:v.inf+" — "+v.en,ar:v.inf+" — "+v.ar},inf?"inf":iFam?"i":"");
+    }));
   }));
   /* stress: every word you have */
   if(PRm.stress){const have=new Set(PRm.stress.list.map(x=>plain(x.ru)));
@@ -377,7 +459,7 @@ function generate(c){
       const o={pid:"stress",part:"",tag:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
 }
 build();
-const APP_VERSION="1.6";
+const APP_VERSION="1.7";
 
 /* ================= feedback notes (localStorage "koren-feedback") =================
    A note box under each drill question, drill result, topic, principle and reading.
@@ -505,13 +587,17 @@ function buildPath(){
   TOP.forEach(t=>{if(!t.song&&!order.includes("t:"+t.id))order.push("t:"+t.id)});
   PR.forEach(x=>{if(!order.includes("p:"+x.id))order.push("p:"+x.id);(x.parts||[]).forEach(pt=>{if(!order.includes(`p:${x.id}:${pt.id}`))order.push(`p:${x.id}:${pt.id}`)})});
   READS.forEach(r=>{if(!order.includes("r:"+r.id))order.push("r:"+r.id)});
+  /* a topic is cut into lessons of about seven words; "t:hello" places all of its lessons not placed by name ("t:hello:3") elsewhere in the path */
+  const chunks={};TOP.forEach(t=>{const ws=WORDS.filter(w=>w.topic===t.id);if(!ws.length||t.song)return;const n=Math.ceil(ws.length/7),size=Math.ceil(ws.length/n);
+    chunks[t.id]=[];for(let i=0;i<n;i++)chunks[t.id].push({id:`t:${t.id}:${i+1}`,k:"t",topic:t.id,words:ws.slice(i*size,(i+1)*size),part:i+1,parts:n,phrases:[]})});
+  const named=new Set(order.filter(x=>/^t:[^:]+:\d+$/.test(x)));
   order.forEach(st=>{const [k,id,part]=st.split(":");
-    if(k==="t"&&TOPm[id]&&!TOPm[id].song){const ws=WORDS.filter(w=>w.topic===id);if(!ws.length)return;const n=Math.ceil(ws.length/7),size=Math.ceil(ws.length/n);
-      for(let i=0;i<n;i++)STEPS.push({id:`t:${id}:${i+1}`,k:"t",topic:id,words:ws.slice(i*size,(i+1)*size),part:i+1,parts:n,phrases:[]})}
+    if(k==="t"&&chunks[id]){if(part){const c=chunks[id][+part-1];if(c&&!STEPm[c.id]){STEPS.push(c);STEPm[c.id]=c}}
+      else chunks[id].forEach(c=>{if(!named.has(c.id)&&!STEPm[c.id]){STEPS.push(c);STEPm[c.id]=c}})}
     else if(k==="p"&&PRm[id]&&(!part||(PRm[id].parts||[]).some(pt=>pt.id===part)))STEPS.push({id:"p:"+id+(part?":"+part:""),k:"p",pid:id,part:part||"",phrases:[]});
     else if(k==="r"&&READS.some(r=>r.id===id))STEPS.push({id:"r:"+id,k:"r",rid:id,phrases:[]});
   });
-  STEPS.forEach((x,i)=>{x.i=i;STEPm[x.id]=x});
+  STEPm={};STEPS.forEach((x,i)=>{x.i=i;STEPm[x.id]=x});
   PHRASES.forEach(ph=>{if(TOPm[ph.topic]&&TOPm[ph.topic].song)return; /* song sentences live on their song page */
     let idx=STEPS.findIndex(x=>x.topic===ph.topic);
     ph.ps.forEach(tag=>{let j=STEPS.findIndex(x=>x.id==="p:"+tag);if(j<0)j=STEPS.findIndex(x=>x.id==="p:"+tag.split(":")[0]);if(j>idx)idx=j});
@@ -519,10 +605,12 @@ function buildPath(){
 }
 const DRILLED=6;
 function stepDone(x){
-  if(!x)return false;if(S.done[x.id])return true;
-  if(x.k==="p"){const k=x.pid+(x.part?":"+x.part:"");return !!(S.ps[k]&&S.ps[k].n>=DRILLED)}
-  if(x.k==="r")return !!S.read[x.rid];
-  return x.words.every(w=>S.seen[w.key])&&x.phrases.every(w=>S.seen[w.key]);
+  if(!x)return false;
+  /* new words: done when every word and phrase has been answered right at least once, so a word added later still gets taught */
+  if(x.k==="t")return x.words.every(w=>rightOnce(w.key))&&x.phrases.every(w=>rightOnce(w.key));
+  if(S.done[x.id])return true;
+  if(x.k==="p"){const k=x.pid+(x.part?":"+x.part:"");const s=S.ps[k];return !!(s&&s.n>=DRILLED&&s.r.slice(-DRILLED).reduce((a,b)=>a+b,0)>=DRILLED*.6)}
+  return !!(S.rd&&S.rd[x.rid]); /* a reading: done once its drills are, not when it's opened */
 }
 const unlocked=tag=>{const st=STEPm["p:"+tag];return st?stepDone(st):stepDone(STEPm["p:"+tag.split(":")[0]])};
 const partOf=(pid,part)=>part?((PRm[pid].parts||[]).find(x=>x.id===part)||null):null;
@@ -539,7 +627,10 @@ function stepSub(x){
   if(x.k==="p"){const pt=partOf(x.pid,x.part);return pt?T(`More on: ${L(PRm[x.pid])}`,`المزيد عن: ${L(PRm[x.pid])}`):L(PRm[x.pid].can)}
   const r=READS.find(y=>y.id===x.rid);return tname(r.topic);
 }
-function lessonQs(x){
+function lessonQs(x){ /* built against what she knows plus what this step teaches */
+  return withK(x.k==="t"?KT([...x.words,...x.phrases].map(w=>w.key),[]):x.k==="p"?KT(x.phrases.map(w=>w.key),[x.pid+(x.part?":"+x.part:"")]):KT(x.phrases.map(w=>w.key),[]),()=>lessonQs0(x));
+}
+function lessonQs0(x){
   const q=[];
   if(x.k==="p"){q.push({t:"card",pid:x.pid,part:x.part});q.push(...principleQs(x.pid,8,x.part))}
   else if(x.k==="r"){q.push({t:"text",rid:x.rid});q.push(...readingQs(x.rid))}
@@ -548,7 +639,7 @@ function lessonQs(x){
     shuffle(set).forEach(w=>q.push(wordQ(w,"pm")));
     shuffle(set).slice(0,4).forEach(w=>q.push(wordQ(w,canPlay(w.key)&&Math.random()<.5?"lp":"pr")));
     shuffle(set).slice(0,2).forEach(w=>q.push(wordQ(w,"ty")));
-    shuffle(set.flatMap(w=>BASEIDX[w.key]||[]).filter(y=>unlocked(y.tag))).slice(0,3).forEach(y=>{const z=principleQ(y,null);if(z)q.push(z)});
+    shuffle(set.flatMap(w=>BASEIDX[w.key]||[]).filter(y=>unlocked(y.tag)&&itemFits(y,QK))).slice(0,3).forEach(y=>{const z=principleQ(y,null);if(z)q.push(z)});
   }
   /* phrases that become sayable at this step */
   x.phrases.forEach(ph=>q.push({t:"intro",it:ph}));
@@ -566,9 +657,10 @@ function startStep(id){
 function poolOf(f){
   f=f||{};
   const met=x=>{const k=x.base?wkey(x.base):x.gen&&x.akey&&x.akey.startsWith("W:")?x.akey:null;if(!k)return true;const it=ITEMS[k];return !it||!!S.seen[it.key]||!!S.srs[it.key]};
-  let items=[...WORDS,...PHRASES].filter(x=>(S.seen[x.key]||S.srs[x.key])&&ready(x));
-  let lines=Object.values(ITEMS).filter(x=>x.kind==="l"&&(S.read[x.read]||S.done["r:"+x.read]));
-  let pr=PR.filter(x=>unlocked(x.id)).flatMap(x=>x.list.filter(y=>met(y)&&unlocked(y.tag||x.id)));
+  /* only what she has answered right at least once, and only sentences whose every word and ending she knows */
+  let items=[...WORDS,...PHRASES].filter(x=>rightOnce(x.key)&&ready(x));
+  let lines=Object.values(ITEMS).filter(x=>x.kind==="l"&&(S.rd&&S.rd[x.read]||S.done["r:"+x.read])&&itemFits(x,KL));
+  let pr=PR.filter(x=>unlocked(x.id)).flatMap(x=>x.list.filter(y=>met(y)&&unlocked(y.tag||x.id)&&!songLocked(y)&&itemFits(y,KL)));
   if(f.pid){items=items.filter(x=>x.ps.includes(f.pid));lines=[];pr=pr.filter(x=>x.pid===f.pid)}
   if(f.song){const ks=new Set(SONGm[f.song]?songItems(SONGm[f.song]).map(x=>x.key):[]);items=items.filter(x=>ks.has(x.key));lines=[];pr=pr.filter(x=>x.base&&ks.has(wkey(x.base)))}
   if(f.topic){items=items.filter(x=>x.topic===f.topic);lines=lines.filter(x=>x.topic===f.topic);pr=pr.filter(x=>x.base&&ITEMS[wkey(x.base)]&&ITEMS[wkey(x.base)].topic===f.topic)}
@@ -871,9 +963,12 @@ function vSong(id){
   ${(s.ps||[]).length?`<div class="card"><span class="label">${TK(s,T("Grammar in this song","القواعد في هذه الأغنية"),T("Grammar in this poem","القواعد في هذه القصيدة"))}</span><p class="lead">${T("Each card explains one building block it uses.","كل بطاقة تشرح قطعة بناء واحدة مستخدمة فيها.")}</p>${pchips(s.ps)}</div>`:""}
   ${fbBox("s:"+id,()=>({kind:"song",src:`${isPoem(s)?"Poem":"Song"} “${plain(s.ru)}” by ${plain(s.by)} (id ${id})`}))}`;
 }
-function songQs(s,li){
-  const l=s.lessons[li],q=[{t:"snote",sid:s.id,li}];
-  const ws=(l.words||[]).map(r=>ITEMS[wkey(r)]).filter(Boolean),ph=(l.phrases||[]).map(r=>ITEMS[pkey(r)]).filter(Boolean);
+function songQs(s,li){ /* the lesson's words and lines are what it teaches; everything else must already be known */
+  const l=s.lessons[li],ws=(l.words||[]).map(r=>ITEMS[wkey(r)]).filter(Boolean),ph=(l.phrases||[]).map(r=>ITEMS[pkey(r)]).filter(Boolean);
+  return withK(KT([...ws,...ph].map(x=>x.key),[]),()=>songQs0(s,li,l,ws,ph));
+}
+function songQs0(s,li,l,ws,ph){
+  const q=[{t:"snote",sid:s.id,li}];
   ws.filter(w=>!seenOrDrilled(w)).forEach(w=>q.push({t:"intro",it:w}));
   shuffle(ws).forEach(w=>q.push(wordQ(w,"pm")));
   shuffle(ws).slice(0,4).forEach(w=>q.push(wordQ(w,canPlay(w.key)&&Math.random()<.5?"lp":"pr")));
@@ -882,7 +977,7 @@ function songQs(s,li){
   const ok=ph.filter(ready);
   ok.filter(x=>!seenOrDrilled(x)).forEach(x=>q.push({t:"intro",it:x}));
   shuffle(ok).forEach(x=>{const z=gapQ(x)||buildQ(x)||wordQ(x,"pm");if(z)q.push(z)});
-  shuffle(ws.flatMap(w=>BASEIDX[w.key]||[]).filter(y=>unlocked(y.tag))).slice(0,3).forEach(y=>{const z=principleQ(y,null);if(z)q.push(z)});
+  shuffle(ws.flatMap(w=>BASEIDX[w.key]||[]).filter(y=>unlocked(y.tag)&&itemFits(y,QK))).slice(0,3).forEach(y=>{const z=principleQ(y,null);if(z)q.push(z)});
   q.push(...reviewQs(2));
   return q.filter(Boolean);
 }
@@ -1315,7 +1410,11 @@ function apUI(){
 const SONGF={};
 async function loadSongFiles(){for(const s of SONGS){try{const f=await idbGet("songfile:"+s.id);if(f&&f.blob)SONGF[s.id]=f.name||T("your file","ملفك")}catch(e){}}}
 
-/* ================= practice: building questions ================= */
+/* ================= practice: building questions =================
+   QK is what the learner knows while a set of questions is built: KL in Practice, and KL plus what the
+   lesson is teaching inside a path step. Every option, gap and tile is checked against it. */
+let QK=KL;
+const withK=(K,f)=>{const o=QK;QK=K;try{return f()}finally{QK=o}};
 const lenScore=(a,b)=>Math.abs(plain(a).length-plain(b).length)+(plain(a).split(" ").length===plain(b).split(" ").length?0:6);
 function pickDistr(it,pool,field){ /* similar length and word count; never the same meaning */
   const mean=x=>(x.en+"|"+x.ar),seen=new Set([mean(it),plain(it.ru)]);
@@ -1324,7 +1423,9 @@ function pickDistr(it,pool,field){ /* similar length and word count; never the s
   const out=[];for(const x of shuffle(cand)){const k=mean(x)+plain(x.ru);if(!seen.has(k)){seen.add(k);out.push(x)}if(out.length===3)break}
   return out;
 }
-function poolFor(it){const same=(it.kind==="p"?PHRASES:WORDS).filter(x=>x.topic===it.topic);return same.length>=6?same:same.concat(it.kind==="p"?PHRASES:WORDS)}
+function poolFor(it){ /* wrong options: known items of the same topic first, then other known items */
+  const all=(it.kind==="p"?PHRASES:WORDS).filter(x=>x===it||QK.w(x.key)),same=all.filter(x=>x.topic===it.topic);
+  return same.length>=6?same:same.concat(all.filter(x=>x.topic!==it.topic))}
 function wordQ(it,type){
   const pool=poolFor(it);
   if(type==="pm")return {t:"pm",it,opts:shuffle([it,...pickDistr(it,pool,S.lang)])};
@@ -1346,10 +1447,13 @@ function stressVariants(ru){
 }
 function principleQ(x,mode){
   const p=PRm[x.pid];
-  if(p.drill==="form")return mode==="type"?{t:"fty",x}:{t:"form",x,opts:shuffle([x.ans,...x.wrong])};
+  if(p.drill==="form"){
+    if(mode==="type")return {t:"fty",x};
+    const ok=shuffle(x.cands||x.wrong).filter(o=>fits(x.frame.replace("…",o),QK)).slice(0,3);
+    return ok.length?{t:"form",x,opts:shuffle([x.ans,...ok])}:{t:"fty",x}}
   if(p.drill==="stress"){const v=stressVariants(x.ru);return v?{t:"stress",x,opts:v}:null}
   const same=y=>x.root&&y.root===x.root?0:1;
-  const others=shuffle(p.list.filter(y=>y!==x&&plain(y.ru)!==plain(x.ru))).sort((a,b)=>same(a)-same(b)||lenScore(a.ru,x.ru)-lenScore(b.ru,x.ru)).slice(0,5);
+  const others=shuffle(p.list.filter(y=>y!==x&&plain(y.ru)!==plain(x.ru)&&itemFits(y,QK))).sort((a,b)=>same(a)-same(b)||lenScore(a.ru,x.ru)-lenScore(b.ru,x.ru)).slice(0,5);
   const d=x.root?others.slice(0,3):shuffle(others).slice(0,3);
   if(p.drill==="read")return {t:"read",x,opts:shuffle([x,...d])};
   if(mode==="type")return {t:"pty",x};
@@ -1363,14 +1467,22 @@ function principleQs(pid,n,part){
 }
 function principleQsFrom(p,list,n){
   const d=today();
-  /* prefer sentences built from words the learner has already met */
-  const met=x=>{const k=x.base?wkey(x.base):x.gen&&x.akey&&x.akey.startsWith("W:")?x.akey:null;if(!k)return true;const it=ITEMS[k];return !it||!!seenOrDrilled(it)};
-  let pool=list.filter(x=>!songLocked(x));if(p.drill==="stress"){const known=pool.filter(met);if(known.length>=n)pool=known}
-  const ranked=shuffle(pool).sort((a,b)=>{const ra=S.srs[a.key],rb=S.srs[b.key];const sa=(ra?(ra.d<=d?0:2)+ra.b/10:1)+(met(a)?0:1.5),sb=(rb?(rb.d<=d?0:2)+rb.b/10:1)+(met(b)?0:1.5);return sa-sb});
-  const pick=ranked.slice(0,n);
+  /* one sentence per base word, so a lesson mixes words */
+  const nWrong=x=>p.drill!=="form"?3:(x.cands||x.wrong).filter(o=>fits(x.frame.replace("…",o),QK)).length;
+  /* only items whose every word is known and every ending explained, and (for picks) with known wrong options: two or more if there are enough such items */
+  let pool=list.filter(x=>!songLocked(x)&&itemFits(x,QK));
+  if(p.drill==="form"){const two=pool.filter(x=>nWrong(x)>=2),one=pool.filter(x=>nWrong(x)>=1);pool=two.length>=n?two:one.length>=n?one:pool}
+  const ranked=shuffle(pool).sort((a,b)=>{const ra=S.srs[a.key],rb=S.srs[b.key];const sa=ra?(ra.d<=d?0:2)+ra.b/10:1,sb=rb?(rb.d<=d?0:2)+rb.b/10:1;return sa-sb});
+  const pick=[],bases=new Set();
+  for(const x of ranked){if(pick.length>=n)break;const b=x.base||(x.hint&&x.gen?x.hint:"");if(b&&bases.has(b))continue;if(b)bases.add(b);pick.push(x)}
+  for(const x of ranked){if(pick.length>=n)break;if(!pick.includes(x))pick.push(x)}
   return pick.map((x,i)=>principleQ(x,p.drill==="pattern"?(i<n/2?"pick":i<n*.75?"mean":"type"):p.drill==="form"&&i>=n-2?"type":null)).filter(Boolean);
 }
 function topicQs(id,learnNew){
+  const fresh0=wordsOf(id).filter(w=>!seenOrDrilled(w)).slice(0,6);
+  return withK(KT(learnNew?fresh0.map(w=>w.key):[],[]),()=>topicQs0(id,learnNew));
+}
+function topicQs0(id,learnNew){
   const ws=wordsOf(id),ph=phrasesOf(id),q=[];
   let fresh=ws.filter(w=>!seenOrDrilled(w)).slice(0,6);
   let set=fresh;
@@ -1385,20 +1497,20 @@ function topicQs(id,learnNew){
   shuffle(set).slice(0,2).forEach(w=>q.push(wordQ(w,"ty")));
   const phr=shuffle(ph.filter(ready)).slice(0,1);phr.forEach(x=>q.push(wordQ(x,"pm")));
   shuffle(ph.filter(ready)).slice(0,3).forEach((x,j)=>{const y=j%2?buildQ(x)||gapQ(x):gapQ(x)||buildQ(x);if(y)q.push(y)});
-  shuffle(ws.flatMap(w=>BASEIDX[w.key]||[]).filter(x=>unlocked(x.pid))).slice(0,4).forEach(x=>{const y=principleQ(x,Math.random()<.25?"type":null);if(y)q.push(y)});
+  shuffle(ws.flatMap(w=>BASEIDX[w.key]||[]).filter(x=>unlocked(x.tag)&&itemFits(x,QK))).slice(0,4).forEach(x=>{const y=principleQ(x,Math.random()<.25?"type":null);if(y)q.push(y)});
   const older=dueKeys().filter(k=>ITEMS[k]&&ITEMS[k].topic!==id).slice(0,2);
   older.forEach(k=>{const y=itemQ(ITEMS[k]);if(y)q.push(y)});
   return q;
 }
 function reviewQs(n){
-  return dueKeys().filter(k=>!ITEMS[k]||ready(ITEMS[k])).slice(0,n).map(k=>ITEMS[k]?itemQ(ITEMS[k]):principleQ(PITEMS[k],["pick","mean","type"][Math.floor(Math.random()*3)])).filter(Boolean);
+  return dueKeys().filter(k=>ITEMS[k]?ready(ITEMS[k])&&(ITEMS[k].kind!=="l"||itemFits(ITEMS[k],QK)):itemFits(PITEMS[k],QK)).slice(0,n).map(k=>ITEMS[k]?itemQ(ITEMS[k]):principleQ(PITEMS[k],["pick","mean","type"][Math.floor(Math.random()*3)])).filter(Boolean);
 }
 /* a gap in a real sentence: the missing word's other forms are the options */
 function gapQ(it){
-  const ts=it.ru.split(/\s+/),cand=ts.map((t,i)=>({i,c:clean(t)})).filter(x=>x.c&&FORMIDX.has(plain(x.c).toLowerCase()));
+  const ts=it.ru.split(/\s+/),okF=f=>tk(f).every(t=>tokOK(t,QK)),cand=ts.map((t,i)=>({i,c:clean(t)})).filter(x=>x.c&&FORMIDX.has(plain(x.c).toLowerCase())&&okF(x.c));
   if(!cand.length)return null;
   const pick=cand[Math.floor(Math.random()*cand.length)],set=FORMIDX.get(plain(pick.c).toLowerCase()),up=pick.c[0]!==pick.c[0].toLowerCase();
-  const others=shuffle(set.filter(f=>plain(f).toLowerCase()!==plain(pick.c).toLowerCase())).slice(0,3).map(f=>up?cap(f):f);
+  const others=shuffle(set.filter(f=>plain(f).toLowerCase()!==plain(pick.c).toLowerCase()&&okF(f))).slice(0,3).map(f=>up?cap(f):f);
   if(others.length<2)return null;
   return {t:"gap",it,frame:ts.map((t,i)=>i===pick.i?t.replace(pick.c,"…"):t).join(" "),ans:pick.c,opts:shuffle([pick.c,...others])};
 }
@@ -1406,9 +1518,9 @@ function gapQ(it){
 function buildQ(it){
   const toks=it.ru.replace(/[—–]/g," ").split(/\s+/).map(clean).filter(Boolean);
   if(toks.length<3||toks.length>8)return null;
-  const tiles=toks.slice(),ci=toks.map((t,i)=>i).filter(i=>FORMIDX.has(plain(toks[i]).toLowerCase()));
+  const okF=f=>tk(f).every(t=>tokOK(t,QK)),tiles=toks.slice(),ci=toks.map((t,i)=>i).filter(i=>FORMIDX.has(plain(toks[i]).toLowerCase()));
   if(ci.length){const t=toks[ci[Math.floor(Math.random()*ci.length)]],set=FORMIDX.get(plain(t).toLowerCase());
-    const alt=shuffle(set.filter(f=>plain(f).toLowerCase()!==plain(t).toLowerCase()))[0];if(alt)tiles.push(t[0]!==t[0].toLowerCase()?cap(alt):alt)}
+    const alt=shuffle(set.filter(f=>plain(f).toLowerCase()!==plain(t).toLowerCase()&&okF(f)))[0];if(alt)tiles.push(t[0]!==t[0].toLowerCase()?cap(alt):alt)}
   return {t:"build",it,target:toks,tiles:shuffle(tiles),built:[]};
 }
 const lineMeanQ=(it,pool)=>{const o=shuffle(pool.filter(x=>x!==it&&x.en!==it.en)).slice(0,3);return o.length>=2?{t:"pm",it,opts:shuffle([it,...o])}:null};
@@ -1580,10 +1692,17 @@ function nextQ(){
   Q.i++;Q.answered=false;renderQ();autoPlay();
 }
 function renderEnd(){
-  if(Q.title==="reading"){const m=/id ([^)]+)\)/.exec(Q.src);if(m&&!S.read[m[1]]){S.read[m[1]]=1;save()}}
-  if(Q.stepId&&!Q.marked){Q.marked=1;S.done[Q.stepId]=1;const x=STEPm[Q.stepId];if(x&&x.k==="r")S.read[x.rid]=1;save()}
+  /* a step counts when most answers were right: progress comes from drills, not from getting to the end */
+  const nAns=Q.res.filter(r=>r===true||r===false).length,passed=!nAns||Q.right>=nAns*.6;
+  if(Q.title==="reading"&&passed){const m=/id ([^)]+)\)/.exec(Q.src);if(m){S.read[m[1]]=1;S.rd=S.rd||{};S.rd[m[1]]=1;save()}}
+  if(Q.stepId&&!Q.marked&&passed){Q.marked=1;const x=STEPm[Q.stepId];if(x&&x.k!=="t")S.done[Q.stepId]=1;if(x&&x.k==="r"){S.read[x.rid]=1;S.rd=S.rd||{};S.rd[x.rid]=1}save()}
+  const again=Q.stepId&&!passed;
   if(Q.song&&!Q.smarked){Q.smarked=1;S.done[sdKey(Q.song.id,Q.song.li)]=1;save()}
   const nx=curStep(),fromPath=Q.title==="step",sg=Q.song?SONGm[Q.song.id]:null,snx=sg?songNext(sg):-1;
+  if(again)return `<div class="drill"><h1>${T("One more round","جولة أخرى")}</h1>
+   <p class="lead">${T("This step counts once most answers come out right. A second round usually does it: the right answers you just saw will feel familiar now.","تُحتسب هذه الخطوة حين تأتي معظم الإجابات صحيحة. جولة ثانية تكفي عادةً: الإجابات الصحيحة التي رأيتها للتوّ ستبدو مألوفة الآن.")}</p>
+   <button type="button" class="btn primary wide" data-act="step" data-id="${esc(Q.stepId)}">${T("Do this step again","أعيد⟦ي|⟧ هذه الخطوة")}</button>
+   <button type="button" class="btn wide" data-act="quit">${T("Back to the path","العودة إلى المسار")}</button></div>`;
   return `<div class="drill"><h1>${fromPath?T("Step done","أنجزت الخطوة"):sg?T("Lesson done","أنجزت الدرس"):T("Done for now","انتهينا الآن")}</h1>
    <p class="lead">${T(`You worked with ${Q.touched.size} words and patterns. They'll come back in Practice at the right time.`,`تدرّبت على ${Q.touched.size} من الكلمات والأنماط. ستعود في التدريب في الوقت المناسب.`)}</p>
    ${fromPath&&nx?`<div class="card"><span class="label">${T(`Next: step ${nx.i+1} of ${STEPS.length}`,`التالي: الخطوة ${nx.i+1} من ${STEPS.length}`)} · ${esc(stepKind(nx))}</span><h2>${esc(stepName(nx))}</h2><p class="lead">${esc(stepSub(nx))}</p>
@@ -1635,7 +1754,7 @@ document.addEventListener("click",e=>{
   if(a==="lyrrm"){if(t.dataset.sure){delete LYR[t.dataset.id];saveLyr();render();const c=$("#lyrics");if(c)c.scrollIntoView({block:"start"})}else{t.dataset.sure="1";t.textContent=T("Tap again to remove","اضغط⟦ي|⟧ مرة أخرى للحذف")}return}
   if(a==="practice"){const f=t.dataset.pid?{pid:t.dataset.pid}:t.dataset.topic?{topic:t.dataset.topic}:null;
     const l=practiceQs(f,15);if(!l.length)return;startQ(l,"practice",f?f.pid?`Practice: principle ${f.pid}`:`Practice: topic ${f.topic}`:"Mixed practice");if(Q)Q.filter=f;return}
-  if(a==="ppractice")return startQ(principleQs(t.dataset.id,8),"principle",`Principle practice “${(PRm[t.dataset.id]||{}).en}” (id ${t.dataset.id})`);
+  if(a==="ppractice")return startQ(withK(KT([],[t.dataset.id]),()=>principleQs(t.dataset.id,8)),"principle",`Principle practice “${(PRm[t.dataset.id]||{}).en}” (id ${t.dataset.id})`);
   if(a==="bcheck"){const q=Q.list[Q.i];answer(q.built.map(i=>q.tiles[i]).join(" "));return}
   if(a==="rpractice"){const r=READS.find(x=>x.id===t.dataset.id);return startQ(readingQs(t.dataset.id),"reading",`Reading practice “${r?r.en:""}” (id ${t.dataset.id})`)}
   if(a==="check"){const v=($("#typein")||{}).value||"";if(!v.trim())return;answer(v);return}
