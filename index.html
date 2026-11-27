@@ -536,7 +536,7 @@ function generate(c){
       const o={pid:"stress",part:"",tag:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
 }
 build();
-const APP_VERSION="1.11";
+const APP_VERSION="1.12";
 
 /* ================= feedback notes (localStorage "koren-feedback") =================
    A note box under each drill question, drill result, topic, principle and reading.
@@ -1679,7 +1679,7 @@ function matchQ(words,fill){
   if(out.length<3)return null;
   /* pictures for about half the rounds, and only when every word in the round has its own */
   const es=out.map(emoOf),emo=es.every(Boolean)&&new Set(es).size===es.length&&Math.random()<.5;
-  return {t:"match",items:out,left:shuffle(out.slice()),right:shuffle(out.slice()),emo,sel:-1,done:new Set(),miss:new Set(),bad:-1};
+  return {t:"match",items:out,left:shuffle(out.slice()),right:shuffle(out.slice()),emo,sel:-1,side:"",done:new Set(),miss:new Set(),bad:-1,badSide:""};
 }
 /* a gap in a real sentence: the missing word's other forms are the options */
 function gapQ(it){
@@ -1884,8 +1884,8 @@ function renderQ(){
       opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
     else if(q.t==="match"){
       const lab=(it,emo)=>emo?`<span aria-label="${M(it)}">${emoOf(it)}</span>`:M(it);
-      head=`<p class="prompt">${T("Match the pairs","صِل⟦ي|⟧ الأزواج")}</p><div class="match"><div class="mcol">${q.left.map((it,i)=>`<button type="button" class="mt ru${q.done.has(it.key)?" done":""}${q.sel===i?" sel":""}" data-ml="${i}" ${q.done.has(it.key)?"disabled":""}>${RUw(it)}</button>`).join("")}</div>
-       <div class="mcol">${q.right.map((it,j)=>`<button type="button" class="mt${q.emo?" emo":""}${q.done.has(it.key)?" done":""}${q.bad===j?" bad":""}" data-mr="${j}" ${q.done.has(it.key)?"disabled":""}>${lab(it,q.emo)}</button>`).join("")}</div></div>`}
+      head=`<p class="prompt">${T("Match the pairs","صِل⟦ي|⟧ الأزواج")}</p><div class="match"><div class="mcol">${q.left.map((it,i)=>`<button type="button" class="mt ru${q.done.has(it.key)?" done":""}${q.sel===i&&q.side==="l"?" sel":""}${q.bad===i&&q.badSide==="l"?" bad":""}" data-ml="${i}" ${q.done.has(it.key)?"disabled":""}>${RUw(it)}</button>`).join("")}</div>
+       <div class="mcol">${q.right.map((it,j)=>`<button type="button" class="mt${q.emo?" emo":""}${q.done.has(it.key)?" done":""}${q.sel===j&&q.side==="r"?" sel":""}${q.bad===j&&q.badSide==="r"?" bad":""}" data-mr="${j}" ${q.done.has(it.key)?"disabled":""}>${lab(it,q.emo)}</button>`).join("")}</div></div>`}
     else if(q.t==="rsign"){head=`<p class="prompt">${T("Which sign says this?","أيّ لافتة تقول هذا؟")}</p><div class="big">${meaningOf(q.x)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${esc(o.ru)}</span>`)).join("")}
     else if(q.t==="lsign"){head=`<p class="prompt">${T("Listen: which sign is it?","استمع⟦ي|⟧: أيّ لافتة هي؟")}</p><div class="center">${spk(q.x.akey,q.x.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${esc(o.ru)}</span>`)).join("")}
     else if(q.t==="read"){head=`<p class="prompt">${T("You see this sign. What is it?","تر⟦ين|ى⟧ هذه اللافتة. ما هي؟")}</p><div class="sign">${esc(q.x.ru)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,meaningOf(o))).join("")}
@@ -1939,12 +1939,15 @@ function answer(given){
   $("#fb").innerHTML=html;
   const nb=$('#fb [data-act="next"]');if(nb)setTimeout(()=>{try{nb.focus({preventScroll:false});nb.scrollIntoView({block:"nearest",behavior:"smooth"})}catch(e){}},30);
 }
+/* start on either side: tap a Russian word or a meaning, then its partner on the other side */
 function matchPick(side,i){
   const q=Q.list[Q.i];if(!q||q.t!=="match"||Q.answered)return;
-  if(side==="l"){q.sel=i;const it=q.left[i];if(autoOn())play(it.akey||it.key,it.ru);renderQ();return}
-  if(q.sel<0)return;
-  const a=q.left[q.sel],b=q.right[i];
-  if(a===b){q.done.add(a.key);q.sel=-1;q.bad=-1}else{q.miss.add(a.key);q.bad=i;setTimeout(()=>{if(Q&&Q.list[Q.i]===q&&q.bad===i){q.bad=-1}},400)}
+  const it=(side==="l"?q.left:q.right)[i];if(q.done.has(it.key))return;
+  if(side==="l"&&autoOn())play(it.akey||it.key,it.ru);
+  if(q.sel<0||q.side===side){q.sel=i;q.side=side;q.bad=-1;renderQ();return} /* first tap, or a change of mind on the same side */
+  const first=(q.side==="l"?q.left:q.right)[q.sel];
+  if(first===it){q.done.add(it.key);q.sel=-1;q.bad=-1}
+  else{q.miss.add(first.key);q.bad=i;q.badSide=side;setTimeout(()=>{if(Q&&Q.list[Q.i]===q&&q.bad===i)q.bad=-1},400)} /* the word she was looking for needs another look */
   renderQ();
   if(q.done.size===q.items.length)matchEnd(q);
 }

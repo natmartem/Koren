@@ -4,7 +4,7 @@
      falling back to the saved copy when offline or the network is slow.
    - everything else (icons, fonts, manifest): saved on first install, served from the phone.
    If you ever change an icon, a font or the manifest, bump CACHE so phones fetch the new files. */
-const CACHE = "koren-static-v2";
+const CACHE = "koren-static-v3";
 const ASSETS = [
   "index.html",
   "course.js",
