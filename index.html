@@ -203,8 +203,9 @@ textarea{width:100%;min-height:120px;border-radius:12px;border:1px solid var(--l
 /* Koren · Copyright © 2026 natmartem · SPDX-License-Identifier: AGPL-3.0-or-later
    localStorage "koren-state": progress and settings. "koren-packs": lessons added in the app.
    "koren-lyrics": song lyrics the learner pasted (never in the repo: copyright).
-   IndexedDB "koren" → "audio", "audio2": recordings imported on this phone; "lines1", "lines2": song and poem lines
-   (kept off GitHub: lyrics are copyrighted); "songfile:<id>": the learner's own audio file of a song. */
+   IndexedDB "koren" → "audio", "audio2": the speaker's recordings file imported on this phone, song and poem lines included
+   (kept off GitHub: lyrics are copyrighted); "lines1", "lines2": song lines from older separate files;
+   "songfile:<id>": the learner's own audio file of a song. */
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -960,7 +961,7 @@ function vMore(){
    <p class="lead">${T("Lyrics are copyrighted, so the app doesn't include them. Paste them on each page with one tap: they stay on this phone only, for your own study.","كلمات الأغاني محمية بحقوق النشر، لذلك لا يتضمّنها التطبيق. الصق⟦ي|⟧ها في كل صفحة بضغطة واحدة: تبقى على هذا الهاتف فقط، لدراستك الشخصية.")}</p>
    <div class="list">${SONGS.map(s=>`<a class="li" href="#song/${esc(s.id)}/lyrics"><div class="grow"><div class="t ru">${esc(s.ru)}</div><div class="s">${LYR[s.id]?T("Added on this phone","مضافة على هذا الهاتف"):s.text?T("Built in (public domain)","مضمّنة (ملك عام)"):T("Not added yet: tap to add","لم تُضف بعد: اضغط⟦ي|⟧ للإضافة")}</div></div>${CHEV}</a>`).join("")}</div></div>`:""}
   <div class="card"><span class="label">${T("Recordings","التسجيلات")}</span>
-   <p>${T(`${nA} items have a real voice.`,`${nA} عنصرًا بصوت حقيقي.`)} ${T("A speaker records them on the recorder page, then the file goes into the app's GitHub folder (or import it here to hear it on this phone now).","يسجّلها متحدّث في صفحة التسجيل، ثم يوضع الملف في مجلد التطبيق على GitHub (أو ⟦استورديه|استورده⟧ هنا لتسمع⟦ي|⟧ه على هذا الهاتف الآن).")}</p>
+   <p>${T(`${nA} items have a real voice.`,`${nA} عنصرًا بصوت حقيقي.`)} ${T("A speaker records them on the recorder page and sends you the file, with the song texts. Import it here; it stays on this phone.","يسجّلها متحدّث في صفحة التسجيل ويرسل إلي⟦كِ|ك⟧ الملف مع نصوص الأغاني. ⟦استورديه|استورده⟧ هنا، ويبقى على هذا الهاتف.")}</p>
    <div class="row"><a class="btn small" href="record.html">${T("Recorder, voice 1","صفحة التسجيل، الصوت 1")}</a><a class="btn small" href="record.html?speaker=2">${T("Voice 2","الصوت 2")}</a></div>
    <label class="btn small" style="align-self:flex-start">${T("Import a recordings file","استيراد ملف تسجيلات")}<input type="file" accept=".json,application/json" data-act="impaudio" class="sr"></label><p class="msg" id="audmsg"></p></div>
   <div class="card"><span class="label">${T("Add a lesson pack","إضافة حزمة دروس")}</span>
@@ -985,7 +986,7 @@ function vMore(){
    - Words and sentences: heard N times (voice 1, then voice 2 if there is one), each followed by a pause.
    - Readings and dialogues: the whole text → line by line with pauses → the whole text again.
    - Songs and poems: the song (the learner's own audio file, or the video) → line by line with pauses → the song again.
-     Song lines are recorded line by line on the recorder page and stay on the phone (lyrics are copyrighted). */
+     Song lines are recorded line by line on the recorder page and come in the speaker's recordings file, imported on the phone (lyrics are copyrighted, so never on GitHub). */
 const AU_DEF={pause:"m",reps:2,song:1};
 const AU=()=>Object.assign({},AU_DEF,S.au||{});
 const PMULT={s:.75,m:1,l:1.45};
@@ -1784,9 +1785,9 @@ document.addEventListener("change",async e=>{
   if(t.dataset.act==="impaudio"){
     const m=$("#audmsg");if(!o||o.app!=="koren-audio"){m.textContent=T("That isn't a Koren recordings file.","هذا ليس ملف تسجيلات لكورين.");return}
     const sp=+o.speaker===2?2:1,lines=o.kind==="lines";
-    /* the speaker's song text comes with the lines: fill songs that have no lyrics yet, keep the learner's own */
+    /* the speaker's song text comes with the recordings (older files: with the separate song lines): fill songs that have no lyrics yet, keep the learner's own */
     let lyrNote="";
-    if(lines&&o.lyrics&&typeof o.lyrics==="object"){const got=[],kept=[];
+    if(o.lyrics&&typeof o.lyrics==="object"){const got=[],kept=[];
       Object.entries(o.lyrics).forEach(([id,txt])=>{const sg=SONGm[id];if(!sg||typeof txt!=="string"||!txt.trim())return;
         if(!LYR[id]){LYR[id]=txt;got.push(plain(sg.ru))}else if(LYR[id]!==txt)kept.push(plain(sg.ru))});
       if(got.length)saveLyr();delete o.lyrics;
@@ -1794,7 +1795,7 @@ document.addEventListener("change",async e=>{
       if(kept.length)lyrNote+=" "+T(`You already had lyrics for ${kept.join(", ")}, so yours stay; lines written differently won't play. To use the speaker's text, delete yours on the song page and import again.`,`كانت عند⟦كِ|ك⟧ كلمات ${kept.join("، ")} فبقيت كما هي، والسطور المكتوبة بشكل مختلف لن تُسمع. لاستخدام نص المتحدّث، احذف⟦ي|⟧ نص⟦كِ|ك⟧ في صفحة الأغنية ثم استورد⟦ي|⟧ الملف مرة أخرى.`)}
     if(lines){const old=await idbGet("lines"+sp).catch(()=>null);if(old&&old.clips)o.clips=Object.assign({},old.clips,o.clips)} /* song lines add up, song by song */
     try{await idbSet(lines?"lines"+sp:sp===1?"audio":"audio2",o)}catch(err){}
-    const n=addClips(o,lines?"lines":"local",sp);const msgTxt=lines?T(`Added ${n} song and poem lines (voice ${sp}). They stay on this phone.`,`أُضيف ${n} سطرًا من الأغاني والقصائد (الصوت ${sp}). تبقى على هذا الهاتف.`)+lyrNote:T(`Added ${n} recordings (voice ${sp}).`,`أُضيف ${n} تسجيلًا (الصوت ${sp}).`);render();const m3=$("#audmsg");if(m3)m3.textContent=msgTxt;return;
+    const n=addClips(o,lines?"lines":"local",sp);const msgTxt=lines?T(`Added ${n} song and poem lines (voice ${sp}). They stay on this phone.`,`أُضيف ${n} سطرًا من الأغاني والقصائد (الصوت ${sp}). تبقى على هذا الهاتف.`)+lyrNote:T(`Added ${n} recordings (voice ${sp}). They stay on this phone.`,`أُضيف ${n} تسجيلًا (الصوت ${sp}). تبقى على هذا الهاتف.`)+lyrNote;render();const m3=$("#audmsg");if(m3)m3.textContent=msgTxt;return;
   }
   if(t.dataset.act==="restore"){
     const m=$("#bkmsg");if(!o||o.app!=="koren-backup"||!o.state){m.textContent=T("That isn't a Koren backup file.","هذا ليس ملف نسخة احتياطية لكورين.");return}
