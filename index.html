@@ -390,7 +390,9 @@ function generate(c){
   };
   const things=N.filter(n=>(n.cat==="F"||n.cat==="C")&&n.g!=="pl"&&!n.song).map(n=>n.nom); /* never put a song word into someone else's sentence */
   const WF={L:["Я сейча́с …","Мы …","Ма́ма …","Брат …"],C:["Я живу́ …","Сестра́ живёт …","Мы сейча́с …"],V:["Я сейча́с …","Мы …"],T:["Ключ …","Кот …","Телефо́н …","Кни́га …"],M:["Мой день рожде́ния …","Мы отдыха́ем …","… хо́лодно."]};
-  const AF={I:["Я люблю́ …","Я учу́ …"],P:["Я ви́жу …","Я люблю́ …","Я жду …","Я зна́ю …"],T:["Я ви́жу …","Я хочу́ …"],F:["Я люблю́ …"],L:["Я ви́жу …","Я люблю́ …"],C:["Я люблю́ …","Я зна́ю …"],V:["Я ви́жу …","Я жду …"]};
+  const AF={I:["Я люблю́ …","Я учу́ …","Ты лю́бишь …?","Она́ у́чит …"],P:["Я ви́жу …","Я люблю́ …","Я жду …","Я зна́ю …","Ты ви́дишь …?","Она́ лю́бит …","Мы ждём …","Они́ зна́ют …"],
+    T:["Я ви́жу …","Я хочу́ …","Ты хо́чешь …?","Она́ ви́дит …"],F:["Я люблю́ …","Ты лю́бишь …?","Мы хоти́м …"],L:["Я ви́жу …","Я люблю́ …","Ты лю́бишь …?","Мы ви́дим …"],
+    C:["Я люблю́ …","Я зна́ю …","Ты лю́бишь …?","Они́ зна́ют …"],V:["Я ви́жу …","Я жду …","Ты ви́дишь …?","Мы ждём …"]};
   const DF=["Я рабо́таю …","Мы отдыха́ем …","У меня́ уро́к …"];
   const HAVE=["У … есть маши́на.","У … есть телефо́н.","У … есть дом."],STATES=["хо́лодно","тепло́","бо́льно"];
   const end=f=>/[.?!]$/.test(f)?f:f+" .";
@@ -459,7 +461,7 @@ function generate(c){
       const o={pid:"stress",part:"",tag:"stress",ru:w.ru,en:w.en,ar:w.ar,key:"I:stress:"+pw+"||",akey:w.key,gen:1};PITEMS[o.key]=o;PRm.stress.list.push(o)})}
 }
 build();
-const APP_VERSION="1.7";
+const APP_VERSION="1.8";
 
 /* ================= feedback notes (localStorage "koren-feedback") =================
    A note box under each drill question, drill result, topic, principle and reading.
@@ -672,7 +674,7 @@ function practiceQs(f,n){
   const pick=(arr,k)=>shuffle(arr).sort((a,b)=>(due(a.key)?0:1)-(due(b.key)?0:1)).slice(0,k);
   const quota=[[P.pr,Math.ceil(n*.45)],[P.items,Math.ceil(n*.35)],[P.lines,Math.ceil(n*.2)]];
   quota.forEach(([arr,k])=>pick(arr,k).forEach(x=>{if(used.has(x.key))return;used.add(x.key);
-    const z=x.pid?principleQ(x,Math.random()<.2?"type":["pick","mean","type"][Math.floor(Math.random()*3)]):itemQ(x);if(z)q.push(z)}));
+    const z=x.pid?principleQ(x,modeFor(x))||principleQ(x,null):itemQ(x);if(z)q.push(z)}));
   if(q.length<n){[...P.items,...P.pr,...P.lines].filter(x=>!used.has(x.key)).sort(()=>Math.random()-.5).slice(0,n-q.length).forEach(x=>{const z=x.pid?principleQ(x,null):itemQ(x);if(z)q.push(z)})}
   return shuffle(q).slice(0,n);
 }
@@ -1445,17 +1447,45 @@ function stressVariants(ru){
   const others=shuffle(idx.map(mk).filter(v=>v!==ru)).slice(0,3);
   return shuffle([ru,...others]);
 }
+/* stress by position: "Which one is stressed on the first syllable?", options from other known words */
+const stressPos=ru=>{const p=[...String(ru)];let syl=0,at=0;p.forEach((c,i)=>{if(/[аеиоуыэюяё]/i.test(c)){syl++;if(p[i+1]==="́"||/ё/i.test(c))at=syl}});return {at,n:syl}};
+function stressPosQ(x){
+  const me=stressPos(x.ru);if(!me.at||me.n<2)return null;
+  const last=me.at===me.n,label=last?"last":me.at;
+  const hit=y=>{const o=stressPos(y.ru);return label==="last"?o.at===o.n:o.at===label};
+  const others=shuffle(PRm.stress.list.filter(y=>y!==x&&!/\s/.test(y.ru)&&stressPos(y.ru).n>=2&&!hit(y)&&itemFits(y,QK))).slice(0,3);
+  if(others.length<2)return null;
+  return {t:"spos",x,label,opts:shuffle([x,...others])};
+}
+/* which kind of question an item gets in review: easier while it's new, harder once it's known */
+function modeFor(x){
+  const b=(S.srs[x.key]||{}).b||0,p=PRm[x.pid],r=Math.random();
+  if(p.drill==="form")return b<=1?"pick":b===2?(r<.5?"listen":"build"):(r<.5?"type":"dict");
+  if(p.drill==="stress")return b<=1?null:r<.5?"mem":"pos";
+  if(p.drill==="read")return b<=1?null:r<.5?"rev":"listen";
+  return b<=1?(r<.5?"pick":"mean"):b===2?"mean":"type";
+}
 function principleQ(x,mode){
   const p=PRm[x.pid];
   if(p.drill==="form"){
+    /* the same sentence, five ways: pick the form, hear it and pick, build it from tiles, type the form, write it from dictation */
+    const sent={key:x.key,akey:x.akey,ru:x.full,en:x.en,ar:x.ar,kind:"s",ps:[x.tag]};
     if(mode==="type")return {t:"fty",x};
+    if(mode==="dict"&&canPlay(x.akey)&&tk(x.full).length<=6)return {t:"lt",it:sent,x};
+    if(mode==="build"){const b=buildQ(sent);if(b&&b.tiles.length>b.target.length){b.x=x;return b}}
     const ok=shuffle(x.cands||x.wrong).filter(o=>fits(x.frame.replace("…",o),QK)).slice(0,3);
-    return ok.length?{t:"form",x,opts:shuffle([x.ans,...ok])}:{t:"fty",x}}
-  if(p.drill==="stress"){const v=stressVariants(x.ru);return v?{t:"stress",x,opts:v}:null}
+    if(!ok.length)return {t:"fty",x};
+    return {t:mode==="listen"&&canPlay(x.akey)?"lform":"form",x,opts:shuffle([x.ans,...ok])}}
+  if(p.drill==="stress"){
+    if(mode==="pos"){const q=stressPosQ(x);if(q)return q}
+    const v=stressVariants(x.ru);return v?{t:"stress",x,opts:v,mem:mode==="mem"}:null}
   const same=y=>x.root&&y.root===x.root?0:1;
   const others=shuffle(p.list.filter(y=>y!==x&&plain(y.ru)!==plain(x.ru)&&itemFits(y,QK))).sort((a,b)=>same(a)-same(b)||lenScore(a.ru,x.ru)-lenScore(b.ru,x.ru)).slice(0,5);
   const d=x.root?others.slice(0,3):shuffle(others).slice(0,3);
-  if(p.drill==="read")return {t:"read",x,opts:shuffle([x,...d])};
+  if(p.drill==="read"){
+    if(mode==="rev")return {t:"rsign",x,opts:shuffle([x,...d])};
+    if(mode==="listen"&&canPlay(x.akey))return {t:"lsign",x,opts:shuffle([x,...d])};
+    return {t:"read",x,opts:shuffle([x,...d])}}
   if(mode==="type")return {t:"pty",x};
   if(mode==="mean")return {t:"pmean",x,opts:shuffle([x,...d])};
   return {t:"pat",x,opts:shuffle([x,...d])};
@@ -1476,7 +1506,10 @@ function principleQsFrom(p,list,n){
   const pick=[],bases=new Set();
   for(const x of ranked){if(pick.length>=n)break;const b=x.base||(x.hint&&x.gen?x.hint:"");if(b&&bases.has(b))continue;if(b)bases.add(b);pick.push(x)}
   for(const x of ranked){if(pick.length>=n)break;if(!pick.includes(x))pick.push(x)}
-  return pick.map((x,i)=>principleQ(x,p.drill==="pattern"?(i<n/2?"pick":i<n*.75?"mean":"type"):p.drill==="form"&&i>=n-2?"type":null)).filter(Boolean);
+  /* easy to hard inside the lesson: recognise first, then hear, build and finally produce */
+  const LAD={form:["pick","pick","pick","listen","pick","build","type","dict"],stress:[null,null,null,null,"mem","mem","pos","pos"],read:[null,null,null,"listen","listen","rev","rev","rev"]};
+  return pick.map((x,i)=>{const lad=LAD[p.drill],m=p.drill==="pattern"?(i<n/2?"pick":i<n*.75?"mean":"type"):lad?lad[Math.min(7,Math.floor(i*8/Math.max(n,1)))]:null;
+    return principleQ(x,m)||principleQ(x,null)}).filter(Boolean);
 }
 function topicQs(id,learnNew){
   const fresh0=wordsOf(id).filter(w=>!seenOrDrilled(w)).slice(0,6);
@@ -1503,7 +1536,7 @@ function topicQs0(id,learnNew){
   return q;
 }
 function reviewQs(n){
-  return dueKeys().filter(k=>ITEMS[k]?ready(ITEMS[k])&&(ITEMS[k].kind!=="l"||itemFits(ITEMS[k],QK)):itemFits(PITEMS[k],QK)).slice(0,n).map(k=>ITEMS[k]?itemQ(ITEMS[k]):principleQ(PITEMS[k],["pick","mean","type"][Math.floor(Math.random()*3)])).filter(Boolean);
+  return dueKeys().filter(k=>ITEMS[k]?ready(ITEMS[k])&&(ITEMS[k].kind!=="l"||itemFits(ITEMS[k],QK)):itemFits(PITEMS[k],QK)).slice(0,n).map(k=>ITEMS[k]?itemQ(ITEMS[k]):principleQ(PITEMS[k],modeFor(PITEMS[k]))||principleQ(PITEMS[k],null)).filter(Boolean);
 }
 /* a gap in a real sentence: the missing word's other forms are the options */
 function gapQ(it){
@@ -1551,19 +1584,19 @@ function startQ(list,title,src){
 }
 
 /* what a question looked like, in words, for feedback notes */
-const TASK={snote:"Song lesson card",fty:"Type the missing words",gap:"Fill the gap in a sentence",build:"Build the sentence from tiles",intro:"New word card",pm:"What does it mean?",pr:"Which one is it? (meaning → Russian)",lp:"Listen and pick",ty:"Type it in Russian",lt:"Listen and type",form:"Fill the gap",pat:"Which is the Russian word? (English → Russian)",pmean:"What does it mean? (rule word)",pty:"Use the rule: type it",stress:"Where is the stress?",read:"Read the sign"};
+const TASK={lform:"Listen and pick the form",spos:"Which word has the stress here?",rsign:"Which sign says this?",lsign:"Listen and pick the sign",snote:"Song lesson card",fty:"Type the missing words",gap:"Fill the gap in a sentence",build:"Build the sentence from tiles",intro:"New word card",pm:"What does it mean?",pr:"Which one is it? (meaning → Russian)",lp:"Listen and pick",ty:"Type it in Russian",lt:"Listen and type",form:"Fill the gap",pat:"Which is the Russian word? (English → Russian)",pmean:"What does it mean? (rule word)",pty:"Use the rule: type it",stress:"Where is the stress?",read:"Read the sign"};
 function qCtx(i){
   const Qr=Q,q=Q.list[i];
   return ()=>{
     const it=q.it||{},x=q.x||{},r=Qr.res[i];
     const opts=(q.opts||[]).map(o=>typeof o==="string"?o:o.ru+" ("+o.en+")").join(" | ");
     let prompt="";
-    if(q.t==="form"||q.t==="fty")prompt=x.frame+(x.hint?" ("+x.hint+")":" — "+x.en);
+    if(q.t==="form"||q.t==="fty"||q.t==="lform")prompt=x.frame+(x.hint?" ("+x.hint+")":" — "+x.en);
     else if(q.t==="gap")prompt=q.frame+" — "+it.en;
     else if(q.t==="build")prompt=it.en+" · tiles: "+q.tiles.join(" | ");
     else if(q.x)prompt=(q.t==="pat"||q.t==="pty")?x.en:x.ru;
     else prompt=(q.t==="pr"||q.t==="ty")?it.en:it.ru;
-    const ans=q.t==="form"||q.t==="fty"?x.full:(x.ru||it.ru||"");
+    const ans=q.t==="form"||q.t==="fty"||q.t==="lform"?x.full:(x.ru||it.ru||"");
     return {kind:"question",src:Qr.src,n:`${i+1}/${Qr.list.length}`,task:TASK[q.t]||q.t,prompt,opts,ans,
       item:[(it.ru||x.ru||x.ans||""),(it.en||x.en||"")].filter(Boolean).join(" — "),key:it.key||x.key||"",
       lang:S.lang==="ar"?"Arabic":"English",result:q.t==="intro"?"just shown":r===undefined?"not answered yet":r?"right":"wrong"};
@@ -1588,7 +1621,7 @@ function factFor(q){
 }
 
 /* ================= practice: drawing a question ================= */
-const ansOf=q=>q.t==="form"||q.t==="fty"?q.x.ans:q.t==="stress"?q.x.ru:q.t==="gap"?q.ans:q.t==="build"?q.target.join(" "):(q.x||q.it).ru;
+const ansOf=q=>q.t==="form"||q.t==="fty"||q.t==="lform"?q.x.ans:q.t==="stress"?q.x.ru:q.t==="gap"?q.ans:q.t==="build"?q.target.join(" "):q.t==="lt"?q.it.ru:(q.x||q.it).ru;
 const TYPED=["ty","lt","pty","fty","build"];
 function renderQ(){
   const view=$("#view");
@@ -1640,7 +1673,14 @@ function renderQ(){
     else if(q.t==="pat"){head=`<p class="prompt">${T("Which is the Russian word?","ما الكلمة الروسية؟")}</p><div class="big latin" dir="ltr">${esc(q.x.en)}</div>${S.lang==="ar"?`<p class="hint ar">${esc(q.x.ar)}</p>`:""}`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${esc(o.ru)}</span>`)).join("")}
     else if(q.t==="pmean"){head=`<p class="prompt">${T("What does it mean?","ما معناها؟")}</p><div class="big ru">${esc(q.x.ru)}</div><div class="center">${spk(q.x.akey,q.x.ru)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,meaningOf(o))).join("")}
     else if(q.t==="pty"){head=`<p class="prompt">${T("Use the rule: type it in Russian","طبّق⟦ي|⟧ القاعدة: اكتب⟦ي|⟧ها بالروسية")}</p><div class="big latin" dir="ltr">${esc(q.x.en)}</div>${S.lang==="ar"?`<p class="hint ar">${esc(q.x.ar)}</p>`:""}`+hearBtn(q.x.akey,q.x.ru)}
-    else if(q.t==="stress"){head=`<p class="prompt">${T("Where is the stress?","أين النبر؟")}</p><div class="center">${spk(q.x.akey,q.x.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
+    else if(q.t==="stress"){head=q.mem?`<p class="prompt">${T("Where is the stress? From memory, then listen","أين النبر؟ من الذاكرة، ثم استمع⟦ي|⟧")}</p><div class="big ru">${esc(plain(q.x.ru))}</div>`:`<p class="prompt">${T("Where is the stress?","أين النبر؟")}</p><div class="center">${spk(q.x.akey,q.x.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
+    else if(q.t==="spos"){const lab=q.label==="last"?T("on the last syllable","على المقطع الأخير"):T(["","on the first syllable","on the second syllable","on the third syllable","on the fourth syllable"][q.label]||"",["","على المقطع الأول","على المقطع الثاني","على المقطع الثالث","على المقطع الرابع"][q.label]||"");
+      head=`<p class="prompt">${T("Which one is stressed","أيّها منبورة")} ${lab}?</p>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${esc(plain(o.ru))}</span>`)).join("")}
+    else if(q.t==="lform"){const x=q.x;
+      head=`<p class="prompt">${T("Listen and fill the gap","استمع⟦ي|⟧ و⟦املئي|املأ⟧ الفراغ")}</p><div class="center">${spk(x.akey,x.full,true)}</div><div class="frame ru">${esc(x.frame.replace(/\s+([.?!,])/g,"$1")).replace("…",'<span class="blank">…</span>')}</div>`;
+      opts=q.opts.map(o=>optBtn(o,`<span class="ru">${esc(o)}</span>`)).join("")}
+    else if(q.t==="rsign"){head=`<p class="prompt">${T("Which sign says this?","أيّ لافتة تقول هذا؟")}</p><div class="big">${meaningOf(q.x)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${esc(o.ru)}</span>`)).join("")}
+    else if(q.t==="lsign"){head=`<p class="prompt">${T("Listen: which sign is it?","استمع⟦ي|⟧: أيّ لافتة هي؟")}</p><div class="center">${spk(q.x.akey,q.x.ru,true)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,`<span class="ru">${esc(o.ru)}</span>`)).join("")}
     else if(q.t==="read"){head=`<p class="prompt">${T("You see this sign. What is it?","تر⟦ين|ى⟧ هذه اللافتة. ما هي؟")}</p><div class="sign">${esc(q.x.ru)}</div>`;opts=q.opts.map(o=>optBtn(o.ru,meaningOf(o))).join("")}
     const typing=q.t==="ty"||q.t==="lt"||q.t==="pty"||q.t==="fty";
     body=head+(q.t==="build"?`<div id="fb"></div>`:typing?`<input class="typein ru" id="typein" lang="ru" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="${T("Russian keyboard","لوحة المفاتيح الروسية")}"><button type="button" class="btn primary wide" data-act="check">${T("Check","تحقّق")}</button><div id="fb"></div>`:`<div class="opts">${opts}</div><div id="fb"></div>`);
@@ -1652,7 +1692,9 @@ function autoPlay(){
   if(!Q||Q.finished)return;const q=Q.list[Q.i];if(!q)return;
   /* listening drills always play; otherwise only where the Russian is already on screen, so sound never gives the answer away */
   if(q.t==="lp"||q.t==="lt")play(q.it.akey||q.it.key,q.it.ru);
-  else if(q.t==="stress")play(q.x.akey,q.x.ru); /* stress drills are listening drills */
+  else if(q.t==="stress"&&!q.mem)play(q.x.akey,q.x.ru); /* stress drills are listening drills (except from memory) */
+  else if(q.t==="lform")play(q.x.akey,q.x.full);
+  else if(q.t==="lsign")play(q.x.akey,q.x.ru);
   else if(!autoOn())return;
   else if(q.t==="intro"||q.t==="pm")play(q.it.akey||q.it.key,q.it.ru);
   else if(q.t==="pmean")play(q.x.akey,q.x.ru);
@@ -1667,13 +1709,13 @@ function answer(given){
   document.querySelectorAll("[data-ans]").forEach(b=>{b.disabled=true;if(b.dataset.ans===right)b.classList.add("ok");else if(b.dataset.ans===given)b.classList.add("dim")});
   const ti=$("#typein");if(ti)ti.disabled=true;
   document.querySelectorAll("[data-tile],[data-unbuild],[data-act=bcheck]").forEach(b=>b.disabled=true);
-  const fullText=q.t==="form"||q.t==="fty"?q.x.full:(q.t==="gap"||q.t==="build")?q.it.ru:right;
+  const fullText=q.t==="form"||q.t==="fty"||q.t==="lform"?q.x.full:(q.t==="gap"||q.t==="build")?q.it.ru:right;
   const audioKey=q.x?(q.x.akey):(item.akey||item.key),audioText=fullText;
   const meaning=esc(S.lang==="ar"?item.ar:item.en);
   const links=q.x?[q.x.pid]:item.ps;
   let html="";
   if(ok){
-    html=`<div class="fb"><div class="row"><span class="yes">✓ ${["form","fty","gap","build"].includes(q.t)?`<span class="ru">${esc(fullText)}</span>`:T("Yes","نعم")}</span>${spk(audioKey,audioText)}</div>`;
+    html=`<div class="fb"><div class="row"><span class="yes">✓ ${["form","fty","gap","build","lform"].includes(q.t)?`<span class="ru">${esc(fullText)}</span>`:T("Yes","نعم")}</span>${spk(audioKey,audioText)}</div>`;
     const f=factFor(q);if(f){Q.factShown++;Q.facts.add(f);html+=`<p class="fact">${esc(L(f))}</p>`}
     html+=`</div>`;
   }else{
@@ -1712,7 +1754,7 @@ function renderEnd(){
    ${sg&&snx<0?`<div class="card"><h2>${TK(sg,T("You've learned the song's words","تعلّمت كلمات الأغنية"),T("You've learned the poem's words","تعلّمت كلمات القصيدة"))}</h2><p class="lead">${TK(sg,T("Play the song again: you'll recognise much more now.","شغّل⟦ي|⟧ الأغنية مرة أخرى: ستعرف⟦ين|⟧ أكثر بكثير الآن."),T("Read the poem again: you'll recognise much more now.","⟦اقرئي|اقرأ⟧ القصيدة مرة أخرى: ستعرف⟦ين|⟧ أكثر بكثير الآن."))}</p></div>`:""}
    ${Q.title==="practice"?`<button type="button" class="btn primary wide" data-act="again">${T("Another round","جولة أخرى")}</button>`:""}
    <button type="button" class="btn wide" data-act="quit">${fromPath?T("Back to the path","العودة إلى المسار"):sg?TK(sg,T("Back to the song","العودة إلى الأغنية"),T("Back to the poem","العودة إلى القصيدة")):Q.title==="practice"?T("Back to Practice","العودة إلى التدريب"):T("Back","رجوع")}</button>
-   ${fbBox("d:"+Q.qid,()=>{const qs=Q.list.filter(q=>q.t!=="intro"&&q.t!=="card"&&q.t!=="text"),wr=Q.list.map((q,i)=>Q.res[i]===false?(q.t==="form"||q.t==="fty"?q.x.full:(q.x||q.it).ru):null).filter(Boolean);return {kind:"drill",src:Q.src,score:`${Q.right}/${qs.length} right`,wrong:wr.join(", ")}})}</div>`;
+   ${fbBox("d:"+Q.qid,()=>{const qs=Q.list.filter(q=>q.t!=="intro"&&q.t!=="card"&&q.t!=="text"),wr=Q.list.map((q,i)=>Q.res[i]===false?(q.t==="form"||q.t==="fty"||q.t==="lform"?q.x.full:(q.x||q.it).ru):null).filter(Boolean);return {kind:"drill",src:Q.src,score:`${Q.right}/${qs.length} right`,wrong:wr.join(", ")}})}</div>`;
 }
 
 /* ================= events ================= */
